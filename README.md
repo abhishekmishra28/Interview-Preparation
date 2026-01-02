@@ -48,7 +48,7 @@ Interview-Prep/
 └── README.md
 
 > Folder structure may expand as preparation deepens.
-
+```
 ---
 
 ## 🧠 Problem Documentation Format
