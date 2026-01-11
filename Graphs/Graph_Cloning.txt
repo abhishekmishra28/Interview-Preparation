@@ -1,0 +1,246 @@
+INTERVIEW FOLLOW-UP QUESTIONS – GRAPH CLONING / GRAPH PROBLEMS
+=============================================================
+/*
+ * Problem: 133. Clone Graph
+ *
+ * Statement:
+ * Given a reference of a node in a connected undirected graph,
+ * return a deep copy (clone) of the graph.
+ *
+ * Each node in the graph contains:
+ * - an integer value `val`
+ * - a list of neighbors `neighbors`
+ *
+ * The graph is represented using adjacency lists.
+ *
+ * ------------------------------------------------------------
+ * Important Clarifications:
+ * - The graph may contain cycles
+ * - The graph is connected
+ * - Node values are unique
+ * - You must create NEW nodes (deep copy), not reuse old ones
+ *
+ * ------------------------------------------------------------
+ * Key Challenge:
+ * - If the graph contains cycles, naive DFS/BFS will loop forever
+ * - We must remember already cloned nodes
+ *
+ * ------------------------------------------------------------
+ * Approach 1: DFS + Hash Map (Most Intuitive)
+ *
+ * Idea:
+ * - Traverse the graph using DFS
+ * - For each node:
+ *   - Create its clone
+ *   - Store mapping: original node → cloned node
+ * - If a node is visited again, return the already created clone
+ *
+ * Data Structure Used:
+ * - unordered_map<Node*, Node*> to store mapping
+ *
+ * Why this works:
+ * - Prevents infinite recursion due to cycles
+ * - Ensures each node is cloned exactly once
+ *
+ * ------------------------------------------------------------
+ * Step-by-Step Algorithm:
+ *
+ * 1. If input node is NULL → return NULL
+ * 2. If current node already exists in map → return its clone
+ * 3. Create a new node with same value as current node
+ * 4. Store it in the map
+ * 5. Recursively clone all neighbors and attach them
+ * 6. Return the cloned node
+ *
+ * ------------------------------------------------------------
+ * Example:
+ *
+ * Graph:
+ * 1 -- 2
+ * |    |
+ * 4 -- 3
+ *
+ * DFS Order:
+ * clone(1)
+ *  ├─ clone(2)
+ *  │   └─ clone(3)
+ *  │       └─ clone(4)
+ *
+ * Mapping ensures already visited nodes are reused
+ *
+ * ------------------------------------------------------------
+ * Edge Cases:
+ * - Single node graph
+ * - Graph with cycles
+ * - Graph with self-loop
+ *
+ * ------------------------------------------------------------
+ * Time Complexity:
+ * - O(V + E)
+ *   where V = number of vertices, E = number of edges
+ *
+ * Space Complexity:
+ * - O(V)
+ *   for hash map + recursion stack
+ *
+ * ------------------------------------------------------------
+ * Note:
+ * This is the most commonly expected solution in interviews.
+ * BFS solution is also valid and equivalent.
+ */
+
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> neighbors;
+
+    Node() {
+        val = 0;
+        neighbors = vector<Node*>();
+    }
+
+    Node(int _val) {
+        val = _val;
+        neighbors = vector<Node*>();
+    }
+
+    Node(int _val, vector<Node*> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+};
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Map to store original node -> cloned node
+    unordered_map<Node*, Node*> cloned;
+
+    Node* cloneGraph(Node* node) {
+        // Base case
+        if (node == NULL)
+            return NULL;
+
+        // If already cloned, return it
+        if (cloned.find(node) != cloned.end())
+            return cloned[node];
+
+        // Create a clone of current node
+        Node* copy = new Node(node->val);
+
+        // Store mapping
+        cloned[node] = copy;
+
+        // Clone all neighbors
+        for (Node* neigh : node->neighbors) {
+            copy->neighbors.push_back(cloneGraph(neigh));
+        }
+
+        return copy;
+    }
+};
+
+***************************************************************************************************
+Q1. Can you solve it using BFS?
+--------------------------------
+Yes, the problem can be solved using Breadth First Search (BFS).
+
+In a BFS-based solution:
+- We start from the given node.
+- Use a queue to traverse the graph level by level.
+- Maintain a hash map (original node → cloned node) to avoid cloning the same node multiple times.
+- For each node popped from the queue:
+  - Visit all its neighbors.
+  - If a neighbor is not yet cloned, create its clone and push the neighbor into the queue.
+  - Add the cloned neighbor to the current node’s cloned neighbor list.
+
+Why BFS works:
+- BFS ensures we visit every reachable node exactly once.
+- The visited map prevents infinite loops in cyclic graphs.
+- BFS avoids deep recursion, so it is safer for very deep graphs.
+
+Time Complexity:
+- O(V + E), where V is the number of vertices and E is the number of edges.
+
+Space Complexity:
+- O(V) for the queue and the hash map.
+
+--------------------------------
+
+Q2. What happens if the graph is disconnected?
+-----------------------------------------------
+If the graph is disconnected, starting BFS or DFS from a single node will only clone the connected component that contains that node.
+
+Important clarification:
+- In many interview problems (like LeetCode Clone Graph), the input guarantees a connected graph.
+- If the graph is not guaranteed to be connected, we must:
+  - Iterate over all nodes in the graph.
+  - Start a BFS/DFS from each unvisited node.
+  - Clone each connected component separately.
+
+Key Interview Insight:
+- A graph cloning solution should clearly mention whether the graph is assumed to be connected.
+- If not specified, always handle disconnected graphs explicitly.
+
+--------------------------------
+
+Q3. How do you handle self-loops?
+---------------------------------
+A self-loop occurs when a node has an edge to itself.
+
+Handling self-loops during cloning:
+- When cloning a node, we first create its copy and store it in the map.
+- While iterating through neighbors:
+  - If the neighbor is the same node (self-loop), the map already contains its cloned version.
+  - We simply add the cloned node to its own neighbor list.
+
+Why this works:
+- The visited/cloned map prevents infinite recursion.
+- Self-loops naturally get replicated without any special condition.
+
+Interview Tip:
+- Mention that self-loops are handled automatically if the visited map is used correctly.
+
+--------------------------------
+
+Q4. Can you explain deep copy vs shallow copy?
+-----------------------------------------------
+Yes, this is a very important concept.
+
+Shallow Copy:
+- Copies only the reference (pointer) to the original object.
+- Both original and copied objects point to the same memory.
+- Changes in one object affect the other.
+- Not suitable for graph cloning.
+
+Example:
+- Copying a pointer without creating new nodes.
+
+Deep Copy:
+- Creates an entirely new object with new memory.
+- All nested objects (neighbors in a graph) are also copied.
+- Changes in the cloned object do NOT affect the original.
+
+In graph cloning:
+- We must perform a DEEP COPY.
+- Every node is newly created.
+- All edges are recreated using cloned nodes.
+- No memory is shared with the original graph.
+
+Interview One-Liner:
+“Graph cloning requires a deep copy because each node and its connections must be recreated independently.”
+
+--------------------------------
+
+KEY INTERVIEW TAKEAWAY
+----------------------
+- BFS and DFS are both valid for graph cloning.
+- Always use a visited/hash map.
+- Handle cycles, self-loops, and disconnected components.
+- Emphasize deep copy over shallow copy.
+- Explain your approach before writing code.
+
+This demonstrates strong problem-solving and system-level thinking.
