@@ -12,7 +12,7 @@
 - [Special Binary Trees](#special-binary-trees)
 - [Common Problems](#common-problems)
 - [Advanced Concepts](#advanced-concepts)
-- [Complete C++ Implementation](#complete-cpp-implementation)
+- [Complete C++ Implementation](#complete-c++-implementation)
 - [Practice Problems](#practice-problems)
 
 ---
