@@ -1215,18 +1215,124 @@ public:
     
     void levelOrder(TreeNode* node) {
         if (node == nullptr) return;
-                queue<TreeNode*> q;
+        
+        queue<TreeNode*> q;
         q.push(node);
-
+        
         while (!q.empty()) {
-            TreeNode* curr = q.front();
+            TreeNode* current = q.front();
             q.pop();
-
-            cout << curr->data << " ";
-
-            if (curr->left) q.push(curr->left);
-            if (curr->right) q.push(curr->right);
+            cout << current->data << " ";
+            
+            if (current->left) q.push(current->left);
+            if (current->right) q.push(current->right);
         }
+    }
+    
+    // ==================== OPERATIONS ====================
+    
+    int height(TreeNode* node) {
+        if (node == nullptr) return -1;
+        return 1 + max(height(node->left), height(node->right));
+    }
+    
+    int countNodes(TreeNode* node) {
+        if (node == nullptr) return 0;
+        return 1 + countNodes(node->left) + countNodes(node->right);
+    }
+    
+    int countLeaves(TreeNode* node) {
+        if (node == nullptr) return 0;
+        if (node->left == nullptr && node->right == nullptr) return 1;
+        return countLeaves(node->left) + countLeaves(node->right);
+    }
+    
+    int sumNodes(TreeNode* node) {
+        if (node == nullptr) return 0;
+        return node->data + sumNodes(node->left) + sumNodes(node->right);
+    }
+    
+    bool search(TreeNode* node, int key) {
+        if (node == nullptr) return false;
+        if (node->data == key) return true;
+        return search(node->left, key) || search(node->right, key);
+    }
+    
+    int findMax(TreeNode* node) {
+        if (node == nullptr) return INT_MIN;
+        int maxVal = node->data;
+        int leftMax = findMax(node->left);
+        int rightMax = findMax(node->right);
+        return max(maxVal, max(leftMax, rightMax));
+    }
+    
+    void mirror(TreeNode* node) {
+        if (node == nullptr) return;
+        swap(node->left, node->right);
+        mirror(node->left);
+        mirror(node->right);
+    }
+    
+    bool isIdentical(TreeNode* root1, TreeNode* root2) {
+        if (root1 == nullptr && root2 == nullptr) return true;
+        if (root1 == nullptr || root2 == nullptr) return false;
+        return (root1->data == root2->data) &&
+               isIdentical(root1->left, root2->left) &&
+               isIdentical(root1->right, root2->right);
+    }
+    
+    // ==================== PUBLIC METHODS ====================
+    
+    void printInorder() {
+        cout << "Inorder: ";
+        inorder(root);
+        cout << endl;
+    }
+    
+    void printPreorder() {
+        cout << "Preorder: ";
+        preorder(root);
+        cout << endl;
+    }
+    
+    void printPostorder() {
+        cout << "Postorder: ";
+        postorder(root);
+        cout << endl;
+    }
+    
+    void printLevelOrder() {
+        cout << "Level Order: ";
+        levelOrder(root);
+        cout << endl;
+    }
+    
+    int getHeight() {
+        return height(root);
+    }
+    
+    int getTotalNodes() {
+        return countNodes(root);
+    }
+    
+    int getLeafNodes() {
+        return countLeaves(root);
+    }
+    
+    int getSum() {
+        return sumNodes(root);
+    }
+    
+    bool searchElement(int key) {
+        return search(root, key);
+    }
+    
+    int getMax() {
+        return findMax(root);
+    }
+    
+    void mirrorTree() {
+        mirror(root);
     }
 };
 
@@ -1234,39 +1340,420 @@ public:
 
 int main() {
     BinaryTree tree;
-
-    // Create the tree:
-    //           1
-    //          / \
-    //         2   3
-    //        / \
-    //       4   5
-
+    
+    // Create tree:
+    //       1
+    //      / \
+    //     2   3
+    //    / \   \
+    //   4   5   6
+    
     tree.createRoot(1);
     TreeNode* root = tree.getRoot();
-
+    
     TreeNode* node2 = tree.insertLeft(root, 2);
     TreeNode* node3 = tree.insertRight(root, 3);
-
+    
     tree.insertLeft(node2, 4);
     tree.insertRight(node2, 5);
-
-    cout << "Inorder Traversal: ";
-    tree.inorder(root);
-    cout << endl;
-
-    cout << "Preorder Traversal: ";
-    tree.preorder(root);
-    cout << endl;
-
-    cout << "Postorder Traversal: ";
-    tree.postorder(root);
-    cout << endl;
-
-    cout << "Level Order Traversal: ";
-    tree.levelOrder(root);
-    cout << endl;
-
+    tree.insertRight(node3, 6);
+    
+    cout << "========== TREE TRAVERSALS ==========\n";
+    tree.printInorder();
+    tree.printPreorder();
+    tree.printPostorder();
+    tree.printLevelOrder();
+    
+    cout << "\n========== TREE PROPERTIES ==========\n";
+    cout << "Height: " << tree.getHeight() << endl;
+    cout << "Total Nodes: " << tree.getTotalNodes() << endl;
+    cout << "Leaf Nodes: " << tree.getLeafNodes() << endl;
+    cout << "Sum of Nodes: " << tree.getSum() << endl;
+    cout << "Maximum Element: " << tree.getMax() << endl;
+    
+    cout << "\n========== SEARCH OPERATION ==========\n";
+    int searchKey = 5;
+    cout << "Search for " << searchKey << ": " 
+         << (tree.searchElement(searchKey) ? "Found" : "Not Found") << endl;
+    
+    searchKey = 10;
+    cout << "Search for " << searchKey << ": " 
+         << (tree.searchElement(searchKey) ? "Found" : "Not Found") << endl;
+    
+    cout << "\n========== MIRROR TREE ==========\n";
+    cout << "Before Mirror - Inorder: ";
+    tree.printInorder();
+    tree.mirrorTree();
+    cout << "After Mirror - Inorder: ";
+    tree.printInorder();
+    
     return 0;
 }
 ```
+
+### Sample Output
+```
+========== TREE TRAVERSALS ==========
+Inorder: 4 2 5 1 3 6 
+Preorder: 1 2 4 5 3 6 
+Postorder: 4 5 2 6 3 1 
+Level Order: 1 2 3 4 5 6 
+
+========== TREE PROPERTIES ==========
+Height: 2
+Total Nodes: 6
+Leaf Nodes: 3
+Sum of Nodes: 21
+Maximum Element: 6
+
+========== SEARCH OPERATION ==========
+Search for 5: Found
+Search for 10: Not Found
+
+========== MIRROR TREE ==========
+Before Mirror - Inorder: 4 2 5 1 3 6 
+After Mirror - Inorder: 6 3 1 5 2 4 
+```
+
+---
+
+# Practice Problems
+
+## Easy Level
+
+1. **Binary Tree Traversals**
+   - Implement all four traversals (Inorder, Preorder, Postorder, Level Order)
+
+2. **Maximum Depth of Binary Tree** (LeetCode 104)
+   ```cpp
+   Input: [3,9,20,null,null,15,7]
+   Output: 3
+   ```
+
+3. **Same Tree** (LeetCode 100)
+   - Check if two trees are identical
+
+4. **Invert Binary Tree** (LeetCode 226)
+   - Mirror the binary tree
+
+5. **Sum of Left Leaves** (LeetCode 404)
+   ```cpp
+   Input:     3
+             / \
+            9  20
+              /  \
+             15   7
+   Output: 24 (9 + 15)
+   ```
+
+6. **Path Sum** (LeetCode 112)
+   - Check if tree has root-to-leaf path with given sum
+
+7. **Symmetric Tree** (LeetCode 101)
+   - Check if tree is mirror of itself
+
+8. **Minimum Depth of Binary Tree** (LeetCode 111)
+
+9. **Count Complete Tree Nodes** (LeetCode 222)
+
+10. **Binary Tree Paths** (LeetCode 257)
+    - Return all root-to-leaf paths
+
+## Medium Level
+
+11. **Binary Tree Level Order Traversal** (LeetCode 102)
+    ```cpp
+    Input:     3
+              / \
+             9  20
+               /  \
+              15   7
+    Output: [[3],[9,20],[15,7]]
+    ```
+
+12. **Binary Tree Zigzag Level Order** (LeetCode 103)
+
+13. **Binary Tree Right Side View** (LeetCode 199)
+    - Return values of nodes visible from right side
+
+14. **Validate Binary Search Tree** (LeetCode 98)
+
+15. **Construct Binary Tree from Preorder and Inorder** (LeetCode 105)
+
+16. **Construct Binary Tree from Inorder and Postorder** (LeetCode 106)
+
+17. **Flatten Binary Tree to Linked List** (LeetCode 114)
+
+18. **Populating Next Right Pointers** (LeetCode 116)
+
+19. **Sum Root to Leaf Numbers** (LeetCode 129)
+
+20. **Binary Tree Maximum Path Sum** (LeetCode 124)
+
+21. **Lowest Common Ancestor** (LeetCode 236)
+
+22. **Kth Smallest Element in BST** (LeetCode 230)
+
+23. **Count Good Nodes in Binary Tree** (LeetCode 1448)
+
+24. **Even Odd Tree** (LeetCode 1609)
+
+25. **Find Duplicate Subtrees** (LeetCode 652)
+
+## Hard Level
+
+26. **Binary Tree Maximum Path Sum** (LeetCode 124)
+    ```cpp
+    Input:    -10
+              / \
+             9  20
+               /  \
+              15   7
+    Output: 42 (15 + 20 + 7)
+    ```
+
+27. **Serialize and Deserialize Binary Tree** (LeetCode 297)
+
+28. **Binary Tree Cameras** (LeetCode 968)
+
+29. **Recover Binary Search Tree** (LeetCode 99)
+
+30. **Vertical Order Traversal** (LeetCode 987)
+
+31. **All Nodes Distance K** (LeetCode 863)
+
+32. **Maximum Width of Binary Tree** (LeetCode 662)
+
+33. **Binary Tree Postorder Traversal** (Iterative) (LeetCode 145)
+
+34. **Morris Traversal Implementation**
+
+35. **Burn Binary Tree from Leaf**
+
+## LeetCode Problem Links
+
+- [94. Binary Tree Inorder Traversal](https://leetcode.com/problems/binary-tree-inorder-traversal/)
+- [100. Same Tree](https://leetcode.com/problems/same-tree/)
+- [101. Symmetric Tree](https://leetcode.com/problems/symmetric-tree/)
+- [102. Binary Tree Level Order Traversal](https://leetcode.com/problems/binary-tree-level-order-traversal/)
+- [104. Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/)
+- [105. Construct Binary Tree from Preorder and Inorder](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+- [124. Binary Tree Maximum Path Sum](https://leetcode.com/problems/binary-tree-maximum-path-sum/)
+- [226. Invert Binary Tree](https://leetcode.com/problems/invert-binary-tree/)
+- [236. Lowest Common Ancestor](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
+- [297. Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/)
+
+---
+
+# Key Takeaways
+
+## When to Use Binary Trees
+
+✅ **Use Binary Trees when:**
+- Hierarchical data representation (file systems, org charts)
+- Expression parsing and evaluation
+- Implementing search/sort operations
+- Decision trees and game trees
+- Huffman coding (data compression)
+- BST for ordered data with O(log n) operations
+
+## Complexity Summary
+
+### Time Complexity
+
+| Operation | Average | Worst Case |
+|-----------|---------|------------|
+| **Search** | O(log n) | O(n) |
+| **Insert** | O(log n) | O(n) |
+| **Delete** | O(log n) | O(n) |
+| **Traversal** | O(n) | O(n) |
+| **Height** | O(n) | O(n) |
+
+### Space Complexity
+
+| Operation | Space |
+|-----------|-------|
+| **Recursive Traversal** | O(h) - recursion stack |
+| **Iterative Traversal** | O(w) - queue (w = max width) |
+| **Morris Traversal** | O(1) |
+
+Where:
+- h = height of tree
+- w = maximum width of tree
+- n = number of nodes
+
+## Important Patterns
+
+### 1. Recursion Pattern
+```cpp
+// Base case
+if (root == nullptr) return;
+
+// Process current node
+// ...
+
+// Recurse on children
+function(root->left);
+function(root->right);
+```
+
+### 2. Level Order Pattern (BFS)
+```cpp
+queue<TreeNode*> q;
+q.push(root);
+
+while (!q.empty()) {
+    TreeNode* node = q.front();
+    q.pop();
+    
+    // Process node
+    
+    if (node->left) q.push(node->left);
+    if (node->right) q.push(node->right);
+}
+```
+
+### 3. DFS Pattern (Stack)
+```cpp
+stack<TreeNode*> s;
+s.push(root);
+
+while (!s.empty()) {
+    TreeNode* node = s.top();
+    s.pop();
+    
+    // Process node
+    
+    if (node->right) s.push(node->right);
+    if (node->left) s.push(node->left);
+}
+```
+
+### 4. Path Tracking Pattern
+```cpp
+void findPaths(TreeNode* root, vector<int>& path) {
+    if (root == nullptr) return;
+    
+    path.push_back(root->data);
+    
+    if (isLeaf(root)) {
+        // Process complete path
+    }
+    
+    findPaths(root->left, path);
+    findPaths(root->right, path);
+    
+    path.pop_back();  // Backtrack
+}
+```
+
+## Common Mistakes to Avoid
+
+❌ **Not checking for nullptr** before accessing node  
+❌ **Confusing tree height and depth** (height starts from bottom)  
+❌ **Memory leaks** in tree deletion  
+❌ **Wrong base case** in recursion  
+❌ **Not handling empty tree** edge case  
+❌ **Modifying tree during traversal** without care  
+
+## Best Practices
+
+✅ **Always validate input** (check for null pointers)  
+✅ **Use helper functions** for recursive solutions  
+✅ **Draw diagrams** for complex problems  
+✅ **Consider iterative solutions** to save stack space  
+✅ **Think about edge cases:** empty tree, single node, skewed tree  
+✅ **Use appropriate traversal** for the problem  
+✅ **Clean up memory** (implement destructor)  
+
+## Interview Tips
+
+### Problem-Solving Strategy
+
+1. **Understand the problem**
+   - Draw the tree
+   - Identify pattern (traversal, path, level, etc.)
+
+2. **Choose approach**
+   - Recursive or iterative?
+   - Which traversal fits best?
+   - Need extra space (queue, stack)?
+
+3. **Handle edge cases**
+   - Empty tree
+   - Single node
+   - Skewed tree
+   - All nodes same value
+
+4. **Optimize**
+   - Can you reduce space complexity?
+   - Is there a better traversal?
+   - Can you combine operations?
+
+5. **Test thoroughly**
+   - Normal cases
+   - Edge cases
+   - Large trees
+
+### Common Interview Questions
+
+**Q: "Explain tree traversals"**
+- Inorder: Left → Root → Right (gives sorted in BST)
+- Preorder: Root → Left → Right (copy tree)
+- Postorder: Left → Right → Root (delete tree)
+- Level Order: Level by level (BFS)
+
+**Q: "Difference between height and depth?"**
+- **Depth:** Distance from root to node
+- **Height:** Distance from node to farthest leaf
+
+**Q: "When to use recursion vs iteration?"**
+- **Recursion:** Cleaner code, natural for trees
+- **Iteration:** Better space complexity, avoids stack overflow
+
+**Q: "What's time complexity of tree traversal?"**
+- **O(n)** - must visit all nodes
+
+**Q: "Binary Tree vs Binary Search Tree?"**
+- **Binary Tree:** No ordering constraint
+- **BST:** Left < Root < Right (enables faster search)
+
+---
+
+# Comparison: Tree Types
+
+| Type | Property | Search | Insert | Use Case |
+|------|----------|--------|--------|----------|
+| **Binary Tree** | Max 2 children | O(n) | O(1) | General hierarchy |
+| **BST** | Ordered | O(log n)* | O(log n)* | Searching, sorting |
+| **AVL Tree** | Balanced BST | O(log n) | O(log n) | Frequent searches |
+| **Red-Black Tree** | Balanced BST | O(log n) | O(log n) | Frequent inserts |
+| **Complete BT** | All levels filled | O(n) | O(1) | Heaps |
+| **Perfect BT** | All levels full | O(n) | - | Theoretical |
+
+*Average case; worst case O(n) for skewed tree
+
+---
+
+**Master Binary Trees, Master Tree Algorithms! 🌳**
+
+## Additional Resources
+
+- **Books:**
+  - "Introduction to Algorithms" (CLRS) - Chapter on Trees
+  - "Cracking the Coding Interview" - Trees and Graphs
+
+- **Online:**
+  - VisuAlgo Tree Visualization
+  - LeetCode Tree Problems
+  - GeeksforGeeks Binary Tree Section
+
+- **Practice Strategy:**
+  1. Master all traversals (recursive and iterative)
+  2. Solve 10 easy problems
+  3. Solve 15 medium problems
+  4. Solve 5 hard problems
+  5. Implement BST operations
+  6. Learn tree construction from traversals
+
+**Remember:** Trees are recursive structures - master recursion, master trees!
