@@ -1103,4 +1103,853 @@ private:
                 } else {
                     if (z == z->parent->right) {
                         // Case 2: z is right child
-                        z = z->
+                        z = z->parent;
+                        leftRotate(z);
+                    }
+                    // Case 3: z is left child
+                    z->parent->color = BLACK;
+                    z->parent->parent->color = RED;
+                    rightRotate(z->parent->parent);
+                }
+            } else {
+                RBNode* y = z->parent->parent->left;  // Uncle
+                
+                if (y && y->color == RED) {
+                    // Case 1: Uncle is red
+                    z->parent->color = BLACK;
+                    y->color = BLACK;
+                    z->parent->parent->color = RED;
+                    z = z->parent->parent;
+                } else {
+                    if (z == z->parent->left) {
+                        // Case 2: z is left child
+                        z = z->parent;
+                        rightRotate(z);
+                    }
+                    // Case 3: z is right child
+                    z->parent->color = BLACK;
+                    z->parent->parent->color = RED;
+                    leftRotate(z->parent->parent);
+                }
+            }
+        }
+        root->color = BLACK;
+    }
+    
+    void insert(RBNode* z) {
+        RBNode* y = nullptr;
+        RBNode* x = root;
+        
+        // Find position for new node
+        while (x != NIL && x != nullptr) {
+            y = x;
+            if (z->data < x->data) {
+                x = x->left;
+            } else {
+                x = x->right;
+            }
+        }
+        
+        z->parent = y;
+        
+        if (y == nullptr) {
+            root = z;
+        } else if (z->data < y->data) {
+            y->left = z;
+        } else {
+            y->right = z;
+        }
+        
+        z->left = NIL;
+        z->right = NIL;
+        z->color = RED;
+        
+        insertFixup(z);
+    }
+    
+    void inorderRec(RBNode* node) {
+        if (node == NIL || node == nullptr) return;
+        inorderRec(node->left);
+        cout << node->data << "(" << (node->color == RED ? "R" : "B") << ") ";
+        inorderRec(node->right);
+    }
+
+public:
+    RedBlackTree() {
+        NIL = new RBNode(0);
+        NIL->color = BLACK;
+        root = NIL;
+    }
+    
+    void insert(int data) {
+        RBNode* node = new RBNode(data);
+        insert(node);
+    }
+    
+    void inorder() {
+        inorderRec(root);
+        cout << endl;
+    }
+};
+```
+
+## RBT Operations
+
+### 1. Insertion Cases
+
+#### Case 1: Uncle is Red
+
+```
+Before:                 After:
+     B:g                  R:g
+    /   \                /   \
+  R:p   R:u    →       B:p   B:u
+  /                    /
+R:z                  R:z
+
+Action: Recolor parent and uncle to black, grandparent to red
+```
+
+#### Case 2: Uncle is Black (Triangle)
+
+```
+Before:                 After:
+     B:g                  B:g
+    /   \                /   \
+  R:p   B:u    →       R:z   B:u
+    \                  /
+    R:z              R:p
+
+Action: Left rotate on parent, then apply Case 3
+```
+
+#### Case 3: Uncle is Black (Line)
+
+```
+Before:                 After:
+     B:g                  B:p
+    /   \                /   \
+  R:p   B:u    →       R:z   R:g
+  /                            \
+R:z                            B:u
+
+Action: Right rotate on grandparent, recolor
+```
+
+### 2. Complete Insertion Example
+
+```cpp
+Insert: 10, 20, 30, 15
+
+Step 1: Insert 10
+    B:10
+
+Step 2: Insert 20
+    B:10
+      \
+      R:20
+
+Step 3: Insert 30 (violation!)
+    B:10           After rebalance:
+      \                 B:20
+      R:20        →    /    \
+        \            R:10   R:30
+        R:30
+
+Step 4: Insert 15
+    B:20                After fixing:
+   /    \                   B:20
+ R:10   R:30          →    /    \
+   \                     B:15   B:30
+   R:15                  /
+                       R:10
+```
+
+### 3. Deletion (Complex)
+
+```cpp
+void deleteFixup(RBNode* x) {
+    while (x != root && x->color == BLACK) {
+        if (x == x->parent->left) {
+            RBNode* w = x->parent->right;  // Sibling
+            
+            // Case 1: Sibling is red
+            if (w->color == RED) {
+                w->color = BLACK;
+                x->parent->color = RED;
+                leftRotate(x->parent);
+                w = x->parent->right;
+            }
+            
+            // Case 2: Sibling's children are black
+            if (w->left->color == BLACK && w->right->color == BLACK) {
+                w->color = RED;
+                x = x->parent;
+            } else {
+                // Case 3: Sibling's right child is black
+                if (w->right->color == BLACK) {
+                    w->left->color = BLACK;
+                    w->color = RED;
+                    rightRotate(w);
+                    w = x->parent->right;
+                }
+                // Case 4: Sibling's right child is red
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->right->color = BLACK;
+                leftRotate(x->parent);
+                x = root;
+            }
+        } else {
+            // Mirror cases for right child
+            // ... (symmetric to above)
+        }
+    }
+    x->color = BLACK;
+}
+```
+
+### 4. Search (Same as BST)
+
+```cpp
+RBNode* search(RBNode* node, int key) {
+    if (node == NIL || node == nullptr || node->data == key) {
+        return node;
+    }
+    
+    if (key < node->data) {
+        return search(node->left, key);
+    }
+    return search(node->right, key);
+}
+```
+
+## RBT Properties
+
+### 1. Five Red-Black Properties
+
+```
+Property 1: Every node is either red or black
+Property 2: Root is always black
+Property 3: All leaves (NIL) are black
+Property 4: Red nodes have black children (no two red nodes in a row)
+Property 5: All paths from node to descendant leaves contain 
+            same number of black nodes (black height)
+```
+
+### 2. Black Height
+
+```
+Black Height: Number of black nodes on path to leaf (excluding node itself)
+
+Example:
+        B:7 (bh=2)
+       /    \
+     R:3    B:18 (bh=1)
+    /  \    /   \
+  B:1 B:5 B:12 B:20 (bh=0)
+
+All paths have 2 black nodes (excluding root)
+```
+
+### 3. Height Bound
+
+```
+For Red-Black tree with n nodes:
+Height h ≤ 2 × log₂(n + 1)
+
+Proof:
+- Shortest path has only black nodes
+- Longest path alternates red and black
+- Longest path ≤ 2 × shortest path (Property 4)
+- Therefore: h ≤ 2 × log₂(n + 1)
+```
+
+### 4. Rotation and Recoloring
+
+```
+Insertion:
+- At most 2 rotations
+- O(log n) recolorings
+
+Deletion:
+- At most 3 rotations
+- O(log n) recolorings
+```
+
+### 5. Time Complexities
+
+| Operation | Time Complexity |
+|-----------|----------------|
+| Search | O(log n) |
+| Insert | O(log n) |
+| Delete | O(log n) |
+| Min/Max | O(log n) |
+
+### 6. Space Complexity
+
+```
+Space: O(n) for n nodes
+Extra per node: 1 bit for color
+Parent pointer: Optional but recommended
+```
+
+## RBT Applications
+
+### 1. **Standard Template Libraries**
+- C++ STL: `map`, `set`, `multimap`, `multiset`
+- Java: `TreeMap`, `TreeSet`
+- Linux Kernel: Process scheduling (CFS)
+
+### 2. **Database Systems**
+- MySQL: Index structures
+- PostgreSQL: GIN indexes
+- In-memory databases
+
+### 3. **Operating Systems**
+- Linux: Virtual memory management
+- Process scheduling
+- File system structures
+
+### 4. **Computational Geometry**
+- Sweep line algorithms
+- Range trees
+- Segment trees
+
+### 5. **Network Applications**
+- Packet scheduling
+- QoS (Quality of Service) management
+- Route tables
+
+### 6. **Compilers**
+- Symbol tables
+- Syntax tree balancing
+- Optimization passes
+
+---
+
+# Comparison
+
+## BST vs AVL vs Red-Black Tree
+
+### Feature Comparison
+
+| Feature | BST | AVL Tree | Red-Black Tree |
+|---------|-----|----------|----------------|
+| **Balancing** | None | Strict | Relaxed |
+| **Height** | O(n) worst | ≈ 1.44 log n | ≈ 2 log n |
+| **Search** | O(n) worst | O(log n) | O(log n) |
+| **Insert** | O(n) worst | O(log n) | O(log n) |
+| **Delete** | O(n) worst | O(log n) | O(log n) |
+| **Rotations (Insert)** | 0 | ≤ 2 | ≤ 2 |
+| **Rotations (Delete)** | 0 | O(log n) | ≤ 3 |
+| **Extra Space** | None | 1 int (height) | 1 bit (color) |
+| **Best For** | Simple use | Frequent searches | Frequent updates |
+
+### Performance Comparison
+
+```
+Search Performance:
+AVL > Red-Black > BST
+
+Insert Performance:
+Red-Black > AVL > BST
+
+Delete Performance:
+Red-Black > AVL > BST
+
+Memory Usage:
+BST < Red-Black < AVL
+```
+
+### Balance Factor
+
+```
+BST:
+Balance Factor: Can be anything
+Example: Linear chain (height = n)
+
+AVL:
+Balance Factor: {-1, 0, 1}
+Example:     4
+           /   \
+          2     6
+         / \   / \
+        1   3 5   7
+
+Red-Black:
+Balance Factor: Not explicitly tracked
+Height constraint: h ≤ 2 log(n+1)
+```
+
+### Use Case Recommendations
+
+```
+Choose BST when:
+✓ Simple implementation needed
+✓ Data is mostly random
+✓ Small dataset
+✓ Memory is very limited
+
+Choose AVL when:
+✓ Search-intensive applications
+✓ Read >> Write operations
+✓ Need strictly balanced tree
+✓ Predictable performance critical
+
+Choose Red-Black when:
+✓ Balanced read/write operations
+✓ Insert/delete heavy workload
+✓ Standard library implementations
+✓ Operating system internals
+```
+
+### Real-World Usage
+
+```
+BST:
+- Educational purposes
+- Simple applications
+- Prototyping
+
+AVL:
+- In-memory databases
+- Look-up intensive apps
+- Windows NT kernel
+
+Red-Black:
+- C++ STL (map, set)
+- Java Collections (TreeMap)
+- Linux kernel (CFS scheduler)
+- Most production systems
+```
+
+---
+
+# Complete C++ Implementation
+
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+// ==================== BST IMPLEMENTATION ====================
+
+struct BSTNode {
+    int data;
+    BSTNode* left;
+    BSTNode* right;
+    
+    BSTNode(int val) : data(val), left(nullptr), right(nullptr) {}
+};
+
+class BST {
+private:
+    BSTNode* root;
+    
+    BSTNode* insertRec(BSTNode* node, int data) {
+        if (node == nullptr) return new BSTNode(data);
+        
+        if (data < node->data) {
+            node->left = insertRec(node->left, data);
+        } else if (data > node->data) {
+            node->right = insertRec(node->right, data);
+        }
+        return node;
+    }
+    
+    BSTNode* searchRec(BSTNode* node, int key) {
+        if (node == nullptr || node->data == key) return node;
+        if (key < node->data) return searchRec(node->left, key);
+        return searchRec(node->right, key);
+    }
+    
+    void inorderRec(BSTNode* node) {
+        if (node == nullptr) return;
+        inorderRec(node->left);
+        cout << node->data << " ";
+        inorderRec(node->right);
+    }
+
+public:
+    BST() : root(nullptr) {}
+    
+    void insert(int data) {
+        root = insertRec(root, data);
+    }
+    
+    bool search(int key) {
+        return searchRec(root, key) != nullptr;
+    }
+    
+    void inorder() {
+        inorderRec(root);
+        cout << endl;
+    }
+};
+
+// ==================== AVL TREE IMPLEMENTATION ====================
+
+struct AVLNode {
+    int data;
+    AVLNode* left;
+    AVLNode* right;
+    int height;
+    
+    AVLNode(int val) : data(val), left(nullptr), right(nullptr), height(1) {}
+};
+
+class AVLTree {
+private:
+    AVLNode* root;
+    
+    int height(AVLNode* node) {
+        return node ? node->height : 0;
+    }
+    
+    int getBalance(AVLNode* node) {
+        return node ? height(node->left) - height(node->right) : 0;
+    }
+    
+    AVLNode* rightRotate(AVLNode* y) {
+        AVLNode* x = y->left;
+        AVLNode* T2 = x->right;
+        
+        x->right = y;
+        y->left = T2;
+        
+        y->height = max(height(y->left), height(y->right)) + 1;
+        x->height = max(height(x->left), height(x->right)) + 1;
+        
+        return x;
+    }
+    
+    AVLNode* leftRotate(AVLNode* x) {
+        AVLNode* y = x->right;
+        AVLNode* T2 = y->left;
+        
+        y->left = x;
+        x->right = T2;
+        
+        x->height = max(height(x->left), height(x->right)) + 1;
+        y->height = max(height(y->left), height(y->right)) + 1;
+        
+        return y;
+    }
+    
+    AVLNode* insert(AVLNode* node, int key) {
+        if (node == nullptr) return new AVLNode(key);
+        
+        if (key < node->data) {
+            node->left = insert(node->left, key);
+        } else if (key > node->data) {
+            node->right = insert(node->right, key);
+        } else {
+            return node;
+        }
+        
+        node->height = 1 + max(height(node->left), height(node->right));
+        
+        int balance = getBalance(node);
+        
+        // Left Left Case
+        if (balance > 1 && key < node->left->data) {
+            return rightRotate(node);
+        }
+        
+        // Right Right Case
+        if (balance < -1 && key > node->right->data) {
+            return leftRotate(node);
+        }
+        
+        // Left Right Case
+        if (balance > 1 && key > node->left->data) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
+        }
+        
+        // Right Left Case
+        if (balance < -1 && key < node->right->data) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+        
+        return node;
+    }
+    
+    void inorderRec(AVLNode* node) {
+        if (node == nullptr) return;
+        inorderRec(node->left);
+        cout << node->data << " ";
+        inorderRec(node->right);
+    }
+
+public:
+    AVLTree() : root(nullptr) {}
+    
+    void insert(int key) {
+        root = insert(root, key);
+    }
+    
+    void inorder() {
+        inorderRec(root);
+        cout << endl;
+    }
+    
+    int getHeight() {
+        return height(root);
+    }
+};
+
+// ==================== RED-BLACK TREE IMPLEMENTATION ====================
+
+enum Color { RED, BLACK };
+
+struct RBNode {
+    int data;
+    Color color;
+    RBNode* left;
+    RBNode* right;
+    RBNode* parent;
+    
+    RBNode(int val) : data(val), color(RED), 
+                      left(nullptr), right(nullptr), parent(nullptr) {}
+};
+
+class RedBlackTree {
+private:
+    RBNode* root;
+    RBNode* NIL;
+    
+    void leftRotate(RBNode* x) {
+        RBNode* y = x->right;
+        x->right = y->left;
+        
+        if (y->left != NIL) {
+            y->left->parent = x;
+        }
+        
+        y->parent = x->parent;
+        
+        if (x->parent == nullptr) {
+            root = y;
+        } else if (x == x->parent->left) {
+            x->parent->left = y;
+        } else {
+            x->parent->right = y;
+        }
+        
+        y->left = x;
+        x->parent = y;
+    }
+    
+    void rightRotate(RBNode* y) {
+        RBNode* x = y->left;
+        y->left = x->right;
+        
+        if (x->right != NIL) {
+            x->right->parent = y;
+        }
+        
+        x->parent = y->parent;
+        
+        if (y->parent == nullptr) {
+            root = x;
+        } else if (y == y->parent->right) {
+            y->parent->right = x;
+        } else {
+            y->parent->left = x;
+        }
+        
+        x->right = y;
+        y->parent = x;
+    }
+    
+    void insertFixup(RBNode* z) {
+        while (z->parent && z->parent->color == RED) {
+            if (z->parent == z->parent->parent->left) {
+                RBNode* y = z->parent->parent->right;
+                
+                if (y && y->color == RED) {
+                    z->parent->color = BLACK;
+                    y->color = BLACK;
+                    z->parent->parent->color = RED;
+                    z = z->parent->parent;
+                } else {
+                    if (z == z->parent->right) {
+                        z = z->parent;
+                        leftRotate(z);
+                    }
+                    z->parent->color = BLACK;
+                    z->parent->parent->color = RED;
+                    rightRotate(z->parent->parent);
+                }
+            } else {
+                RBNode* y = z->parent->parent->left;
+                
+                if (y && y->color == RED) {
+                    z->parent->color = BLACK;
+                    y->color = BLACK;
+                    z->parent->parent->color = RED;
+                    z = z->parent->parent;
+                } else {
+                    if (z == z->parent->left) {
+                        z = z->parent;
+                        rightRotate(z);
+                    }
+                    z->parent->color = BLACK;
+                    z->parent->parent->color = RED;
+                    leftRotate(z->parent->parent);
+                }
+            }
+        }
+        root->color = BLACK;
+    }
+    
+    void insert(RBNode* z) {
+        RBNode* y = nullptr;
+        RBNode* x = root;
+        
+        while (x != NIL && x != nullptr) {
+            y = x;
+            if (z->data < x->data) {
+                x = x->left;
+            } else {
+                x = x->right;
+            }
+        }
+        
+        z->parent = y;
+        
+        if (y == nullptr) {
+            root = z;
+        } else if (z->data < y->data) {
+            y->left = z;
+        } else {
+            y->right = z;
+        }
+        
+        z->left = NIL;
+        z->right = NIL;
+        z->color = RED;
+        
+        insertFixup(z);
+    }
+    
+    void inorderRec(RBNode* node) {
+        if (node == NIL || node == nullptr) return;
+        inorderRec(node->left);
+        cout << node->data << "(" << (node->color == RED ? "R" : "B") << ") ";
+        inorderRec(node->right);
+    }
+
+public:
+    RedBlackTree() {
+        NIL = new RBNode(0);
+        NIL->color = BLACK;
+        root = NIL;
+    }
+    
+    void insert(int data) {
+        RBNode* node = new RBNode(data);
+        insert(node);
+    }
+    
+    void inorder() {
+        inorderRec(root);
+        cout << endl;
+    }
+};
+
+// ==================== MAIN FUNCTION ====================
+
+int main() {
+    cout << "========== BINARY SEARCH TREE ==========\n";
+    BST bst;
+    bst.insert(50);
+    bst.insert(30);
+    bst.insert(70);
+    bst.insert(20);
+    bst.insert(40);
+    bst.insert(60);
+    bst.insert(80);
+    
+    cout << "BST Inorder: ";
+    bst.inorder();
+    
+    cout << "Search 40: " << (bst.search(40) ? "Found" : "Not Found") << endl;
+    cout << "Search 25: " << (bst.search(25) ? "Found" : "Not Found") << endl;
+    
+    cout << "\n========== AVL TREE ==========\n";
+    AVLTree avl;
+    avl.insert(10);
+    avl.insert(20);
+    avl.insert(30);
+    avl.insert(40);
+    avl.insert(50);
+    avl.insert(25);
+    
+    cout << "AVL Inorder: ";
+    avl.inorder();
+    cout << "AVL Height: " << avl.getHeight() << endl;
+    
+    cout << "\n========== RED-BLACK TREE ==========\n";
+    RedBlackTree rbt;
+    rbt.insert(10);
+    rbt.insert(20);
+    rbt.insert(30);
+    rbt.insert(15);
+    rbt.insert(25);
+    rbt.insert(5);
+    
+    cout << "RBT Inorder (with colors): ";
+    rbt.inorder();
+    
+    return 0;
+}
+```
+
+### Sample Output
+
+```
+========== BINARY SEARCH TREE ==========
+BST Inorder: 20 30 40 50 60 70 80 
+Search 40: Found
+Search 25: Not Found
+
+========== AVL TREE ==========
+AVL Inorder: 10 20 25 30 40 50 
+AVL Height: 3
+
+========== RED-BLACK TREE ==========
+RBT Inorder (with colors): 5(R) 10(B) 15(R) 20(B) 25(R) 30(B) 
+```
+
+---
+
+**Master Balanced Trees, Master Efficient Data Structures! 🌳**
+
+## Key Takeaways
+
+### When to Use Which?
+
+**Use BST when:**
+- Learning tree concepts
+- Simple, small applications
+- Data is randomly ordered
+- Memory is extremely limited
+
+**Use AVL Tree when:**
+- Search operations dominate (90%+ searches)
+- Need predictable O(log n) performance
+- Read-heavy applications
+- Strict balance is required
+
+**Use Red-Black Tree when:**
+- Balanced read/write operations
+- Insert/delete operations are frequent
+- Using standard libraries (already implemented)
+- Operating system level programming
+- General-purpose balanced tree needed
+
+**Remember:** In practice, most production systems use Red-Black Trees (C++ STL, Java Collections) due to their excellent balance between performance and implementation complexity!
