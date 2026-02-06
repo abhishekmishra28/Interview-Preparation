@@ -1399,7 +1399,7 @@ INSERT INTO orders VALUES (1, '2024-01-01', 100);
 COMMIT;  -- Data persists even if system crashes after this
 ```
 
-**Ensured by:** Write-ahead logging, checkpoints
+**Ensured by:** Write-ahead logging, checkpoint
 
 ---
 
@@ -1409,7 +1409,1317 @@ COMMIT;  -- Data persists even if system crashes after this
 
 ### Entities
 ```
-Strong Entity: Has primary key
-Weak Entity: Depends on strong entity
+Strong Entity: Has primary key (e.g., Employee, Department)
+Weak Entity: Depends on strong entity for identification (e.g., Dependent)
 
-Example
+Example:
+┌──────────────┐         ┌──────────────┐
+│   Employee   │─────────│  Dependent   │
+│  (Strong)    │         │   (Weak)     │
+│  EmpID (PK)  │         │  DepName     │
+│  Name        │         │  Age         │
+│  Salary      │         │  Relation    │
+└──────────────┘         └──────────────┘
+Dependent identified by (EmpID + DepName)
+```
+
+### Attributes
+
+```
+Simple Attribute:     Name, Age
+Composite Attribute:  Address → (Street, City, State, ZIP)
+Multivalued Attribute: Phone Numbers (multiple values)
+Derived Attribute:    Age (derived from Date of Birth)
+Key Attribute:        EmpID (underlined in ER diagram)
+
+Example:
+         ┌─────────┐
+    Name─┤         ├─DOB
+   Email─┤ Student ├─Age (derived, shown as dashed oval)
+      ID─┤         ├─Phone (multivalued, shown as double oval)
+         └─────────┘
+              │
+         Address (composite)
+         /    |     \
+     Street  City   ZIP
+```
+
+### Relationships
+
+```
+One-to-One (1:1):
+┌──────────┐  1     1  ┌──────────┐
+│ Employee ├────────────┤ Passport │
+└──────────┘            └──────────┘
+Each employee has exactly one passport
+
+One-to-Many (1:N):
+┌────────────┐  1     N  ┌──────────┐
+│ Department ├───────────┤ Employee │
+└────────────┘            └──────────┘
+One department has many employees
+
+Many-to-Many (M:N):
+┌──────────┐  M     N  ┌──────────┐
+│ Student  ├────────────┤  Course  │
+└──────────┘            └──────────┘
+Many students enroll in many courses
+```
+
+### Participation Constraints
+
+```
+Total Participation (double line): Every entity MUST participate
+Partial Participation (single line): Entity MAY participate
+
+Example:
+┌──────────┐          ┌────────────┐
+│ Employee ├══════════┤ Department │
+└──────────┘  works   └────────────┘
+              in
+(Every employee MUST belong to a department → total participation)
+(Some departments MAY have no employees → partial participation)
+```
+
+## ER to Relational Mapping
+
+### Strong Entity → Table
+```sql
+-- Entity: Student(StudentID, Name, Age)
+CREATE TABLE Student (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Age INT
+);
+```
+
+### Weak Entity → Table with Foreign Key
+```sql
+-- Weak Entity: Dependent(DepName, Age, Relation)
+-- Owner: Employee
+CREATE TABLE Dependent (
+    EmpID INT,
+    DepName VARCHAR(100),
+    Age INT,
+    Relation VARCHAR(50),
+    PRIMARY KEY (EmpID, DepName),
+    FOREIGN KEY (EmpID) REFERENCES Employee(EmpID) ON DELETE CASCADE
+);
+```
+
+### 1:1 Relationship
+```sql
+-- Merge into one table or add FK to either side
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    PassportID INT UNIQUE,
+    FOREIGN KEY (PassportID) REFERENCES Passport(PassportID)
+);
+```
+
+### 1:N Relationship
+```sql
+-- Add FK on the "many" side
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    DeptID INT,
+    FOREIGN KEY (DeptID) REFERENCES Department(DeptID)
+);
+```
+
+### M:N Relationship
+```sql
+-- Create junction/bridge table
+CREATE TABLE Enrollment (
+    StudentID INT,
+    CourseID INT,
+    EnrollDate DATE,
+    Grade CHAR(2),
+    PRIMARY KEY (StudentID, CourseID),
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+);
+```
+
+### Multivalued Attribute → Separate Table
+```sql
+-- Multivalued: Student has multiple phone numbers
+CREATE TABLE StudentPhone (
+    StudentID INT,
+    PhoneNumber VARCHAR(15),
+    PRIMARY KEY (StudentID, PhoneNumber),
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID)
+);
+```
+
+### Composite Attribute → Flatten
+```sql
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Street VARCHAR(100),
+    City VARCHAR(50),
+    State VARCHAR(50),
+    ZIP VARCHAR(10)
+);
+```
+
+## EER (Enhanced ER) Model
+
+### Generalization / Specialization
+```
+          ┌──────────┐
+          │  Person   │
+          │ PersonID  │
+          │ Name      │
+          └─────┬─────┘
+            ISA (d or o)
+           /          \
+  ┌──────────┐  ┌──────────┐
+  │ Student  │  │ Employee │
+  │ GPA      │  │ Salary   │
+  └──────────┘  └──────────┘
+
+d = disjoint (person is EITHER student OR employee)
+o = overlapping (person can be BOTH)
+```
+
+```sql
+-- Method 1: Single table (with type column)
+CREATE TABLE Person (
+    PersonID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Type ENUM('Student', 'Employee', 'Both'),
+    GPA DECIMAL(3,2),      -- NULL for employees
+    Salary DECIMAL(10,2)   -- NULL for students
+);
+
+-- Method 2: Separate tables
+CREATE TABLE Person (
+    PersonID INT PRIMARY KEY,
+    Name VARCHAR(100)
+);
+
+CREATE TABLE Student (
+    PersonID INT PRIMARY KEY,
+    GPA DECIMAL(3,2),
+    FOREIGN KEY (PersonID) REFERENCES Person(PersonID)
+);
+
+CREATE TABLE Employee (
+    PersonID INT PRIMARY KEY,
+    Salary DECIMAL(10,2),
+    FOREIGN KEY (PersonID) REFERENCES Person(PersonID)
+);
+```
+
+---
+
+# Functional Dependencies
+
+## Definition
+
+**Functional Dependency (FD):** X → Y means Y is functionally determined by X
+
+```
+If two tuples have same X value, they MUST have same Y value
+
+Example:
+EmpID → EmpName     (Employee ID determines Employee Name)
+EmpID → Dept        (Employee ID determines Department)
+DeptID → DeptName   (Department ID determines Department Name)
+```
+
+## Types of Functional Dependencies
+
+### Trivial FD
+```
+X → Y where Y ⊆ X
+Example: {EmpID, Name} → Name  (trivial)
+```
+
+### Non-Trivial FD
+```
+X → Y where Y ⊄ X
+Example: EmpID → Name  (non-trivial)
+```
+
+### Partial FD
+```
+Part of candidate key determines non-key attribute
+Example: {StudentID, CourseID} → StudentName
+StudentID alone → StudentName (partial dependency)
+```
+
+### Transitive FD
+```
+X → Y → Z (X determines Z through Y)
+Example: EmpID → DeptID → DeptName
+```
+
+## Armstrong's Axioms
+
+```
+1. Reflexivity:   If Y ⊆ X, then X → Y
+2. Augmentation:  If X → Y, then XZ → YZ
+3. Transitivity:  If X → Y and Y → Z, then X → Z
+
+Derived Rules:
+4. Union:         If X → Y and X → Z, then X → YZ
+5. Decomposition: If X → YZ, then X → Y and X → Z
+6. Pseudo-transitivity: If X → Y and WY → Z, then WX → Z
+```
+
+## Closure of Attributes
+
+```
+Finding all attributes determined by a set of attributes
+
+Given FDs:
+A → B
+B → C
+C → D
+AB → E
+
+Closure of A (A+):
+Start: {A}
+A → B: {A, B}
+B → C: {A, B, C}
+C → D: {A, B, C, D}
+AB → E: {A, B, C, D, E}
+
+A+ = {A, B, C, D, E}
+A is a candidate key (determines all attributes)
+```
+
+## Canonical Cover (Minimal Cover)
+
+```
+Steps:
+1. Decompose FDs to single attribute on right side
+2. Remove extraneous attributes from left side
+3. Remove redundant FDs
+
+Example:
+FDs: {A → BC, B → C, AB → D}
+
+Step 1: A → B, A → C, B → C, AB → D
+Step 2: A → C is redundant (A → B → C via transitivity)
+        AB → D: Can we remove B? A+ = {A,B,C} → A → D? No. Keep AB → D
+        AB → D: Can we remove A? B+ = {B,C} → B → D? No. Keep AB → D
+
+Minimal Cover: {A → B, B → C, AB → D}
+```
+
+---
+
+# File Organization
+
+## Heap File (Unordered)
+```
+Records stored in insertion order
++ Fast insertion
+- Slow search (linear scan)
+
+Example:
+Block 1: [Rec3, Rec1, Rec7]
+Block 2: [Rec2, Rec9, Rec4]
+Block 3: [Rec5, Rec8, Rec6]
+```
+
+## Sequential File (Ordered)
+```
+Records sorted by search key
++ Fast range queries
++ Binary search possible
+- Slow insertion (need to shift)
+
+Example (sorted by ID):
+Block 1: [1, 2, 3]
+Block 2: [4, 5, 6]
+Block 3: [7, 8, 9]
+```
+
+## Hash File
+```
+Hash function maps key to bucket
++ Very fast equality search O(1)
+- No range queries
+- Overflow handling needed
+
+Example:
+h(key) = key mod 4
+Bucket 0: [4, 8, 12]
+Bucket 1: [1, 5, 9]
+Bucket 2: [2, 6, 10]
+Bucket 3: [3, 7, 11]
+```
+
+## B-Tree vs B+ Tree
+
+### B-Tree
+```
+          [30, 60]
+         /   |    \
+    [10,20] [40,50] [70,80]
+    
+- Keys and data at all nodes
+- No duplicate keys
+- Less storage efficient
+```
+
+### B+ Tree
+```
+          [30, 60]
+         /   |    \
+    [10,20] [30,50] [60,80]
+     ↕   ↕   ↕   ↕   ↕   ↕
+    data data data data data data
+    
+    Leaf level: [10]↔[20]↔[30]↔[50]↔[60]↔[80]
+    
+- Data only at leaf nodes
+- Leaf nodes linked (great for range queries)
+- Internal nodes have only keys (more keys per node)
+- More storage efficient
+- Preferred in DBMS
+```
+
+### B+ Tree Properties
+```
+Order m:
+- Each node has at most m children
+- Each node (except root) has at least ⌈m/2⌉ children
+- Root has at least 2 children
+- Leaf nodes at same level
+
+For order 4 (m=4):
+- Max children: 4
+- Max keys per node: 3
+- Min children (non-root): 2
+- Min keys (non-root): 1
+```
+
+---
+
+# Recovery System
+
+## Log-Based Recovery
+
+### Write-Ahead Logging (WAL)
+```
+Rule: Log record must be written BEFORE the actual data modification
+
+Log Format: <TransactionID, DataItem, OldValue, NewValue>
+
+Example:
+<T1, START>
+<T1, A, 100, 200>     -- A changed from 100 to 200
+<T1, B, 300, 250>     -- B changed from 300 to 250
+<T1, COMMIT>
+```
+
+### Undo Recovery
+```
+If transaction not committed before crash → UNDO changes
+Use old values from log to restore
+
+Log:
+<T1, START>
+<T1, A, 100, 200>
+<T1, B, 300, 250>
+── CRASH ──
+
+Recovery:
+B = 300 (restore old value)
+A = 100 (restore old value)
+```
+
+### Redo Recovery
+```
+If transaction committed but changes not written to disk → REDO changes
+Use new values from log to apply
+
+Log:
+<T1, START>
+<T1, A, 100, 200>
+<T1, B, 300, 250>
+<T1, COMMIT>
+── CRASH ──
+
+Recovery:
+A = 200 (apply new value)
+B = 250 (apply new value)
+```
+
+### Undo-Redo Recovery
+```
+Combines both approaches
+- Undo uncommitted transactions
+- Redo committed transactions
+
+Log:
+<T1, START>
+<T1, A, 100, 200>
+<T2, START>
+<T2, C, 400, 500>
+<T1, B, 300, 250>
+<T1, COMMIT>
+── CRASH ──
+
+Recovery:
+Redo T1: A=200, B=250 (committed)
+Undo T2: C=400 (not committed)
+```
+
+## Checkpoints
+
+```
+Reduces recovery time by marking a known good state
+
+Log:
+<T1, START>
+<T1, A, 100, 200>
+<T1, COMMIT>
+<CHECKPOINT>           ← Everything before this is safe
+<T2, START>
+<T2, B, 300, 400>
+<T3, START>
+<T3, C, 500, 600>
+<T2, COMMIT>
+── CRASH ──
+
+Recovery (only process after checkpoint):
+Redo T2: B=400 (committed after checkpoint)
+Undo T3: C=500 (not committed)
+T1: No action needed (committed before checkpoint)
+```
+
+---
+
+# Distributed Databases
+
+## Concepts
+
+```
+Distributed Database: Data spread across multiple locations
+
+Site 1 (New York)     Site 2 (London)     Site 3 (Tokyo)
+┌─────────────┐      ┌─────────────┐     ┌─────────────┐
+│ Employees   │      │ Employees   │     │ Employees   │
+│ (US region) │      │ (EU region) │     │ (Asia)      │
+└─────────────┘      └─────────────┘     └─────────────┘
+```
+
+## Fragmentation
+
+### Horizontal Fragmentation
+```sql
+-- Split by rows
+-- Fragment 1: US employees
+SELECT * FROM Employees WHERE country = 'US';
+
+-- Fragment 2: UK employees
+SELECT * FROM Employees WHERE country = 'UK';
+```
+
+### Vertical Fragmentation
+```sql
+-- Split by columns
+-- Fragment 1: Employee basic info
+SELECT EmpID, Name, Dept FROM Employees;
+
+-- Fragment 2: Employee salary info
+SELECT EmpID, Salary, Bonus FROM Employees;
+```
+
+## CAP Theorem
+
+```
+In a distributed system, you can only guarantee 2 out of 3:
+
+C - Consistency:    Every read gets most recent write
+A - Availability:   Every request gets a response
+P - Partition Tolerance: System works despite network failures
+
+       C
+      / \
+     /   \
+    /     \
+   A ───── P
+
+CA: Traditional RDBMS (PostgreSQL, MySQL)
+CP: MongoDB, HBase
+AP: Cassandra, DynamoDB
+```
+
+## Two-Phase Commit (2PC)
+
+```
+Ensures atomicity in distributed transactions
+
+Phase 1: Prepare (Voting)
+Coordinator → All Participants: "Can you commit?"
+Participant 1: "Yes (VOTE COMMIT)"
+Participant 2: "Yes (VOTE COMMIT)"
+
+Phase 2: Commit (Decision)
+If ALL voted YES:
+    Coordinator → All: "COMMIT"
+If ANY voted NO:
+    Coordinator → All: "ABORT"
+
+Timeline:
+Coordinator:  PREPARE ──→ (collect votes) ──→ COMMIT/ABORT
+Participant1: ──→ VOTE YES ──→ (wait) ──→ COMMIT/ABORT
+Participant2: ──→ VOTE YES ──→ (wait) ──→ COMMIT/ABORT
+```
+
+---
+
+# NoSQL Databases
+
+## Types of NoSQL
+
+### 1. Key-Value Store
+```
+Key → Value
+
+Example (Redis):
+"user:1001" → {"name": "Alice", "age": 25}
+"session:abc" → {"userId": 1001, "expires": "2024-12-31"}
+
+Use cases: Caching, session management
+```
+
+### 2. Document Store
+```json
+// Example (MongoDB):
+{
+    "_id": ObjectId("507f1f77bcf86cd799439011"),
+    "name": "Alice",
+    "age": 25,
+    "address": {
+        "street": "123 Main St",
+        "city": "New York"
+    },
+    "courses": ["Math", "Physics", "CS"]
+}
+
+Use cases: Content management, catalogs
+```
+
+### 3. Column-Family Store
+```
+// Example (Cassandra):
+Row Key: "user1001"
+    Column Family: "personal"
+        name: "Alice"
+        age: 25
+    Column Family: "academic"
+        gpa: 3.8
+        major: "CS"
+
+Use cases: Analytics, time-series data
+```
+
+### 4. Graph Database
+```
+// Example (Neo4j):
+(Alice)-[:FRIENDS_WITH]->(Bob)
+(Alice)-[:ENROLLED_IN]->(CS101)
+(Bob)-[:ENROLLED_IN]->(CS101)
+(CS101)-[:TAUGHT_BY]->(Prof. Smith)
+
+Use cases: Social networks, recommendation engines
+```
+
+## SQL vs NoSQL
+
+| Feature | SQL | NoSQL |
+|---------|-----|-------|
+| **Schema** | Fixed schema | Dynamic/flexible schema |
+| **Scaling** | Vertical (scale up) | Horizontal (scale out) |
+| **ACID** | Strong ACID | Eventual consistency (BASE) |
+| **Query** | SQL | Database-specific APIs |
+| **Data Model** | Tables | Documents, key-value, graphs |
+| **Best For** | Complex queries, transactions | Large scale, flexible data |
+| **Examples** | MySQL, PostgreSQL, Oracle | MongoDB, Redis, Cassandra |
+
+## BASE Properties (NoSQL)
+
+```
+BA - Basically Available: System guarantees availability
+S  - Soft State: State may change over time (even without input)
+E  - Eventually Consistent: System will become consistent eventually
+
+Contrast with ACID:
+ACID → Strong consistency, used in banking/finance
+BASE → Eventual consistency, used in social media/streaming
+```
+
+---
+
+# Data Warehousing
+
+## OLTP vs OLAP
+
+| Feature | OLTP | OLAP |
+|---------|------|------|
+| **Purpose** | Daily operations | Analysis & reporting |
+| **Queries** | Simple, short | Complex, analytical |
+| **Data** | Current, detailed | Historical, summarized |
+| **Users** | Clerks, customers | Analysts, managers |
+| **Normalization** | Highly normalized | Denormalized |
+| **Example** | Banking transactions | Sales trend analysis |
+
+## Star Schema
+
+```
+              ┌─────────────┐
+              │  Date_Dim   │
+              │ date_id     │
+              │ day         │
+              │ month       │
+              │ year        │
+              └──────┬──────┘
+                     │
+┌─────────────┐  ┌───┴────────┐  ┌─────────────┐
+│ Product_Dim │──│ Sales_Fact │──│ Store_Dim   │
+│ product_id  │  │ date_id    │  │ store_id    │
+│ name        │  │ product_id │  │ location    │
+│ category    │  │ store_id   │  │ manager     │
+└─────────────┘  │ quantity   │  └─────────────┘
+                 │ revenue    │
+                 └────────────┘
+
+- Central fact table (measurable data)
+- Surrounded by dimension tables (descriptive data)
+- Simple joins, fast queries
+```
+
+## Snowflake Schema
+
+```
+┌────────────┐   ┌─────────────┐
+│ Category   │───│ Product_Dim │
+│ cat_id     │   │ product_id  │
+│ cat_name   │   │ name        │──┐
+└────────────┘   │ cat_id      │  │
+                 └─────────────┘  │  ┌────────────┐
+                              ┌───┴──┤ Sales_Fact │
+                              │      │ date_id    │
+                              │      │ product_id │
+                              │      │ quantity   │
+                              │      └────────────┘
+
+- Normalized dimension tables
+- More tables, more joins
+- Less storage, more complex queries
+```
+
+---
+
+# SQL Practice Problems
+
+## Easy Level
+
+### 1. Second Highest Salary
+```sql
+-- Method 1: LIMIT OFFSET
+SELECT DISTINCT salary FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET 1;
+
+-- Method 2: Subquery
+SELECT MAX(salary) FROM employees
+WHERE salary < (SELECT MAX(salary) FROM employees);
+
+-- Method 3: Dense Rank
+SELECT salary FROM (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) as rnk
+    FROM employees
+) t WHERE rnk = 2;
+```
+
+### 2. Nth Highest Salary
+```sql
+-- Generic solution for Nth highest
+SELECT DISTINCT salary FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET N-1;
+
+-- Using CTE
+WITH ranked AS (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) as rnk
+    FROM employees
+)
+SELECT DISTINCT salary FROM ranked WHERE rnk = N;
+```
+
+### 3. Duplicate Records
+```sql
+-- Find duplicates
+SELECT email, COUNT(*) as cnt
+FROM employees
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+-- Delete duplicates (keep one)
+DELETE e1 FROM employees e1
+INNER JOIN employees e2
+WHERE e1.id > e2.id AND e1.email = e2.email;
+
+-- Alternative using CTE
+WITH duplicates AS (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) as rn
+    FROM employees
+)
+DELETE FROM employees WHERE id IN (
+    SELECT id FROM duplicates WHERE rn > 1
+);
+```
+
+### 4. Employees Earning More Than Manager
+```sql
+SELECT e.name as Employee
+FROM employees e
+JOIN employees m ON e.manager_id = m.id
+WHERE e.salary > m.salary;
+```
+
+### 5. Consecutive Numbers
+```sql
+-- Find numbers appearing 3 times consecutively
+SELECT DISTINCT l1.num as ConsecutiveNums
+FROM logs l1
+JOIN logs l2 ON l1.id = l2.id - 1
+JOIN logs l3 ON l2.id = l3.id - 1
+WHERE l1.num = l2.num AND l2.num = l3.num;
+```
+
+## Medium Level
+
+### 6. Department Top 3 Salaries
+```sql
+SELECT d.name as Department, e.name as Employee, e.salary
+FROM (
+    SELECT *, DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) as rnk
+    FROM employees
+) e
+JOIN departments d ON e.dept_id = d.id
+WHERE e.rnk <= 3;
+```
+
+### 7. Running Total
+```sql
+SELECT 
+    order_date,
+    amount,
+    SUM(amount) OVER (ORDER BY order_date) as running_total,
+    AVG(amount) OVER (ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) as moving_avg
+FROM orders;
+```
+
+### 8. Year-over-Year Growth
+```sql
+WITH yearly_sales AS (
+    SELECT 
+        YEAR(order_date) as year,
+        SUM(amount) as total_sales
+    FROM orders
+    GROUP BY YEAR(order_date)
+)
+SELECT 
+    year,
+    total_sales,
+    LAG(total_sales) OVER (ORDER BY year) as prev_year_sales,
+    ROUND((total_sales - LAG(total_sales) OVER (ORDER BY year)) * 100.0 
+          / LAG(total_sales) OVER (ORDER BY year), 2) as growth_pct
+FROM yearly_sales;
+```
+
+### 9. Pivot Table
+```sql
+-- Convert rows to columns
+SELECT 
+    student_name,
+    MAX(CASE WHEN subject = 'Math' THEN marks END) as Math,
+    MAX(CASE WHEN subject = 'Science' THEN marks END) as Science,
+    MAX(CASE WHEN subject = 'English' THEN marks END) as English
+FROM student_marks
+GROUP BY student_name;
+```
+
+### 10. Gap Analysis (Missing IDs)
+```sql
+SELECT t1.id + 1 as gap_start,
+       MIN(t2.id) - 1 as gap_end
+FROM my_table t1
+JOIN my_table t2 ON t2.id > t1.id
+GROUP BY t1.id
+HAVING t1.id + 1 < MIN(t2.id);
+```
+
+## Hard Level
+
+### 11. Median Salary
+```sql
+-- Method 1
+WITH ordered AS (
+    SELECT salary,
+           ROW_NUMBER() OVER (ORDER BY salary) as rn,
+           COUNT(*) OVER () as total
+    FROM employees
+)
+SELECT AVG(salary) as median
+FROM ordered
+WHERE rn IN (FLOOR((total + 1) / 2), CEIL((total + 1) / 2));
+```
+
+### 12. Cumulative Distribution
+```sql
+SELECT 
+    dept,
+    salary,
+    CUME_DIST() OVER (PARTITION BY dept ORDER BY salary) as cumulative_dist,
+    PERCENT_RANK() OVER (PARTITION BY dept ORDER BY salary) as percent_rank,
+    NTILE(4) OVER (PARTITION BY dept ORDER BY salary) as quartile
+FROM employees;
+```
+
+### 13. Recursive Hierarchy (Org Chart)
+```sql
+WITH RECURSIVE org_chart AS (
+    -- CEO (no manager)
+    SELECT emp_id, name, manager_id, 1 as level,
+           CAST(name AS CHAR(1000)) as path
+    FROM employees
+    WHERE manager_id IS NULL
+    
+    UNION ALL
+    
+    -- All reports
+    SELECT e.emp_id, e.name, e.manager_id, oc.level + 1,
+           CONCAT(oc.path, ' → ', e.name)
+    FROM employees e
+    JOIN org_chart oc ON e.manager_id = oc.emp_id
+)
+SELECT * FROM org_chart ORDER BY level, name;
+```
+
+### 14. Island and Gap Problem
+```sql
+-- Find consecutive date ranges (islands)
+WITH numbered AS (
+    SELECT login_date,
+           login_date - INTERVAL ROW_NUMBER() OVER (ORDER BY login_date) DAY as grp
+    FROM user_logins
+    WHERE user_id = 1
+)
+SELECT MIN(login_date) as streak_start,
+       MAX(login_date) as streak_end,
+       COUNT(*) as streak_length
+FROM numbered
+GROUP BY grp
+ORDER BY streak_start;
+```
+
+---
+
+# Interview Questions
+
+## Conceptual Questions
+
+### Q1: What is the difference between DELETE, TRUNCATE, and DROP?
+
+```
+DELETE:
+- DML command
+- Removes specific rows (WHERE clause)
+- Can be rolled back
+- Fires triggers
+- Slower (row-by-row logging)
+- Does NOT reset AUTO_INCREMENT
+
+TRUNCATE:
+- DDL command
+- Removes ALL rows
+- Cannot be rolled back (in most DBMS)
+- Does NOT fire triggers
+- Faster (deallocates pages)
+- Resets AUTO_INCREMENT
+
+DROP:
+- DDL command
+- Removes table structure + data
+- Cannot be rolled back
+- Table no longer exists
+```
+
+### Q2: What is the difference between WHERE and HAVING?
+
+```sql
+-- WHERE: Filters rows BEFORE grouping
+SELECT dept, AVG(salary)
+FROM employees
+WHERE salary > 30000      -- Filters individual rows
+GROUP BY dept;
+
+-- HAVING: Filters groups AFTER grouping
+SELECT dept, AVG(salary) as avg_sal
+FROM employees
+GROUP BY dept
+HAVING AVG(salary) > 50000;  -- Filters groups
+
+-- Combined
+SELECT dept, AVG(salary) as avg_sal
+FROM employees
+WHERE hire_date > '2020-01-01'   -- Filter rows first
+GROUP BY dept
+HAVING AVG(salary) > 50000;      -- Then filter groups
+```
+
+### Q3: What is the difference between UNION and UNION ALL?
+
+```sql
+-- UNION: Removes duplicates (slower)
+SELECT name FROM employees
+UNION
+SELECT name FROM contractors;
+
+-- UNION ALL: Keeps duplicates (faster)
+SELECT name FROM employees
+UNION ALL
+SELECT name FROM contractors;
+
+-- Both require same number of columns and compatible types
+```
+
+### Q4: What is a deadlock? How to prevent it?
+
+```
+Deadlock: Two or more transactions waiting for each other's locks
+
+Prevention:
+1. Lock ordering: Always acquire locks in same order
+2. Lock timeout: Set maximum wait time
+3. Deadlock detection: Wait-for graph cycle detection
+4. Two-phase locking with deadlock detection
+
+Example:
+-- Use consistent ordering
+T1: Lock(A), Lock(B)  -- Always lock A before B
+T2: Lock(A), Lock(B)  -- Same order prevents deadlock
+```
+
+### Q5: Explain different types of indexes
+
+```
+1. Clustered Index:
+   - Physical order = index order
+   - One per table
+   - Primary key by default
+   - Leaf nodes contain actual data
+
+2. Non-Clustered Index:
+   - Separate structure from data
+   - Multiple per table
+   - Leaf nodes contain pointers to data
+   - Extra lookup needed (bookmark lookup)
+
+3. Covering Index:
+   - Contains all columns needed by query
+   - No need to access actual table
+   
+   CREATE INDEX idx_cover ON employees(dept, salary, name);
+   SELECT name, salary FROM employees WHERE dept = 'IT';
+   -- Satisfied entirely from index
+
+4. Filtered Index:
+   CREATE INDEX idx_active ON employees(name) WHERE status = 'active';
+```
+
+### Q6: What is normalization vs denormalization?
+
+```
+Normalization:
+- Break tables into smaller tables
+- Reduce redundancy
+- Improve data integrity
+- More joins needed
+- Used in OLTP systems
+
+Denormalization:
+- Combine tables to reduce joins
+- Intentionally add redundancy
+- Improve read performance
+- Used in OLAP/data warehouse systems
+
+Example:
+Normalized:
+  Orders(OrderID, CustomerID, OrderDate)
+  Customers(CustomerID, Name, City)
+
+Denormalized:
+  Orders(OrderID, CustomerID, CustomerName, CustomerCity, OrderDate)
+  -- Redundant but faster for queries needing customer info with orders
+```
+
+### Q7: What is MVCC (Multi-Version Concurrency Control)?
+
+```
+MVCC: Each transaction sees a snapshot of data at a point in time
+
+How it works:
+- Multiple versions of each row maintained
+- Readers don't block writers
+- Writers don't block readers
+- Each transaction sees consistent snapshot
+
+Example (PostgreSQL):
+T1 starts at time 10
+T2 starts at time 15
+
+T2 updates row X (creates new version)
+T1 still sees old version of row X (snapshot at time 10)
+
+Used by: PostgreSQL, MySQL InnoDB, Oracle
+```
+
+### Q8: Explain the SQL query execution order
+
+```
+Written Order:        Execution Order:
+1. SELECT            1. FROM / JOIN
+2. FROM              2. WHERE
+3. WHERE             3. GROUP BY
+4. GROUP BY          4. HAVING
+5. HAVING            5. SELECT
+6. ORDER BY          6. DISTINCT
+7. LIMIT             7. ORDER BY
+                     8. LIMIT/OFFSET
+
+This is why you CAN'T use column aliases in WHERE:
+SELECT salary * 12 AS annual_salary
+FROM employees
+WHERE annual_salary > 100000;  -- ❌ ERROR!
+
+But you CAN use them in ORDER BY:
+SELECT salary * 12 AS annual_salary
+FROM employees
+ORDER BY annual_salary DESC;   -- ✓ Works!
+
+And you CAN use them in HAVING (in MySQL):
+SELECT dept, AVG(salary) AS avg_sal
+FROM employees
+GROUP BY dept
+HAVING avg_sal > 50000;        -- ✓ Works in MySQL
+```
+
+### Q9: What are phantom reads and how to prevent them?
+
+```
+Phantom Read: New rows appear in repeated queries within same transaction
+
+Example:
+T1: SELECT COUNT(*) FROM employees WHERE dept='IT' → 5
+T2: INSERT INTO employees (name, dept) VALUES ('New', 'IT')
+T2: COMMIT
+T1: SELECT COUNT(*) FROM employees WHERE dept='IT' → 6  ← Phantom!
+
+Prevention:
+1. Serializable isolation level
+2. Range locks (lock the range of values)
+3. Predicate locking
+4. Gap locks (InnoDB)
+
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+```
+
+### Q10: Design a database for an e-commerce application
+
+```sql
+-- Users
+CREATE TABLE users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Categories
+CREATE TABLE categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    parent_category_id INT,
+    FOREIGN KEY (parent_category_id) REFERENCES categories(category_id)
+);
+
+-- Products
+CREATE TABLE products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL CHECK (price > 0),
+    stock_quantity INT DEFAULT 0 CHECK (stock_quantity >= 0),
+    category_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- Orders
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    total_amount DECIMAL(12,2) NOT NULL,
+    shipping_address TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Order Items
+CREATE TABLE order_items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Reviews
+CREATE TABLE reviews (
+    review_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    UNIQUE (user_id, product_id)  -- One review per user per product
+);
+
+-- Shopping Cart
+CREATE TABLE cart (
+    cart_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    UNIQUE (user_id, product_id)
+);
+
+-- Useful indexes
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_date ON orders(order_date);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_reviews_product ON reviews(product_id);
+```
+
+---
+
+# Quick Reference Cheat Sheet
+
+## SQL Command Categories
+
+```
+DDL: CREATE, ALTER, DROP, TRUNCATE, RENAME
+DML: SELECT, INSERT, UPDATE, DELETE, MERGE
+DCL: GRANT, REVOKE
+TCL: COMMIT, ROLLBACK, SAVEPOINT
+```
+
+## Join Types Visual
+
+```
+INNER JOIN:      A ∩ B         (matching rows only)
+LEFT JOIN:       A              (all from A + matching from B)
+RIGHT JOIN:            B        (all from B + matching from A)
+FULL OUTER JOIN: A ∪ B         (all from both)
+CROSS JOIN:      A × B         (cartesian product)
+SELF JOIN:       A ⋈ A         (table with itself)
+```
+
+## Normalization Summary
+
+```
+1NF: Atomic values, no repeating groups
+2NF: 1NF + No partial dependencies
+3NF: 2NF + No transitive dependencies
+BCNF: Every determinant is a candidate key
+4NF: No multivalued dependencies
+5NF: No join dependencies
+```
+
+## ACID Quick Reference
+
+```
+A - Atomicity:    All or nothing
+C - Consistency:  Valid state to valid state
+I - Isolation:    Concurrent transactions don't interfere
+D - Durability:   Committed data persists
+```
+
+## Isolation Levels
+
+```
+                    Dirty Read  Unrepeatable Read  Phantom Read
+Read Uncommitted       ✓              ✓                ✓
+Read Committed         ✗              ✓                ✓
+Repeatable Read        ✗              ✗                ✓
+Serializable           ✗              ✗                ✗
+```
+
+## Key Types
+
+```
+Super Key:     Any set of attributes that uniquely identifies tuple
+Candidate Key: Minimal super key
+Primary Key:   Selected candidate key (NOT NULL, unique)
+Alternate Key: Candidate keys not selected as primary
+Foreign Key:   References primary key of another table
+Composite Key: Key with multiple attributes
+Unique Key:    Ensures uniqueness (allows one NULL)
+```
+
+## Important SQL Patterns
+
+```sql
+-- Top N per group
+WITH ranked AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY group_col ORDER BY val DESC) as rn
+    FROM table_name
+)
+SELECT * FROM ranked WHERE rn <= N;
+
+-- Running total
+SUM(col) OVER (ORDER BY date_col)
+
+-- Previous/Next row
+LAG(col) OVER (ORDER BY date_col)
+LEAD(col) OVER (ORDER BY date_col)
+
+-- Deduplication
+WITH deduped AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY dup_cols ORDER BY id) as rn
+    FROM table_name
+)
+SELECT * FROM deduped WHERE rn = 1;
+
+-- Conditional aggregation
+SUM(CASE WHEN condition THEN value ELSE 0 END)
+COUNT(CASE WHEN condition THEN 1 END)
+```
+
+---
+
+**End of Complete DBMS & SQL Guide**
