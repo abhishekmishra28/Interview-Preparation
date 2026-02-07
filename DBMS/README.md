@@ -569,108 +569,403 @@ SELECT * FROM employee_hierarchy;
 
 # Normalization
 
-## Purpose
-- Eliminate redundancy
-- Avoid update anomalies
+## What is Normalization?
+**Definition:** Process of organizing database tables to minimize redundancy and dependency
+
+**Goals:**
+- Eliminate redundant data
+- Ensure data dependencies make sense
+- Prevent insertion, update, and deletion anomalies
 - Improve data integrity
 
-## 1NF (First Normal Form)
+## Functional Dependencies (FD)
 
-**Rules:**
-- Atomic values (no multivalued attributes)
-- No repeating groups
-
-**Violation:**
+### Basic Concept
 ```
-Student (ID, Name, Courses)
-1, Alice, "Math, Physics"  ❌
+X → Y (X determines Y)
+If two tuples have same X values, they must have same Y values
 ```
 
-**1NF:**
+### Example
 ```
-Student (ID, Name, Course)
-1, Alice, Math
-1, Alice, Physics  ✓
+StudentID → StudentName
+(StudentID determines StudentName)
 ```
 
-## 2NF (Second Normal Form)
+### Armstrong's Axioms
+```
+1. Reflexivity: If Y ⊆ X, then X → Y
+2. Augmentation: If X → Y, then XZ → YZ  
+3. Transitivity: If X → Y and Y → Z, then X → Z
+```
 
-**Rules:**
+## Types of Keys
+
+```
+Super Key: Set of attributes that uniquely identifies tuples
+Candidate Key: Minimal super key (no redundant attributes)
+Primary Key: Chosen candidate key
+Foreign Key: References primary key of another table
+```
+
+### Example
+```
+Student(ID, Email, Phone, Name)
+Super Keys: {ID, Email}, {ID, Phone}, {ID, Email, Phone}
+Candidate Keys: {ID}, {Email}
+Primary Key: {ID}
+```
+
+## Normal Forms
+
+### 1NF (First Normal Form)
+
+**Requirements:**
+- Each column contains atomic values
+- No repeating groups or arrays
+- Each record is unique
+
+**Before 1NF:**
+```
+Employee(EmpID, Name, PhoneNumbers)
+101, John, "9876543210, 9876543211"  ❌
+```
+
+**After 1NF:**
+```
+Employee(EmpID, Name, PhoneNumber)
+101, John, 9876543210
+101, John, 9876543211  ✓
+```
+
+### 2NF (Second Normal Form)
+
+**Requirements:**
 - Must be in 1NF
-- No partial dependency (non-prime attributes fully dependent on primary key)
+- No partial dependencies (non-key attributes depend on entire primary key)
 
-**Violation:**
+**Before 2NF:**
 ```
-StudentCourse (StudentID, CourseID, StudentName, CourseName)
-PK: (StudentID, CourseID)
-StudentName depends only on StudentID (partial dependency)  ❌
-```
-
-**2NF:**
-```
-Student (StudentID, StudentName)
-Course (CourseID, CourseName)
-Enrollment (StudentID, CourseID)  ✓
+OrderDetails(OrderID, ProductID, ProductName, Quantity)
+Primary Key: (OrderID, ProductID)
+ProductName depends only on ProductID ❌
 ```
 
-## 3NF (Third Normal Form)
+**After 2NF:**
+```
+OrderDetails(OrderID, ProductID, Quantity)
+Product(ProductID, ProductName) ✓
+```
 
-**Rules:**
+### 3NF (Third Normal Form)
+
+**Requirements:**
 - Must be in 2NF
-- No transitive dependency
+- No transitive dependencies (non-key depends on non-key)
 
-**Violation:**
+**Before 3NF:**
 ```
-Employee (EmpID, EmpName, DeptID, DeptName)
-EmpID → DeptID → DeptName (transitive)  ❌
-```
-
-**3NF:**
-```
-Employee (EmpID, EmpName, DeptID)
-Department (DeptID, DeptName)  ✓
+Employee(EmpID, Name, DeptID, DeptName, DeptLocation)
+EmpID → DeptID → DeptName (transitive) ❌
 ```
 
-## BCNF (Boyce-Codd Normal Form)
+**After 3NF:**
+```
+Employee(EmpID, Name, DeptID)
+Department(DeptID, DeptName, DeptLocation) ✓
+```
 
-**Rules:**
+### BCNF (Boyce-Codd Normal Form)
+
+**Requirements:**
 - Must be in 3NF
-- For every functional dependency X→Y, X must be a super key
+- Every determinant must be a candidate key
 
-**Example:**
+**Before BCNF:**
 ```
-StudentAdvisor (StudentID, Subject, Advisor)
-FD: (StudentID, Subject) → Advisor
-FD: Advisor → Subject
-
-If one advisor teaches only one subject:
-Advisor → Subject violates BCNF
+TeacherSubject(StudentID, Subject, Teacher)
+FD: (StudentID, Subject) → Teacher
+FD: Teacher → Subject
+Teacher is not a candidate key ❌
 ```
 
-**BCNF:**
+**After BCNF:**
 ```
-StudentAdvisor (StudentID, Advisor)
-AdvisorSubject (Advisor, Subject)
+StudentTeacher(StudentID, Teacher)
+TeacherSubject(Teacher, Subject) ✓
 ```
 
-## 4NF (Fourth Normal Form)
+### 4NF (Fourth Normal Form)
 
-**Rules:**
+**Requirements:**
 - Must be in BCNF
-- No multivalued dependencies
+- No multi-valued dependencies
+
+**Before 4NF:**
+```
+StudentInfo(StudentID, Course, Sport)
+Student can have multiple courses and sports independently ❌
+```
+
+**After 4NF:**
+```
+StudentCourse(StudentID, Course)
+StudentSport(StudentID, Sport) ✓
+```
+
+### 5NF (Fifth Normal Form)
+
+**Requirements:**
+- Must be in 4NF
+- No join dependencies
 
 **Example:**
 ```
-Student (StudentID, Course, Hobby)
-One student can have multiple courses and hobbies independently
+SupplyInfo(Supplier, Product, Customer)
+Decompose if independent relationships exist
 ```
 
-**4NF:**
+## Database Anomalies
+
+### Update Anomaly
 ```
-StudentCourse (StudentID, Course)
-StudentHobby (StudentID, Hobby)
+Problem: Updating data requires changes in multiple places
+Example: Changing department name needs updating all employee records
 ```
 
+### Insert Anomaly
+```
+Problem: Cannot insert data without unrelated information
+Example: Cannot add new department without an employee
+```
+
+### Delete Anomaly
+```
+Problem: Deleting a record causes loss of other valuable data
+Example: Deleting last employee removes department information
+```
+
+---
+
+# MCQs on Normalization
+
+## Fundamental Concepts
+
+**Q1.** The primary goal of normalization is to:
+```
+a) Increase storage space
+b) Eliminate data redundancy ✓
+c) Make queries faster
+d) Create more tables
+```
+
+**Q2.** A functional dependency X → Y means:
+```
+a) Y determines X
+b) X uniquely determines Y ✓
+c) X and Y are the same
+d) Y is a subset of X
+```
+
+**Q3.** Which of the following is NOT a valid normal form?
+```
+a) 1NF
+b) 2NF
+c) 2.5NF ✓
+d) 3NF
+```
+
+## First Normal Form (1NF)
+
+**Q4.** Which violates 1NF?
+```
+a) Customer(ID, Name, Email)
+b) Customer(ID, Name, Phone1, Phone2)
+c) Customer(ID, Name, Orders) where Orders = "101,102,103" ✓
+d) Customer(ID, FirstName, LastName)
+```
+
+**Q5.** To achieve 1NF, we must eliminate:
+```
+a) Partial dependencies
+b) Transitive dependencies
+c) Repeating groups ✓
+d) All dependencies
+```
+
+## Second Normal Form (2NF)
+
+**Q6.** 2NF eliminates which type of dependency?
+```
+a) Partial dependency ✓
+b) Transitive dependency
+c) Multi-valued dependency
+d) Join dependency
+```
+
+**Q7.** Given R(A,B,C,D) with primary key (A,B) and FD: A → C, this violates:
+```
+a) 1NF
+b) 2NF ✓
+c) 3NF
+d) BCNF
+```
+
+## Third Normal Form (3NF)
+
+**Q8.** A transitive dependency exists when:
+```
+a) A → B and B → C where B is not a key ✓
+b) AB → C
+c) A → BC
+d) A → B and C → D
+```
+
+**Q9.** Employee(EmpID, Name, DeptID, DeptName) violates which normal form?
+```
+a) 1NF
+b) 2NF
+c) 3NF ✓
+d) None
+```
+
+## BCNF
+
+**Q10.** BCNF is stricter than 3NF because:
+```
+a) It eliminates partial dependencies
+b) Every determinant must be a superkey ✓
+c) It eliminates repeating groups
+d) It requires fewer tables
+```
+
+**Q11.** A relation in BCNF is always in:
+```
+a) 1NF only
+b) 2NF only
+c) 3NF ✓
+d) 4NF
+```
+
+## Higher Normal Forms
+
+**Q12.** 4NF deals with:
+```
+a) Partial dependencies
+b) Transitive dependencies
+c) Multi-valued dependencies ✓
+d) Functional dependencies
+```
+
+**Q13.** 5NF is also known as:
+```
+a) Domain-Key Normal Form
+b) Project-Join Normal Form ✓
+c) Boyce-Codd Normal Form
+d) Elementary Normal Form
+```
+
+## Keys and Dependencies
+
+**Q14.** A candidate key is:
+```
+a) Any superkey
+b) Minimal superkey ✓
+c) Foreign key
+d) Primary key only
+```
+
+**Q15.** Given R(A,B,C) with FDs: A → B and B → C, the candidate key is:
+```
+a) A ✓
+b) B
+c) C
+d) ABC
+```
+
+## Practical Applications
+
+**Q16.** Order(OrderID, Date, CustomerID, CustomerName) is in:
+```
+a) 1NF only
+b) 2NF only ✓
+c) 3NF
+d) BCNF
+```
+
+**Q17.** The main disadvantage of over-normalization is:
+```
+a) Data redundancy
+b) Storage waste
+c) Complex queries with many joins ✓
+d) Data inconsistency
+```
+
+**Q18.** Which anomaly occurs when we cannot insert a record without unrelated data?
+```
+a) Update anomaly
+b) Insert anomaly ✓
+c) Delete anomaly
+d) Read anomaly
+```
+
+**Q19.** Denormalization is done primarily for:
+```
+a) Saving storage space
+b) Performance optimization ✓
+c) Better data integrity
+d) Eliminating redundancy
+```
+
+**Q20.** A prime attribute is:
+```
+a) The first attribute in a relation
+b) Part of some candidate key ✓
+c) Always unique
+d) Never NULL
+```
+
+## Advanced Questions
+
+**Q21.** Lossless decomposition ensures:
+```
+a) No data redundancy
+b) Original relation can be reconstructed ✓
+c) Faster queries
+d) Fewer tables
+```
+
+**Q22.** Given Student(SID, Sname, CID, Cname, Grade) with key (SID,CID), which FD violates 2NF?
+```
+a) (SID,CID) → Grade
+b) SID → Sname ✓
+c) (SID,CID) → Sname
+d) Grade → CID
+```
+
+**Q23.** Armstrong's axiom of augmentation states:
+```
+a) If X → Y then X → XY
+b) If X → Y then XZ → YZ ✓
+c) If X → Y and Y → Z then X → Z
+d) If X → Y then Y → X
+```
+
+**Q24.** The closure of attribute set X (denoted X+) contains:
+```
+a) Only X
+b) All attributes determined by X ✓
+c) All candidate keys
+d) All superkeys
+```
+
+**Q25.** A relation R is decomposed into R1 and R2. The decomposition is dependency preserving if:
+```
+a) R1 ∪ R2 = R
+b) R1 ∩ R2 ≠ φ
+c) All FDs can be checked without joining ✓
+d) R1 ∩ R2 is a superkey
+```
 ---
 
 # Transactions
