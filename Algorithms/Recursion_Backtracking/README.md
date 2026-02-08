@@ -1,3 +1,6 @@
+Here is the complete, consolidated Markdown guide. I have integrated your new code snippets, fixed syntax formatting issues (like `cppclass`), completed the cut-off Trie logic, and structured the final sections logically.
+
+```markdown
 # Recursion & Backtracking - Complete Guide with LeetCode
 
 ## Table of Contents
@@ -9,6 +12,8 @@
 - [LeetCode Problems - Medium](#leetcode-problems---medium)
 - [LeetCode Problems - Hard](#leetcode-problems---hard)
 - [Problem Patterns](#problem-patterns)
+- [Optimization & Common Mistakes](#optimization--common-mistakes)
+- [Practice Strategy](#practice-strategy)
 
 ---
 
@@ -1020,3 +1025,409 @@ public:
                 }
                 node = node->children[c - 'a'];
             }
+            node->word = word;
+        }
+        
+        // Search board
+        vector<string> result;
+        for (int i = 0; i < board.size(); i++) {
+            for (int j = 0; j < board[0].size(); j++) {
+                backtrack(board, i, j, root, result);
+            }
+        }
+        return result;
+    }
+    
+    void backtrack(vector<vector<char>>& board, int i, int j,
+                   TrieNode* node, vector<string>& result) {
+        char c = board[i][j];
+        
+        // Boundary checks
+        if (i < 0 || i >= board.size() || j < 0 || j >= board[0].size() ||
+            c == '#' || !node->children[c - 'a']) {
+            return;
+        }
+        
+        node = node->children[c - 'a'];
+        
+        // Found a word
+        if (!node->word.empty()) {
+            result.push_back(node->word);
+            node->word = "";  // Avoid duplicates
+        }
+        
+        // Mark as visited
+        board[i][j] = '#';
+        
+        // Explore 4 directions
+        backtrack(board, i + 1, j, node, result);
+        backtrack(board, i - 1, j, node, result);
+        backtrack(board, i, j + 1, node, result);
+        backtrack(board, i, j - 1, node, result);
+        
+        // Restore
+        board[i][j] = c;
+    }
+};
+
+// Time: O(m × n × 4^L) where L is max word length
+// Space: O(total characters in all words)
+```
+
+## 22. Regular Expression Matching (LeetCode 10)
+
+```cpp
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        return backtrack(s, p, 0, 0);
+    }
+    
+    bool backtrack(string& s, string& p, int i, int j) {
+        // Base cases
+        if (j == p.size()) return i == s.size();
+        
+        bool firstMatch = (i < s.size() && 
+                          (s[i] == p[j] || p[j] == '.'));
+        
+        // Handle '*' pattern
+        if (j + 1 < p.size() && p[j + 1] == '*') {
+            // Two choices:
+            // 1. Don't use '*' (match zero occurrences)
+            // 2. Use '*' if first character matches
+            return backtrack(s, p, i, j + 2) ||
+                   (firstMatch && backtrack(s, p, i + 1, j));
+        }
+        
+        // No '*', must match current character
+        return firstMatch && backtrack(s, p, i + 1, j + 1);
+    }
+    
+    // With memoization
+    bool isMatchMemo(string s, string p) {
+        vector<vector<int>> memo(s.size() + 1, vector<int>(p.size() + 1, -1));
+        return helper(s, p, 0, 0, memo);
+    }
+    
+    bool helper(string& s, string& p, int i, int j,
+                vector<vector<int>>& memo) {
+        if (memo[i][j] != -1) return memo[i][j];
+        
+        bool result;
+        if (j == p.size()) {
+            result = (i == s.size());
+        } else {
+            bool firstMatch = (i < s.size() && 
+                              (s[i] == p[j] || p[j] == '.'));
+            
+            if (j + 1 < p.size() && p[j + 1] == '*') {
+                result = helper(s, p, i, j + 2, memo) ||
+                        (firstMatch && helper(s, p, i + 1, j, memo));
+            } else {
+                result = firstMatch && helper(s, p, i + 1, j + 1, memo);
+            }
+        }
+        
+        memo[i][j] = result;
+        return result;
+    }
+};
+
+// Time: O(m × n) with memoization
+// Space: O(m × n)
+```
+
+## 23. Wildcard Matching (LeetCode 44)
+
+```cpp
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int m = s.size(), n = p.size();
+        vector<vector<bool>> dp(m + 1, vector<bool>(n + 1, false));
+        
+        dp[0][0] = true;
+        
+        // Handle patterns like "*", "**", "***"
+        for (int j = 1; j <= n; j++) {
+            if (p[j - 1] == '*') {
+                dp[0][j] = dp[0][j - 1];
+            }
+        }
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (p[j - 1] == '*') {
+                    // '*' can match empty or any sequence
+                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
+                } else if (p[j - 1] == '?' || s[i - 1] == p[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+            }
+        }
+        
+        return dp[m][n];
+    }
+};
+
+// Time: O(m × n)
+// Space: O(m × n)
+```
+
+---
+
+# Problem Patterns
+
+## Pattern 1: Generate All Solutions
+**When to use:** "Find all", "generate all", "list all"  
+**Examples:** Subsets (78), Permutations (46), Combinations (77), Letter Combinations (17)
+
+**Template:**
+```cpp
+void backtrack(state, result) {
+    if (isComplete(state)) {
+        result.add(state);
+        return;
+    }
+    
+    for (choice in choices) {
+        state.add(choice);
+        backtrack(state, result);
+        state.remove(choice);
+    }
+}
+```
+
+## Pattern 2: Find One Solution
+**When to use:** "Find if exists", "determine if possible"  
+**Examples:** Word Search (79), Sudoku Solver (37)
+
+**Template:**
+```cpp
+bool backtrack(state) {
+    if (isGoal(state)) return true;
+    if (isInvalid(state)) return false;
+    
+    for (choice in choices) {
+        state.add(choice);
+        if (backtrack(state)) return true;
+        state.remove(choice);
+    }
+    return false;
+}
+```
+
+## Pattern 3: Count Solutions
+**When to use:** "How many ways", "count total"  
+**Examples:** N-Queens II (52), Climbing Stairs (70)
+
+**Template:**
+```cpp
+int backtrack(state) {
+    if (isGoal(state)) return 1;
+    if (isInvalid(state)) return 0;
+    
+    int count = 0;
+    for (choice in choices) {
+        state.add(choice);
+        count += backtrack(state);
+        state.remove(choice);
+    }
+    return count;
+}
+```
+
+## Pattern 4: Optimization Problems
+**When to use:** "Find maximum", "find minimum", "best solution"  
+**Examples:** Combination Sum (39), Word Break (139)
+
+**Template:**
+```cpp
+int backtrack(state, best) {
+    if (isGoal(state)) {
+        best = max(best, evaluate(state));
+        return best;
+    }
+    
+    for (choice in choices) {
+        if (isPrunable(choice, best)) continue;
+        state.add(choice);
+        best = backtrack(state, best);
+        state.remove(choice);
+    }
+    return best;
+}
+```
+
+---
+
+# Optimization & Common Mistakes
+
+## Key Optimization Techniques
+
+### 1. Pruning
+Skip branches that cannot lead to valid solutions:
+```cpp
+// In Combination Sum
+if (target < 0) return;  // Prune invalid branches
+
+// In N-Queens
+if (!isValid(board, row, col)) continue;  // Skip invalid placements
+```
+
+### 2. Memoization
+Cache results to avoid recomputation:
+```cpp
+// Fibonacci with memo
+int fib(int n, vector<int>& memo) {
+    if (memo[n] != -1) return memo[n];
+    memo[n] = fib(n-1, memo) + fib(n-2, memo);
+    return memo[n];
+}
+```
+
+### 3. Early Termination
+Stop as soon as solution is found:
+```cpp
+bool backtrack(state) {
+    if (found) return true;  // Early exit
+    // ... rest of logic
+}
+```
+
+### 4. Sorting
+Sort input to handle duplicates efficiently:
+```cpp
+sort(nums.begin(), nums.end());
+if (i > start && nums[i] == nums[i-1]) continue;  // Skip duplicates
+```
+
+## Common Mistakes to Avoid
+
+### 1. Forgetting Base Case
+```cpp
+// ❌ Wrong
+int factorial(int n) {
+    return n * factorial(n - 1);  // Stack overflow!
+}
+
+// ✅ Correct
+int factorial(int n) {
+    if (n <= 1) return 1;  // Base case
+    return n * factorial(n - 1);
+}
+```
+
+### 2. Not Backtracking
+```cpp
+// ❌ Wrong
+void backtrack(vector<int>& path) {
+    path.push_back(num);
+    backtrack(path);
+    // Missing: path.pop_back();
+}
+
+// ✅ Correct
+void backtrack(vector<int>& path) {
+    path.push_back(num);
+    backtrack(path);
+    path.pop_back();  // Restore state
+}
+```
+
+### 3. Incorrect State Modification
+```cpp
+// ❌ Wrong - modifying by reference without restoration
+void backtrack(vector<int> nums) {  // Should pass by reference
+    nums.push_back(x);
+    backtrack(nums);
+    // nums still contains x
+}
+
+// ✅ Correct
+void backtrack(vector<int>& nums) {
+    nums.push_back(x);
+    backtrack(nums);
+    nums.pop_back();  // Restore
+}
+```
+
+### 4. Duplicate Results
+```cpp
+// ❌ Wrong - allows duplicates
+for (int i = start; i < nums.size(); i++) {
+    backtrack(i + 1);
+}
+
+// ✅ Correct - handles duplicates
+for (int i = start; i < nums.size(); i++) {
+    if (i > start && nums[i] == nums[i-1]) continue;
+    backtrack(i + 1);
+}
+```
+
+## Time Complexity Quick Reference
+
+| Problem Type | Time Complexity | Example |
+| :--- | :--- | :--- |
+| All Subsets | O(2^n) | Subsets |
+| All Permutations | O(n!) | Permutations |
+| All Combinations | O(C(n,k)) | Combinations |
+| N-Queens | O(n!) | N-Queens |
+| Sudoku | O(9^(n×n)) | Sudoku Solver |
+| Word Search | O(m×n×4^L) | Word Search |
+| Combination Sum | O(n^target) | Combination Sum |
+
+---
+
+# Practice Strategy
+
+## Beginner (Easy Problems)
+- Start with simple recursion (Fibonacci, Factorial)
+- Practice with power functions (Power of Two/Three/Four)
+- Try string reversal recursively
+- Solve Climbing Stairs
+
+## Intermediate (Medium Problems)
+- Master subset generation (78, 90)
+- Learn permutation generation (46, 47)
+- Practice combination problems (39, 40, 77)
+- Solve grid-based problems (79)
+- Try string backtracking (17, 22, 131)
+
+## Advanced (Hard Problems)
+- N-Queens variants (51, 52)
+- Sudoku Solver (37)
+- Regular Expression Matching (10)
+- Word Search II with Trie (212)
+
+## Additional Resources
+
+### More Easy:
+- LeetCode 206: Reverse Linked List
+- LeetCode 21: Merge Two Sorted Lists
+- LeetCode 100: Same Tree
+
+### More Medium:
+- LeetCode 93: Restore IP Addresses
+- LeetCode 784: Letter Case Permutation
+- LeetCode 494: Target Sum
+
+### More Hard:
+- LeetCode 140: Word Break II
+- LeetCode 301: Remove Invalid Parentheses
+- LeetCode 679: 24 Game
+
+## Key Takeaways
+1. Always define base case first
+2. Think about what choices you have at each step
+3. Remember to backtrack (undo choices)
+4. Use pruning to optimize
+5. Draw recursion tree for complex problems
+6. Practice, practice, practice!
+
+---
+
+**End of Guide**  
+Good luck with your recursion and backtracking journey! 🚀
+```
