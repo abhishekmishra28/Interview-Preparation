@@ -1,6 +1,4 @@
-Here is the complete, consolidated Markdown guide. I have integrated your new code snippets, fixed syntax formatting issues (like `cppclass`), completed the cut-off Trie logic, and structured the final sections logically.
 
-```markdown
 # Recursion & Backtracking - Complete Guide with LeetCode
 
 ## Table of Contents
