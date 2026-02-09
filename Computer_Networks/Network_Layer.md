@@ -1,9 +1,4 @@
----
 
-# Complete Network Layer Reference
-> This section covers every single topic you requested exactly. All exam required material is clearly marked.
-
----
 
 ## Part 1: IP Headers & Addressing
 
