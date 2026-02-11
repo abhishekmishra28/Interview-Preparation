@@ -166,7 +166,7 @@ Describes how **data flows** within the network, regardless of physical connecti
 ## **5. 30 MCQs on Network Topologies**
 
 ### **Section 1: Basic Concepts**
-
+```
 **1. What is a network topology?**
 a) The speed of data transmission
 b) The arrangement of nodes and connections in a network
@@ -226,11 +226,11 @@ a) Ring
 b) Mesh
 c) Tree
 d) Hybrid
-
+```
 ---
 
 ### **Section 2: Data Flow & Performance**
-
+```
 **11. In a bus topology, how does data travel?**
 a) Through a central hub
 b) In one direction only
@@ -290,11 +290,11 @@ a) Physical = cables, Logical = data flow
 b) Physical = software, Logical = hardware
 c) Physical = wireless, Logical = wired
 d) No difference
-
+```
 ---
 
 ### **Section 3: Advanced Concepts**
-
+```
 **21. Which topology is used in modern Ethernet LANs?**
 a) Bus
 b) Star
@@ -354,7 +354,7 @@ a) Low cost
 b) High fault tolerance and security
 c) Easy installation
 d) Works with wireless networks
-
+```
 ---
 
 ### **Answer Key**
