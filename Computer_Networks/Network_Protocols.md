@@ -178,6 +178,7 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
 # **🔥 50 MCQs on Network Protocols**
 
 ### **Section 1: Basic Concepts**
+```
 1. **What is a network protocol?**
    a) A physical cable connecting devices
    b) A set of rules for communication between devices
@@ -237,10 +238,11 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
     b) FTP
     c) SSH
     d) HTTP
-
+```
 ---
 
 ### **Section 2: Transport Layer Protocols**
+```
 11. **What is the main difference between TCP and UDP?**
     a) TCP is faster
     b) UDP guarantees delivery
@@ -300,10 +302,12 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
     b) UDP
     c) SCTP
     d) ICMP
-
+```
 ---
 
 ### **Section 3: Network Layer Protocols**
+```
+
 21. **What is the primary function of the IP protocol?**
     a) Error correction
     b) Logical addressing and routing
@@ -363,10 +367,11 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
     b) DHCP
     c) ARP
     d) ICMP
-
+```
 ---
 
 ### **Section 4: Data Link & Physical Layer Protocols**
+```
 31. **Which protocol is used in wired LANs?**
     a) Wi-Fi
     b) Ethernet
@@ -426,10 +431,12 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
     b) To forward frames based on MAC addresses
     c) To assign IP addresses
     d) To encrypt data
-
+```
 ---
 
 ### **Section 5: Security & Wireless Protocols**
+```
+
 41. **Which protocol is used for secure web browsing?**
     a) HTTP
     b) FTP
@@ -489,7 +496,7 @@ Protocols designed for **low-power, low-bandwidth** IoT devices.
     b) High-speed data transfer
     c) Short-range contactless communication
     d) Routing
-
+```
 ---
 
 # **📌 Answer Key**
