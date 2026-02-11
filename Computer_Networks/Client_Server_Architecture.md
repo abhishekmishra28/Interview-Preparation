@@ -37,7 +37,7 @@ Think of a restaurant:
 
 ## 3. How it Works (The Request-Response Cycle)
 
-```mermaid
+```
 graph LR
     A[1. Client Request] -->|HTTP/TCP| B[2. Server Listens]
     B --> C{3. Processing}
