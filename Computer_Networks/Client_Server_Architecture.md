@@ -83,7 +83,7 @@ graph LR
 | **Efficiency:** Clients don't need powerful hardware. | **Dependency:** Requires a stable network connection. |
 
 ---
-
+```
 # 30 Multiple Choice Questions (MCQs)
 
 **1. In Client-Server architecture, which component initiates the request?**
@@ -267,7 +267,7 @@ graph LR
     d) Because clients have firewalls
 
 ***
-
+```
 ### Answer Key
 
 | Q | Ans | Q | Ans | Q | Ans |
