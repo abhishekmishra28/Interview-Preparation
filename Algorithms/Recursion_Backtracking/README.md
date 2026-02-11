@@ -217,30 +217,152 @@ void backtrack(vector<int>& nums, vector<int>& path,
 **Problem:** Calculate nth Fibonacci number
 
 ```cpp
+/*
+ * Problem: 509. Fibonacci Number
+ *
+ * Statement:
+ * The Fibonacci numbers are defined as:
+ *   fib(0) = 0
+ *   fib(1) = 1
+ *   fib(n) = fib(n-1) + fib(n-2) for n >= 2
+ *
+ * Given an integer n, return fib(n).
+ *
+ * ------------------------------------------------------------
+ * APPROACH OVERVIEW
+ *
+ * We discuss 3 common approaches:
+ *
+ * 1️⃣ Pure Recursion (Brute Force)        → Exponential time
+ * 2️⃣ Dynamic Programming (Bottom-Up)    → Linear time
+ * 3️⃣ Memoization with Recursion (Top-Down) ✅ (Your Final Choice)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 1: Pure Recursive (Brute Force)
+ *
+ * Idea:
+ * - Directly follow Fibonacci definition
+ *
+ * Code:
+ *   fib(n) = fib(n-1) + fib(n-2)
+ *
+ * Problems:
+ * - Recomputes same subproblems again and again
+ * - Very slow for large n
+ *
+ * Time Complexity: O(2^n)
+ * Space Complexity: O(n) (recursion stack)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 2: Dynamic Programming (Bottom-Up)
+ *
+ * Idea:
+ * - Store previously computed values
+ * - Build solution iteratively from 0 → n
+ *
+ * Steps:
+ * - dp[0] = 0
+ * - dp[1] = 1
+ * - dp[i] = dp[i-1] + dp[i-2]
+ *
+ * Time Complexity: O(n)
+ * Space Complexity: O(n)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 3: Memoization + Recursion (Top-Down) ✅
+ * (This is what your final code uses)
+ *
+ * Core Idea:
+ * - Use recursion but store results to avoid recomputation
+ * - Each Fibonacci value is computed only once
+ *
+ * ------------------------------------------------------------
+ * Helper Function: fibo(n, memo)
+ *
+ * Logic:
+ * - If n <= 1 → return n
+ * - If memo[n] already computed → return memo[n]
+ * - Else:
+ *     memo[n] = fibo(n-1) + fibo(n-2)
+ *
+ * ------------------------------------------------------------
+ * Why This Works:
+ *
+ * - Converts exponential recursion into linear recursion
+ * - Retains clean recursive structure
+ * - Avoids repeated subproblem computation
+ *
+ * ------------------------------------------------------------
+ * Example:
+ *
+ * n = 5
+ *
+ * fib(5)
+ *  ├─ fib(4)
+ *  │   ├─ fib(3)
+ *  │   │   ├─ fib(2)
+ *  │   │   └─ fib(1)
+ *  │   └─ fib(2)
+ *  └─ fib(3)
+ *
+ * With memoization → each fib(x) computed once
+ *
+ * ------------------------------------------------------------
+ * Time Complexity:
+ *
+ * - O(n)
+ *
+ * ------------------------------------------------------------
+ * Space Complexity:
+ *
+ * - O(n) for memo array
+ * - O(n) recursion stack
+ *
+ * ------------------------------------------------------------
+ * Interview Notes:
+ *
+ * - Memoization is preferred when recursion is natural
+ * - Bottom-up DP is preferred when recursion stack is a concern
+ * - Both DP and memoization reduce time from exponential to linear
+ */
+
 class Solution {
-public:
-    // Method 1: Pure Recursion (Exponential)
-    int fib(int n) {
-        if (n <= 1) return n;
-        return fib(n - 1) + fib(n - 2);
-    }
-    
-    // Method 2: Memoization (Top-Down DP)
-    int fib(int n) {
-        vector<int> memo(n + 1, -1);
-        return fibMemo(n, memo);
-    }
-    
-    int fibMemo(int n, vector<int>& memo) {
+private:
+    // Helper function for memoized recursion
+    int fibo(int n, vector<int> &memo) {
         if (n <= 1) return n;
         if (memo[n] != -1) return memo[n];
-        memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+
+        memo[n] = fibo(n - 1, memo) + fibo(n - 2, memo);
         return memo[n];
     }
-};
 
-// Time: O(2^n) → O(n) with memoization
-// Space: O(n) stack + O(n) memo
+public:
+    int fib(int n) {
+
+        /*
+        // ---------- APPROACH 1: Pure Recursion ----------
+        if(n <= 1) return n;
+        return fib(n - 1) + fib(n - 2);
+        */
+
+        /*
+        // ---------- APPROACH 2: Bottom-Up Dynamic Programming ----------
+        if(n <= 1) return n;
+        vector<int> dp(n + 1);
+        dp[0] = 0;
+        dp[1] = 1;
+        for(int i = 2; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+        */
+
+        // ---------- APPROACH 3: Memoization + Recursion (Chosen) ----------
+        vector<int> memo(n + 1, -1);
+        return fibo(n, memo);
+    }
+};
 ```
 
 ## 2. Power of Two (LeetCode 231)
@@ -248,29 +370,124 @@ public:
 **Problem:** Check if n is power of 2
 
 ```cpp
+/*
+ * Problem: 231. Power of Two
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an integer n, return true if it is a power of two.
+ * Otherwise, return false.
+ *
+ * A number n is a power of two if:
+ *   n = 2^k for some integer k ≥ 0
+ *
+ * ------------------------------------------------------------
+ * APPROACH OVERVIEW:
+ *
+ * We include ALL commonly asked approaches in a single file:
+ *
+ * 1️⃣ Recursive Division by 2
+ * 2️⃣ Iterative Division by 2
+ * 3️⃣ Bit Manipulation (Optimal & Interview Favorite)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 1: Recursive Division by 2
+ *
+ * Idea:
+ * - A power of two can be divided by 2 repeatedly
+ * - If we finally reach 1 → it is a power of two
+ *
+ * Steps:
+ * - If n == 0 → false
+ * - If n == 1 → true
+ * - If n is odd → false
+ * - Else → recurse on n / 2
+ *
+ * Time Complexity: O(log n)
+ * Space Complexity: O(log n) (recursion stack)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 2: Iterative Division by 2
+ *
+ * Idea:
+ * - Same logic as recursion
+ * - Avoid recursion stack
+ *
+ * Steps:
+ * - While n is divisible by 2 → divide by 2
+ * - At the end check if n == 1
+ *
+ * Time Complexity: O(log n)
+ * Space Complexity: O(1)
+ *
+ * ------------------------------------------------------------
+ * APPROACH 3: Bit Manipulation (Optimal)
+ *
+ * Key Insight:
+ * - A power of two has exactly ONE set bit in binary
+ *
+ * Examples:
+ *   1  → 0001
+ *   2  → 0010
+ *   4  → 0100
+ *   8  → 1000
+ *
+ * Trick:
+ *   n & (n - 1) removes the lowest set bit
+ *
+ * For powers of two:
+ *   n & (n - 1) == 0
+ *
+ * Time Complexity: O(1)
+ * Space Complexity: O(1)
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTE:
+ *
+ * - Start with recursive explanation
+ * - Optimize to iterative
+ * - End with bit manipulation as final answer
+ */
+
 class Solution {
-public:
-    bool isPowerOfTwo(int n) {
-        // Base cases
-        if (n <= 0) return false;
+private:
+    /* ========================================================
+     * APPROACH 1: Recursive Division
+     * ======================================================== */
+    bool isPowerOfTwoRecursive(int n) {
+        if (n == 0) return false;
         if (n == 1) return true;
-        
-        // If odd and not 1, cannot be power of 2
-        if (n % 2 == 1) return false;
-        
-        // Recursive case
-        return isPowerOfTwo(n / 2);
+        return (n % 2 == 0) && isPowerOfTwoRecursive(n / 2);
     }
-    
-    // Iterative approach
+
+    /* ========================================================
+     * APPROACH 2: Iterative Division
+     * ======================================================== */
     bool isPowerOfTwoIterative(int n) {
         if (n <= 0) return false;
-        return (n & (n - 1)) == 0;
+        while (n % 2 == 0) {
+            n /= 2;
+        }
+        return n == 1;
+    }
+
+    /* ========================================================
+     * APPROACH 3: Bit Manipulation (Optimal)
+     * ======================================================== */
+    bool isPowerOfTwoBitwise(int n) {
+        return n > 0 && (n & (n - 1)) == 0;
+    }
+
+public:
+    bool isPowerOfTwo(int n) {
+
+        // ======= Select ONE approach =======
+
+        // return isPowerOfTwoRecursive(n);   // Approach 1
+        // return isPowerOfTwoIterative(n);   // Approach 2
+        return isPowerOfTwoBitwise(n);        // Approach 3 (Recommended)
     }
 };
-
-// Time: O(log n)
-// Space: O(log n) for recursion stack
 ```
 
 ## 3. Power of Three (LeetCode 326)
@@ -331,30 +548,106 @@ public:
 **Problem:** How many ways to climb n stairs (1 or 2 steps at a time)
 
 ```cpp
+/*
+ * Problem: 70. Climbing Stairs
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * You are climbing a staircase. It takes `n` steps to reach the top.
+ * Each time you can either climb 1 step or 2 steps.
+ *
+ * Return the number of distinct ways to reach the top.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Recursion + Memoization (Top-Down DP)
+ *
+ * Core Observation:
+ * - To reach step `n`, you must come from:
+ *     • step (n - 1)  OR
+ *     • step (n - 2)
+ *
+ * So,
+ *   ways(n) = ways(n - 1) + ways(n - 2)
+ *
+ * This is exactly the Fibonacci pattern.
+ *
+ * ------------------------------------------------------------
+ * WHY NOT PURE RECURSION?
+ *
+ * Pure recursion recalculates the same subproblems again and again,
+ * leading to exponential time complexity.
+ *
+ * Memoization stores already computed results and avoids recomputation.
+ *
+ * ------------------------------------------------------------
+ * STEP-BY-STEP EXPLANATION:
+ *
+ * 1️⃣ Define a helper function `helper(n, memo)`:
+ *    - Returns number of ways to reach step `n`
+ *
+ * 2️⃣ Base Cases:
+ *    - If n <= 2, return n directly
+ *        • n = 1 → 1 way
+ *        • n = 2 → 2 ways
+ *
+ * 3️⃣ Memoization Check:
+ *    - If memo[n] is already computed, return it
+ *
+ * 4️⃣ Recursive Relation:
+ *    - memo[n] = helper(n - 1) + helper(n - 2)
+ *
+ * 5️⃣ Final Answer:
+ *    - Call helper(n) from `climbStairs`
+ *
+ * ------------------------------------------------------------
+ * DRY RUN (n = 5):
+ *
+ * helper(5)
+ *  = helper(4) + helper(3)
+ *  = (helper(3) + helper(2)) + (helper(2) + helper(1))
+ *  = (3 + 2) = 5
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(n) → Each value computed once
+ *
+ * Space Complexity:
+ * - O(n) → Memo array + recursion stack
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - This is a classic DP introduction problem
+ * - Fibonacci-based reasoning is expected
+ * - Memoization shows optimization awareness
+ * - Can be further optimized to O(1) space
+ */
+
 class Solution {
-public:
-    // Pure recursion
-    int climbStairs(int n) {
+private:
+    int helper(int n, vector<int> &memo) {
+        // Base case
         if (n <= 2) return n;
-        return climbStairs(n - 1) + climbStairs(n - 2);
-    }
-    
-    // With memoization
-    int climbStairs(int n) {
-        vector<int> memo(n + 1, -1);
-        return helper(n, memo);
-    }
-    
-    int helper(int n, vector<int>& memo) {
-        if (n <= 2) return n;
+
+        // If already computed, return stored value
         if (memo[n] != -1) return memo[n];
+
+        // Compute and store result
         memo[n] = helper(n - 1, memo) + helper(n - 2, memo);
         return memo[n];
     }
-};
 
-// Time: O(2^n) → O(n) with memo
-// Space: O(n)
+public:
+    int climbStairs(int n) {
+        // Memo array initialized with -1
+        vector<int> memo(n + 1, -1);
+
+        // Start recursion with memoization
+        return helper(n, memo);
+    }
+};
 ```
 
 ---
@@ -366,39 +659,123 @@ public:
 **Problem:** Generate all subsets of given array
 
 ```cpp
+/*
+ * Problem: 78. Subsets
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an integer array nums, return all possible subsets
+ * (the power set).
+ *
+ * The solution set must not contain duplicate subsets.
+ * You may return the solution in any order.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking (DFS)
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATION:
+ *
+ * 1️⃣ For every element, we have TWO choices:
+ *    - Include the element
+ *    - Exclude the element
+ *
+ * 2️⃣ All subsets can be generated by exploring these choices
+ *    recursively while maintaining order.
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * - Use backtracking to build subsets incrementally
+ * - At every recursive call:
+ *   → Current subset is a valid subset → add it to answer
+ * - Move forward to avoid duplicates
+ *
+ * ------------------------------------------------------------
+ * RECURSIVE FUNCTION PARAMETERS:
+ *
+ * backtrack(start, nums, curr, ans)
+ *
+ * start → index from where we can pick elements
+ * nums  → input array
+ * curr  → current subset being formed
+ * ans   → stores all subsets
+ *
+ * ------------------------------------------------------------
+ * ALGORITHM STEPS:
+ *
+ * 1️⃣ Start with an empty subset
+ * 2️⃣ Add current subset to answer
+ * 3️⃣ Loop from index = start to n-1:
+ *    - Pick nums[i]
+ *    - Recurse for next index (i + 1)
+ *    - Backtrack by removing last element
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [1, 2]
+ *
+ * Subsets generated:
+ * []
+ * [1]
+ * [1, 2]
+ * [2]
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(2^n)
+ *   (Each element has include/exclude choice)
+ *
+ * Space Complexity:
+ * - O(n) recursion stack
+ * - O(2^n) to store all subsets
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Classic backtracking problem
+ * - Always add current subset before branching
+ * - Order of recursion ensures no duplicates
+ */
+
 class Solution {
-public:
-    vector<vector<int>> subsets(vector<int>& nums) {
-        vector<vector<int>> result;
-        vector<int> current;
-        backtrack(nums, 0, current, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& nums, int start, 
-                   vector<int>& current, vector<vector<int>>& result) {
-        // Add current subset
-        result.push_back(current);
-        
-        // Try adding each remaining element
+private:
+    void backtrack(int start,
+                   vector<int> nums,
+                   vector<int> &curr,
+                   vector<vector<int>> &ans) {
+
+        // Current subset is valid → add to answer
+        ans.push_back(curr);
+
+        // Explore further elements
         for (int i = start; i < nums.size(); i++) {
-            // Choose
-            current.push_back(nums[i]);
-            
-            // Explore
-            backtrack(nums, i + 1, current, result);
-            
-            // Un-choose
-            current.pop_back();
+
+            // Choose the current element
+            curr.push_back(nums[i]);
+
+            // Recurse with next index
+            backtrack(i + 1, nums, curr, ans);
+
+            // Backtrack: remove last chosen element
+            curr.pop_back();
         }
     }
+
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> ans;   // stores all subsets
+        vector<int> curr;          // current subset
+
+        // Start backtracking from index 0
+        backtrack(0, nums, curr, ans);
+
+        return ans;
+    }
 };
-
-// Example: nums = [1,2,3]
-// Output: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
-
-// Time: O(2^n)
-// Space: O(n) for recursion depth
 ```
 
 ## 8. Subsets II (LeetCode 90)
@@ -406,33 +783,147 @@ public:
 **Problem:** Generate all unique subsets (with duplicates in input)
 
 ```cpp
+/*
+ * Problem: 90. Subsets II
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an integer array nums that may contain duplicates,
+ * return all possible subsets (the power set).
+ *
+ * The solution set must NOT contain duplicate subsets.
+ * You may return the solution in any order.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking + Sorting
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ This is similar to the classic Subsets problem,
+ *    BUT duplicates are allowed in the input.
+ *
+ * 2️⃣ To avoid duplicate subsets:
+ *    - We must ensure the same number at the same recursive level
+ *      is not chosen more than once.
+ *
+ * 3️⃣ Sorting is essential.
+ *    - It groups equal elements together
+ *    - Makes it easy to skip duplicates
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * - Sort the input array
+ * - Use backtracking to generate subsets
+ * - Skip duplicate elements at the same recursion level
+ *
+ * ------------------------------------------------------------
+ * DUPLICATE SKIPPING LOGIC:
+ *
+ * if (i != start && nums[i] == nums[i - 1]) continue;
+ *
+ * Meaning:
+ * - If current element is the same as the previous one
+ * - AND we are at the same recursion level
+ * - Then skip it to avoid duplicate subsets
+ *
+ * ------------------------------------------------------------
+ * RECURSIVE FUNCTION PARAMETERS:
+ *
+ * backtrack(start, nums, curr, ans)
+ *
+ * start → index from where elements can be picked
+ * nums  → sorted input array
+ * curr  → current subset
+ * ans   → stores all unique subsets
+ *
+ * ------------------------------------------------------------
+ * ALGORITHM STEPS:
+ *
+ * 1️⃣ Sort nums
+ * 2️⃣ Start backtracking from index 0
+ * 3️⃣ Add current subset to answer
+ * 4️⃣ Loop from index = start to n-1:
+ *    - Skip duplicates at same recursion level
+ *    - Pick nums[i]
+ *    - Recurse with i + 1
+ *    - Backtrack by removing last element
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [1, 2, 2]
+ *
+ * Subsets generated:
+ * []
+ * [1]
+ * [1, 2]
+ * [1, 2, 2]
+ * [2]
+ * [2, 2]
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(2^n)
+ *   (All possible subsets)
+ *
+ * Space Complexity:
+ * - O(n) recursion stack
+ * - O(2^n) to store subsets
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Sorting is mandatory to handle duplicates
+ * - The skip condition is the key insight
+ * - Very common backtracking interview problem
+ */
+
 class Solution {
 public:
-    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
-        sort(nums.begin(), nums.end());  // Sort to handle duplicates
-        vector<vector<int>> result;
-        vector<int> current;
-        backtrack(nums, 0, current, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& nums, int start, 
-                   vector<int>& current, vector<vector<int>>& result) {
-        result.push_back(current);
-        
+    void backtrack(int start,
+                   vector<int>& nums,
+                   vector<int>& curr,
+                   vector<vector<int>>& ans) {
+
+        // Current subset is valid → add to answer
+        ans.push_back(curr);
+
+        // Try picking elements starting from index 'start'
         for (int i = start; i < nums.size(); i++) {
-            // Skip duplicates
-            if (i > start && nums[i] == nums[i-1]) continue;
-            
-            current.push_back(nums[i]);
-            backtrack(nums, i + 1, current, result);
-            current.pop_back();
+
+            // Skip duplicates at the same recursion level
+            if (i != start && nums[i] == nums[i - 1])
+                continue;
+
+            // Choose current element
+            curr.push_back(nums[i]);
+
+            // Recurse for the next index
+            backtrack(i + 1, nums, curr, ans);
+
+            // Backtrack: remove last element
+            curr.pop_back();
         }
     }
-};
 
-// Time: O(2^n)
-// Space: O(n)
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+
+        // Sort to group duplicates together
+        sort(nums.begin(), nums.end());
+
+        vector<vector<int>> ans;
+        vector<int> curr;
+
+        // Start backtracking
+        backtrack(0, nums, curr, ans);
+
+        return ans;
+    }
+};
 ```
 
 ## 9. Permutations (LeetCode 46)
@@ -440,47 +931,132 @@ public:
 **Problem:** Generate all permutations of array
 
 ```cpp
+/*
+ * Problem: 46. Permutations
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an array nums of distinct integers,
+ * return all possible permutations.
+ *
+ * You may return the answer in any order.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking (Swap-Based Permutation Generation)
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ A permutation means arranging elements in all possible orders.
+ *
+ * 2️⃣ At index `idx`, we can choose any element from
+ *    idx → n-1 to place at position `idx`.
+ *
+ * 3️⃣ After fixing one element at position `idx`,
+ *    we recursively permute the remaining elements.
+ *
+ * 4️⃣ Swapping allows in-place generation
+ *    → no extra visited array needed.
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * - Fix one position at a time
+ * - Swap current index with all possible choices
+ * - Recurse for next index
+ * - Backtrack (swap back) to restore original state
+ *
+ * ------------------------------------------------------------
+ * RECURSION TREE IDEA:
+ *
+ * For nums = [1,2,3]
+ *
+ * idx = 0:
+ *   swap(0,0) → [1,2,3]
+ *   swap(0,1) → [2,1,3]
+ *   swap(0,2) → [3,2,1]
+ *
+ * Each branch recursively permutes remaining elements.
+ *
+ * ------------------------------------------------------------
+ * BASE CASE:
+ *
+ * If idx == nums.size():
+ * → One full permutation is formed
+ * → Push into answer
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [1,2]
+ *
+ * idx = 0:
+ *   swap(0,0) → [1,2]
+ *     idx = 1:
+ *       swap(1,1) → [1,2]
+ *       → push
+ *
+ *   swap(0,1) → [2,1]
+ *     idx = 1:
+ *       swap(1,1) → [2,1]
+ *       → push
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(n!)
+ *   (Total permutations)
+ *
+ * Space Complexity:
+ * - O(n) recursion stack
+ * - O(n!) for storing results
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Swap-based approach is memory efficient
+ * - No extra visited array required
+ * - Very common backtracking pattern
+ */
+
 class Solution {
-public:
-    vector<vector<int>> permute(vector<int>& nums) {
-        vector<vector<int>> result;
-        vector<int> current;
-        vector<bool> used(nums.size(), false);
-        backtrack(nums, current, used, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& nums, vector<int>& current,
-                   vector<bool>& used, vector<vector<int>>& result) {
-        // Base case: permutation complete
-        if (current.size() == nums.size()) {
-            result.push_back(current);
+private:
+    void backtrack(int idx,
+                   vector<int>& nums,
+                   vector<vector<int>>& ans) {
+
+        // Base case: one permutation formed
+        if (idx == nums.size()) {
+            ans.push_back(nums);
             return;
         }
-        
-        for (int i = 0; i < nums.size(); i++) {
-            // Skip if already used
-            if (used[i]) continue;
-            
-            // Choose
-            current.push_back(nums[i]);
-            used[i] = true;
-            
-            // Explore
-            backtrack(nums, current, used, result);
-            
-            // Un-choose
-            current.pop_back();
-            used[i] = false;
+
+        // Try placing every element at position idx
+        for (int i = idx; i < nums.size(); i++) {
+
+            // Choose element for current position
+            swap(nums[i], nums[idx]);
+
+            // Recurse for next index
+            backtrack(idx + 1, nums, ans);
+
+            // Backtrack: restore original order
+            swap(nums[i], nums[idx]);
         }
     }
+
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+
+        vector<vector<int>> ans;
+
+        // Start permutation generation from index 0
+        backtrack(0, nums, ans);
+
+        return ans;
+    }
 };
-
-// Example: nums = [1,2,3]
-// Output: [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
-
-// Time: O(n! × n)
-// Space: O(n)
 ```
 
 ## 10. Permutations II (LeetCode 47)
@@ -488,41 +1064,153 @@ public:
 **Problem:** Generate unique permutations (with duplicates)
 
 ```cpp
+/*
+ * Problem: 47. Permutations II
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given a collection of numbers nums, that might contain duplicates,
+ * return all possible unique permutations.
+ *
+ * You may return the answer in any order.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking (Swap-Based) + Duplicate Pruning
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ This is similar to the classic Permutations problem,
+ *    but nums may contain duplicate elements.
+ *
+ * 2️⃣ If we generate permutations normally,
+ *    duplicate permutations will appear.
+ *
+ * 3️⃣ To avoid duplicates:
+ *    - At each recursion level (fixed index),
+ *      do not place the same value twice.
+ *
+ * ------------------------------------------------------------
+ * CORE IDEA:
+ *
+ * At index `idx`, we try placing every element from
+ * idx → n-1 at position `idx`.
+ *
+ * But before swapping:
+ *   - Check whether the same value has already been used
+ *     in this position during this recursion level.
+ *
+ * ------------------------------------------------------------
+ * DUPLICATE CHECK LOGIC:
+ *
+ * bool alreadyUsed = false;
+ * for (int j = idx; j < i; j++)
+ *     if (nums[j] == nums[i])
+ *         alreadyUsed = true;
+ *
+ * Meaning:
+ * - If the same value already appeared between idx and i-1,
+ *   skip it to prevent duplicate permutations.
+ *
+ * ------------------------------------------------------------
+ * WHY SORTING?
+ *
+ * Sorting groups duplicates together.
+ * Though this implementation uses manual checking,
+ * sorting ensures consistent ordering and correctness.
+ *
+ * ------------------------------------------------------------
+ * BASE CASE:
+ *
+ * If idx == nums.size():
+ * → A complete permutation is formed
+ * → Add it to answer
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [1,1,2]
+ *
+ * idx = 0:
+ *   i = 0 → use first 1
+ *   i = 1 → skip (duplicate 1 already used at this level)
+ *   i = 2 → use 2
+ *
+ * Final unique permutations:
+ * [1,1,2]
+ * [1,2,1]
+ * [2,1,1]
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(n! * n)
+ *   (Permutation generation + duplicate checking)
+ *
+ * Space Complexity:
+ * - O(n) recursion stack
+ * - O(n!) for storing results
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Very common backtracking variation
+ * - Key insight: avoid using same value twice at same depth
+ * - Swap-based method avoids extra visited array
+ */
+
 class Solution {
-public:
-    vector<vector<int>> permuteUnique(vector<int>& nums) {
-        sort(nums.begin(), nums.end());  // Sort for duplicate handling
-        vector<vector<int>> result;
-        vector<int> current;
-        vector<bool> used(nums.size(), false);
-        backtrack(nums, current, used, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& nums, vector<int>& current,
-                   vector<bool>& used, vector<vector<int>>& result) {
-        if (current.size() == nums.size()) {
-            result.push_back(current);
+private:
+    void helper(int idx,
+                vector<int>& nums,
+                vector<vector<int>>& ans) {
+
+        // Base case: full permutation formed
+        if (idx == nums.size()) {
+            ans.push_back(nums);
             return;
         }
-        
-        for (int i = 0; i < nums.size(); i++) {
-            if (used[i]) continue;
-            
-            // Skip duplicates
-            if (i > 0 && nums[i] == nums[i-1] && !used[i-1]) continue;
-            
-            current.push_back(nums[i]);
-            used[i] = true;
-            backtrack(nums, current, used, result);
-            current.pop_back();
-            used[i] = false;
+
+        // Try placing elements at position idx
+        for (int i = idx; i < nums.size(); i++) {
+
+            // Check if this value was already used at this level
+            bool alreadyUsed = false;
+            for (int j = idx; j < i; j++) {
+                if (nums[j] == nums[i]) {
+                    alreadyUsed = true;
+                    break;
+                }
+            }
+
+            if (alreadyUsed)
+                continue;
+
+            // Choose element
+            swap(nums[i], nums[idx]);
+
+            // Recurse for next position
+            helper(idx + 1, nums, ans);
+
+            // Backtrack
+            swap(nums[i], nums[idx]);
         }
     }
-};
 
-// Time: O(n! × n)
-// Space: O(n)
+public:
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+
+        // Sorting helps maintain consistent ordering
+        sort(nums.begin(), nums.end());
+
+        vector<vector<int>> ans;
+
+        helper(0, nums, ans);
+
+        return ans;
+    }
+};
 ```
 
 ## 11. Combination Sum (LeetCode 39)
