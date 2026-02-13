@@ -1218,42 +1218,137 @@ public:
 **Problem:** Find combinations that sum to target (can reuse elements)
 
 ```cpp
+/*
+ * Problem: Combination Sum (Unbounded Version – Pick / Not Pick Style)
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an array of integers nums and an integer k (target),
+ * return all possible combinations where:
+ *
+ * - The chosen numbers sum to k
+ * - Each number may be used unlimited times
+ *
+ * The solution set must not contain duplicate combinations.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking (Pick / Skip Strategy)
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ We can reuse the same element multiple times.
+ *
+ * 2️⃣ At every index i, we have TWO choices:
+ *    - Take nums[i]
+ *    - Skip nums[i]
+ *
+ * 3️⃣ If we take the element:
+ *    - Reduce target by nums[i]
+ *    - Stay at same index (since reuse allowed)
+ *
+ * 4️⃣ If we skip:
+ *    - Move to next index
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * Recursive function:
+ *
+ * combSum(i, nums, k, comb, ans)
+ *
+ * i    → current index
+ * k    → remaining target
+ * comb → current combination
+ * ans  → stores final results
+ *
+ * ------------------------------------------------------------
+ * BASE CASES:
+ *
+ * 1️⃣ If k == 0:
+ *    → Valid combination found
+ *    → Add to answer
+ *
+ * 2️⃣ If i == nums.size() OR k < 0:
+ *    → No valid solution from here
+ *    → Return
+ *
+ * ------------------------------------------------------------
+ * RECURSION TREE IDEA:
+ *
+ * At each step:
+ *
+ *         (i, k)
+ *        /       \
+ *   Take nums[i]   Skip nums[i]
+ *     (i, k-x)      (i+1, k)
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [2,3]
+ * k = 6
+ *
+ * Possible combinations:
+ * [2,2,2]
+ * [3,3]
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - Exponential (backtracking)
+ *
+ * Space Complexity:
+ * - O(k) recursion depth (in worst case)
+ * - O(k) for current combination storage
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Classic pick / not-pick recursion pattern
+ * - Staying at same index enables unlimited reuse
+ * - Often asked as base version before introducing duplicates
+ */
+
 class Solution {
-public:
-    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
-        vector<vector<int>> result;
-        vector<int> current;
-        backtrack(candidates, target, 0, current, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& candidates, int target, int start,
-                   vector<int>& current, vector<vector<int>>& result) {
-        // Base cases
-        if (target == 0) {
-            result.push_back(current);
+private:
+    void combSum(int i,
+                 vector<int>& nums,
+                 int k,
+                 vector<int>& comb,
+                 vector<vector<int>>& ans) {
+
+        // Valid combination found
+        if (k == 0) {
+            ans.push_back(comb);
             return;
         }
-        if (target < 0) return;
-        
-        for (int i = start; i < candidates.size(); i++) {
-            // Choose
-            current.push_back(candidates[i]);
-            
-            // Explore (i, not i+1, because we can reuse)
-            backtrack(candidates, target - candidates[i], i, current, result);
-            
-            // Un-choose
-            current.pop_back();
-        }
+
+        // Out of bounds or negative target
+        if (i == nums.size() || k < 0)
+            return;
+
+        // TAKE current element (stay at same index)
+        comb.push_back(nums[i]);
+        combSum(i, nums, k - nums[i], comb, ans);
+        comb.pop_back();
+
+        // SKIP current element
+        combSum(i + 1, nums, k, comb, ans);
+    }
+
+public:
+    vector<vector<int>> combinationSum(vector<int>& nums, int k) {
+
+        vector<vector<int>> ans;
+        vector<int> comb;
+
+        combSum(0, nums, k, comb, ans);
+
+        return ans;
     }
 };
-
-// Example: candidates = [2,3,6,7], target = 7
-// Output: [[2,2,3],[7]]
-
-// Time: O(n^(target/min))
-// Space: O(target/min)
 ```
 
 ## 12. Combination Sum II (LeetCode 40)
@@ -1261,39 +1356,168 @@ public:
 **Problem:** Find unique combinations that sum to target (no reuse)
 
 ```cpp
+/*
+ * Problem: 40. Combination Sum II
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * Given an array nums (may contain duplicates) and an integer target,
+ * return all unique combinations where:
+ *
+ * - Each number is used AT MOST once.
+ * - The chosen numbers sum to target.
+ * - The solution set must not contain duplicate combinations.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking + Sorting + Duplicate Skipping
+ *
+ * ------------------------------------------------------------
+ * KEY DIFFERENCE FROM Combination Sum I:
+ *
+ * 1️⃣ Each element can be used only once.
+ * 2️⃣ Input may contain duplicates.
+ * 3️⃣ We must carefully skip duplicates to avoid repeated combinations.
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ Sorting is mandatory.
+ *    - Groups duplicates together.
+ *    - Enables early pruning.
+ *    - Makes duplicate skipping easy.
+ *
+ * 2️⃣ Duplicate Skipping Condition:
+ *
+ *    if (i > idx && nums[i] == nums[i - 1])
+ *        continue;
+ *
+ *    Meaning:
+ *    - If same number appears again at the same recursion level,
+ *      skip it to prevent duplicate combinations.
+ *
+ * 3️⃣ Early Pruning:
+ *
+ *    if (nums[i] > target)
+ *        break;
+ *
+ *    Since array is sorted, further elements will also exceed target.
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * backtrack(idx, nums, target, curr, result)
+ *
+ * idx    → starting index for selection
+ * target → remaining sum
+ * curr   → current combination
+ * result → stores valid combinations
+ *
+ * ------------------------------------------------------------
+ * BASE CASE:
+ *
+ * If target == 0:
+ * → Valid combination found
+ * → Add to result
+ *
+ * ------------------------------------------------------------
+ * RECURSION FLOW:
+ *
+ * For each index i from idx to n-1:
+ *
+ *   1️⃣ Skip duplicates at same level
+ *   2️⃣ Stop if nums[i] > target
+ *   3️⃣ Choose nums[i]
+ *   4️⃣ Recurse with i + 1 (since reuse not allowed)
+ *   5️⃣ Backtrack
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * nums = [10,1,2,7,6,1,5]
+ * target = 8
+ *
+ * After sorting:
+ * [1,1,2,5,6,7,10]
+ *
+ * Output:
+ * [1,1,6]
+ * [1,2,5]
+ * [1,7]
+ * [2,6]
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - Exponential (backtracking)
+ *
+ * Space Complexity:
+ * - O(target) recursion depth (worst case)
+ * - O(k) for storing current combination
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Sorting + duplicate skipping is the core trick
+ * - Early pruning significantly reduces recursion
+ * - Very common backtracking interview problem
+ */
+
 class Solution {
-public:
-    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
-        sort(candidates.begin(), candidates.end());
-        vector<vector<int>> result;
-        vector<int> current;
-        backtrack(candidates, target, 0, current, result);
-        return result;
-    }
-    
-    void backtrack(vector<int>& candidates, int target, int start,
-                   vector<int>& current, vector<vector<int>>& result) {
+private:
+    void backtrack(int idx,
+                   vector<int>& nums,
+                   int target,
+                   vector<int>& curr,
+                   vector<vector<int>>& result) {
+
+        // Valid combination found
         if (target == 0) {
-            result.push_back(current);
+            result.push_back(curr);
             return;
         }
-        
-        for (int i = start; i < candidates.size(); i++) {
-            // Skip duplicates
-            if (i > start && candidates[i] == candidates[i-1]) continue;
-            
-            // Pruning: if current number > target, no point continuing
-            if (candidates[i] > target) break;
-            
-            current.push_back(candidates[i]);
-            backtrack(candidates, target - candidates[i], i + 1, current, result);
-            current.pop_back();
+
+        // Explore choices starting from idx
+        for (int i = idx; i < nums.size(); i++) {
+
+            // Skip duplicates at the same recursion level
+            if (i > idx && nums[i] == nums[i - 1])
+                continue;
+
+            // Early pruning
+            if (nums[i] > target)
+                break;
+
+            // Choose current element
+            curr.push_back(nums[i]);
+
+            // Move to next index (no reuse allowed)
+            backtrack(i + 1,
+                      nums,
+                      target - nums[i],
+                      curr,
+                      result);
+
+            // Backtrack
+            curr.pop_back();
         }
     }
-};
 
-// Time: O(2^n)
-// Space: O(n)
+public:
+    vector<vector<int>> combinationSum2(vector<int>& nums,
+                                        int target) {
+
+        // Sort to handle duplicates and pruning
+        sort(nums.begin(), nums.end());
+
+        vector<vector<int>> result;
+        vector<int> curr;
+
+        backtrack(0, nums, target, curr, result);
+
+        return result;
+    }
+};
 ```
 
 ## 13. Combinations (LeetCode 77)
