@@ -2171,62 +2171,186 @@ public:
 ## 18. N-Queens (LeetCode 51)
 
 ```cpp
+/*
+ * Problem: 51. N-Queens
+ *
+ * ------------------------------------------------------------
+ * STATEMENT:
+ * The n-queens puzzle is the problem of placing n queens
+ * on an n × n chessboard such that:
+ *
+ * - No two queens attack each other.
+ *
+ * Queens attack:
+ * - Same row
+ * - Same column
+ * - Same diagonal
+ *
+ * Return all distinct solutions.
+ *
+ * ------------------------------------------------------------
+ * APPROACH: Backtracking (Column-by-Column Placement)
+ *
+ * ------------------------------------------------------------
+ * KEY OBSERVATIONS:
+ *
+ * 1️⃣ Place one queen per column.
+ *    → This automatically avoids column conflicts.
+ *
+ * 2️⃣ Before placing a queen at (row, col),
+ *    we must check:
+ *       - Left row
+ *       - Upper-left diagonal
+ *       - Lower-left diagonal
+ *
+ * 3️⃣ We only check LEFT side because:
+ *    - We place queens from left → right.
+ *
+ * ------------------------------------------------------------
+ * SAFETY CHECK (isSafe):
+ *
+ * For position (r, c):
+ *
+ * 1️⃣ Check upper-left diagonal
+ * 2️⃣ Check left row
+ * 3️⃣ Check lower-left diagonal
+ *
+ * If any queen found → not safe.
+ *
+ * ------------------------------------------------------------
+ * RECURSION STRATEGY:
+ *
+ * solve(col):
+ *
+ * If col == n:
+ *    → Valid configuration found
+ *    → Store board
+ *
+ * Otherwise:
+ *    For each row in current column:
+ *        - If safe:
+ *            - Place queen
+ *            - Recurse for next column
+ *            - Backtrack
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * n = 4
+ *
+ * One solution:
+ *
+ * . Q . .
+ * . . . Q
+ * Q . . .
+ * . . Q .
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(n!)
+ *   (Backtracking with branching)
+ *
+ * Space Complexity:
+ * - O(n) recursion stack
+ * - O(n²) board storage
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - Classic hard backtracking problem
+ * - Optimize safety check using hash arrays for:
+ *     row
+ *     upper diagonal
+ *     lower diagonal
+ *   → reduces checking from O(n) to O(1)
+ */
+
 class Solution {
-public:
-    vector<vector<string>> solveNQueens(int n) {
-        vector<vector<string>> result;
-        vector<string> board(n, string(n, '.'));
-        backtrack(board, 0, result);
-        return result;
+private:
+    bool isSafe(int r, int c, vector<string> board, int n) {
+
+        int rCopy = r;
+        int cCopy = c;
+
+        // Check upper-left diagonal (North-West)
+        while (r >= 0 && c >= 0) {
+            if (board[r][c] == 'Q')
+                return false;
+            r--;
+            c--;
+        }
+
+        r = rCopy;
+        c = cCopy;
+
+        // Check left row
+        while (c >= 0) {
+            if (board[r][c] == 'Q')
+                return false;
+            c--;
+        }
+
+        r = rCopy;
+        c = cCopy;
+
+        // Check lower-left diagonal (South-West)
+        while (r < n && c >= 0) {
+            if (board[r][c] == 'Q')
+                return false;
+            r++;
+            c--;
+        }
+
+        return true;
     }
-    
-    void backtrack(vector<string>& board, int row,
-                   vector<vector<string>>& result) {
-        // Base case: all queens placed
-        if (row == board.size()) {
+
+    void solve(int col,
+               vector<string>& board,
+               vector<vector<string>>& result,
+               int n) {
+
+        // All queens placed
+        if (col == n) {
             result.push_back(board);
             return;
         }
-        
-        // Try placing queen in each column
-        for (int col = 0; col < board.size(); col++) {
-            if (isValid(board, row, col)) {
-                // Choose
+
+        // Try placing queen in each row of current column
+        for (int row = 0; row < n; row++) {
+
+            if (isSafe(row, col, board, n)) {
+
                 board[row][col] = 'Q';
-                
-                // Explore
-                backtrack(board, row + 1, result);
-                
-                // Un-choose
+
+                solve(col + 1, board, result, n);
+
+                // Backtrack
                 board[row][col] = '.';
             }
         }
     }
-    
-    bool isValid(vector<string>& board, int row, int col) {
-        int n = board.size();
-        
-        // Check column
-        for (int i = 0; i < row; i++) {
-            if (board[i][col] == 'Q') return false;
+
+public:
+    vector<vector<string>> solveNQueens(int n) {
+
+        vector<vector<string>> result;
+
+        // Initialize empty board
+        vector<string> board(n);
+        string rowString(n, '.');
+
+        for (int i = 0; i < n; i++) {
+            board[i] = rowString;
         }
-        
-        // Check diagonal (top-left)
-        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
-            if (board[i][j] == 'Q') return false;
-        }
-        
-        // Check diagonal (top-right)
-        for (int i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++) {
-            if (board[i][j] == 'Q') return false;
-        }
-        
-        return true;
+
+        solve(0, board, result, n);
+
+        return result;
     }
 };
 
-// Time: O(n!)
-// Space: O(n²)
 ```
 
 ## 19. N-Queens II (LeetCode 52)
