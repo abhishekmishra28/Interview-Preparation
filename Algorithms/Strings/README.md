@@ -813,59 +813,121 @@ public:
  *
  * ------------------------------------------------------------
  * STATEMENT:
- * Given two strings needle and haystack,
- * return the index of the first occurrence of needle in haystack,
- * or -1 if needle is not part of haystack.
+ * Given two strings:
+ *   - haystack
+ *   - needle
+ *
+ * Return the index of the first occurrence of needle
+ * in haystack.
+ *
+ * If needle is not part of haystack, return -1.
  *
  * ------------------------------------------------------------
- * APPROACH 1: Brute Force
- *
- * Check every position in haystack
- *
- * Time: O(n × m)
- * Space: O(1)
+ * APPROACH: Brute Force (Sliding Window Comparison)
  *
  * ------------------------------------------------------------
- * APPROACH 2: Built-in Function
+ * KEY OBSERVATIONS:
  *
- * Use string::find()
+ * 1️⃣ If needle is empty → return 0.
  *
- * Time: O(n × m) worst case
- * Space: O(1)
+ * 2️⃣ If needle length > haystack length → impossible → return -1.
+ *
+ * 3️⃣ For each possible starting position i in haystack:
+ *    - Compare substring of length m with needle.
+ *
+ * ------------------------------------------------------------
+ * STRATEGY:
+ *
+ * Let:
+ *   n = haystack.size()
+ *   m = needle.size()
+ *
+ * Loop i from 0 → n - m:
+ *
+ *   - Compare haystack[i + j] with needle[j]
+ *   - If mismatch → break
+ *   - If all characters match → return i
+ *
+ * ------------------------------------------------------------
+ * LOOP RANGE:
+ *
+ * for (i = 0; i <= n - m; i++)
+ *
+ * Ensures:
+ * - We only check valid starting positions.
+ *
+ * ------------------------------------------------------------
+ * DRY RUN EXAMPLE:
+ *
+ * haystack = "sadbutsad"
+ * needle   = "sad"
+ *
+ * i = 0 → match → return 0
+ *
+ * Example 2:
+ *
+ * haystack = "leetcode"
+ * needle   = "leeto"
+ *
+ * No match → return -1
+ *
+ * ------------------------------------------------------------
+ * TIME & SPACE COMPLEXITY:
+ *
+ * Time Complexity:
+ * - O(n * m)
+ *   (Worst case full comparison at each position)
+ *
+ * Space Complexity:
+ * - O(1)
+ *
+ * ------------------------------------------------------------
+ * INTERVIEW NOTES:
+ *
+ * - This is naive substring search.
+ *
+ * - More optimized approaches:
+ *     - KMP Algorithm → O(n + m)
+ *     - Rabin-Karp
+ *     - Z Algorithm
+ *
+ * - For interviews, mention KMP if optimization is required.
  */
 
 class Solution {
 public:
-    // Approach 1: Brute Force
     int strStr(string haystack, string needle) {
-        int n = haystack.length();
-        int m = needle.length();
-        
-        if (m == 0) return 0;
-        if (m > n) return -1;
-        
+
+        int n = haystack.size();
+        int m = needle.size();
+
+        // Edge case: empty needle
+        if (m == 0)
+            return 0;
+
+        // Needle longer than haystack
+        if (m > n)
+            return -1;
+
+        // Try every possible starting index
         for (int i = 0; i <= n - m; i++) {
-            int j;
-            for (j = 0; j < m; j++) {
-                if (haystack[i + j] != needle[j]) {
-                    break;
-                }
+
+            int j = 0;
+
+            // Compare substring
+            while (j < m && haystack[i + j] == needle[j]) {
+                j++;
             }
-            
-            if (j == m) {
+
+            // Full match found
+            if (j == m)
                 return i;
-            }
         }
-        
+
         return -1;
     }
-    
-    // Approach 2: Using built-in
-    int strStr_v2(string haystack, string needle) {
-        size_t pos = haystack.find(needle);
-        return (pos != string::npos) ? pos : -1;
-    }
 };
+
 ```
 
 ## 8. Roman to Integer (LeetCode 13)
