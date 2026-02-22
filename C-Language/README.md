@@ -1,4 +1,4 @@
-# Complete C Programming Guide for SDE Placements
+# Complete C Programming Guide for SDE Placements (C-Core Focus)
 
 ## Table of Contents
 
@@ -6,54 +6,52 @@
 - [Introduction to C](#introduction-to-c)
 - [Development Environment Setup](#development-environment-setup)
 - [Basic Syntax & Structure](#basic-syntax--structure)
-- [Data Types & Variables](#data-types--variables)
+- [Data Types, Variables & Storage Classes](#data-types-variables--storage-classes)
 - [Operators](#operators)
 - [Input/Output](#inputoutput)
 - [Control Flow](#control-flow)
 
-### Part 2: Advanced Concepts
-- [Functions](#functions)
-- [Arrays](#arrays)
-- [Strings](#strings)
-- [Pointers](#pointers)
-- [Structures & Unions](#structures--unions)
-- [Dynamic Memory Allocation](#dynamic-memory-allocation)
+### Part 2: Advanced C Concepts
+- [Functions & the Call Stack](#functions--the-call-stack)
+- [Arrays & Array-Pointer Duality](#arrays--array-pointer-duality)
+- [Strings & Null Termination](#strings--null-termination)
+- [Pointers - The Heart of C](#pointers---the-heart-of-c)
+- [Structures, Unions & Memory Alignment](#structures-unions--memory-alignment)
+- [Dynamic Memory Allocation (Heap Management)](#dynamic-memory-allocation-heap-management)
 - [File Handling](#file-handling)
 - [Preprocessor Directives](#preprocessor-directives)
 
-### Part 3: Interview Topics
-- [Time & Space Complexity](#time--space-complexity)
-- [Common Patterns](#common-patterns)
-- [Bit Manipulation](#bit-manipulation)
-- [Recursion](#recursion)
-- [Memory Layout](#memory-layout)
-- [Common Pitfalls & Best Practices](#common-pitfalls--best-practices)
-- [Interview Questions](#interview-questions)
-
 ---
+
+# Part 1: Fundamentals
 
 # Introduction to C
 
 ## Why C for SDE Interviews?
 
 ```
-✅ Foundation language for system programming
-✅ Direct hardware manipulation & memory management
-✅ Understanding C → Understanding how computers work
-✅ Required for embedded systems, OS development
-✅ Many companies test C fundamentals (especially for SDE roles)
-✅ Gateway to C++, understanding OOP better
+✅ Foundation language for system programming, OS, embedded systems.
+   Understanding C is crucial for roles involving low-level programming.
+✅ Direct hardware manipulation & fine-grained memory management.
+   No automatic garbage collection or sophisticated runtime. You control everything.
+✅ Understanding C → Understanding how computers work at a fundamental level.
+   It reveals the "mechanics" abstracted away by higher-level languages (like C++'s smart pointers or STL containers).
+✅ Many companies test C fundamentals for SDE roles, especially for core engineering positions.
+✅ Gateway to C++: A strong C foundation makes understanding C++'s advanced features (RAII, OOP implementation details, STL internals) much clearer.
+✅ Minimal runtime overhead: C compiles directly to machine code, providing maximum performance control.
 ```
 
 ## C Language Features
 
 ```
 • Procedural programming paradigm
-• Low-level memory access
+• Low-level memory access (via pointers)
 • Fast execution (compiled language)
 • Portable across platforms
-• Rich library support
+• Rich standard library (libc)
 • Minimal runtime overhead
+• Static typing
+• Manual memory management
 ```
 
 ---
@@ -63,50 +61,68 @@
 ## Installation
 
 ```bash
-# Linux/Mac
+# Linux/Mac (GCC is the standard C compiler)
 sudo apt-get install gcc        # Ubuntu/Debian
 sudo yum install gcc            # CentOS/RHEL
 brew install gcc                # macOS
 
 # Windows
-# Install MinGW or use WSL (Windows Subsystem for Linux)
+# Option 1: Install MinGW (Minimalist GNU for Windows)
+#    - Download installer from mingw-w64.org
+#    - Select `gcc` and `g++` during installation
+# Option 2: Use WSL (Windows Subsystem for Linux)
+#    - Install WSL and a Linux distribution (e.g., Ubuntu)
+#    - Then follow Linux/Mac instructions
 ```
+**Explanation:** `gcc` (GNU Compiler Collection) is the most common compiler for C. It translates your C source code into an executable program. MinGW provides the GNU toolchain for Windows.
 
 ## Compilation & Execution
 
 ```bash
-# Basic compilation
+# Compile 'program.c' into an executable named 'program'
 gcc program.c -o program
-./program
+./program  # Execute the compiled program
 
-# With warnings enabled (ALWAYS USE IN INTERVIEWS)
+# With warnings enabled (ALWAYS USE! Catches common errors early)
 gcc -Wall -Wextra -o program program.c
 ./program
 
-# With debugging symbols
+# With debugging symbols (for use with a debugger like GDB)
 gcc -g -o program program.c
 gdb ./program
 
-# With optimization
+# With optimization level 2 (often used for production code)
 gcc -O2 -o program program.c
+
+# Compile multiple source files (e.g., main.c and helper.c)
+gcc main.c helper.c -o myapp
 ```
+**Explanation:**
+*   `gcc`: Invokes the GNU C compiler.
+*   `-o program`: Specifies the output executable name.
+*   `-Wall`, `-Wextra`: Enable a comprehensive set of warning messages. These are crucial for writing robust C code.
+*   `-g`: Includes debugging information, allowing debuggers to map machine code back to source code.
+*   `-O2`: Applies various optimizations during compilation to make the resulting program run faster. Higher optimization levels exist (`-O3`, `-Os` for size).
 
 ## Hello World
 
 ```c
-#include <stdio.h>
+#include <stdio.h> // Include standard input/output library
 
-int main() {
-    printf("Hello, World!\n");
-    return 0;
+int main() {       // Main function, entry point of the program
+    printf("Hello, World!\n"); // Print string to console
+    return 0;      // Indicate successful execution
 }
 ```
-
 **Compilation:**
 ```bash
 gcc hello.c -o hello
 ./hello
 ```
+**Explanation:**
+*   `#include <stdio.h>`: This is a preprocessor directive. It tells the C preprocessor to include the contents of the `stdio.h` header file before compilation. This file provides declarations for standard input/output functions like `printf`.
+*   `int main() { ... }`: The `main` function is the entry point of every C program. Execution begins here. `int` indicates that the function returns an integer status code to the operating system. `0` typically signifies successful execution.
+*   `printf("Hello, World!\n");`: `printf` is a standard library function used for formatted output to the console. `\n` is the newline character.
 
 ---
 
@@ -115,159 +131,315 @@ gcc hello.c -o hello
 ## Program Structure
 
 ```c
-/* 
- * Multi-line comment
- * Program structure demonstration
+/*
+ * Multi-line comment (C-style)
+ * This program demonstrates basic C structure.
  */
 
-// Single-line comment (C99 onwards)
+// Single-line comment (C99 onwards, widely supported)
 
-#include <stdio.h>      // Preprocessor directive
-#include <stdlib.h>
+#include <stdio.h>      // Preprocessor directive: Includes standard I/O library
+#include <stdlib.h>     // Preprocessor directive: Includes standard utility functions
 
-#define MAX 100         // Macro definition
+#define MAX_VALUE 100   // Macro definition: A symbolic constant, replaced by preprocessor
 
-int globalVar = 10;     // Global variable
+// Global variable: Accessible from any function in this file. Stored in Data or BSS segment.
+int globalVar = 10;
 
-// Function declaration
+// Function declaration (Prototype): Informs the compiler about a function's signature.
+// This allows `main` to call `add` even if `add` is defined later.
 int add(int a, int b);
 
-// Main function - entry point
+// Main function - The entry point of the program.
 int main() {
-    int localVar = 20;  // Local variable
-    
+    // Local variable: Exists only within `main` function. Stored on the Stack.
+    int localVar = 20;
+
     printf("Global: %d, Local: %d\n", globalVar, localVar);
-    
-    int result = add(5, 3);
+
+    int result = add(5, 3); // Function call
     printf("Sum: %d\n", result);
-    
-    return 0;           // Return status to OS
+
+    return 0;           // Return status to the OS (0 for success)
 }
 
-// Function definition
+// Function definition: Provides the actual implementation of the function.
 int add(int a, int b) {
     return a + b;
 }
 ```
+**Explanation:**
+*   **Comments:** Used to explain code. `/* ... */` for multi-line, `//` for single-line.
+*   **`#include`:** Brings in declarations from header files. Without `<stdio.h>`, `printf` would be an undeclared function.
+*   **`#define`:** A preprocessor directive for defining macros. These are simple text substitutions performed *before* compilation. `MAX_VALUE` will literally be replaced with `100` wherever it appears.
+*   **Global Variables:** Declared outside any function. Their lifetime is the entire program duration.
+*   **Function Prototype:** Declares a function's return type, name, and parameter types *before* its definition. This is necessary if the function is called before it's defined (e.g., `add` called in `main` but defined after `main`).
+*   **`main` Function:** The program's starting point.
+*   **Local Variables:** Declared inside a function. Their lifetime is limited to that function's execution.
+*   **Function Definition:** The actual code block for a function.
+*   **`return 0;`:** Standard way to indicate successful program execution. Non-zero values usually indicate an error.
 
 ## Header Files
 
 ```c
-// Common standard headers
-#include <stdio.h>      // Standard I/O
-#include <stdlib.h>     // Memory allocation, conversion
-#include <string.h>     // String operations
-#include <math.h>       // Mathematical functions
-#include <time.h>       // Time functions
-#include <ctype.h>      // Character type functions
-#include <limits.h>     // Integer limits
-#include <float.h>      // Float limits
-#include <stdbool.h>    // Boolean type (C99)
-#include <stdint.h>     // Fixed-width integers (C99)
+// Common standard headers, organized by functionality:
+
+#include <stdio.h>      // Standard I/O (printf, scanf, fopen, fclose, etc.)
+#include <stdlib.h>     // Standard utilities (malloc, free, exit, atoi, etc.)
+#include <string.h>     // String manipulation (strlen, strcpy, strcmp, etc.)
+#include <math.h>       // Mathematical functions (sqrt, sin, cos, pow, etc.)
+#include <time.h>       // Time functions (time, clock, difftime, etc.)
+#include <ctype.h>      // Character type functions (isdigit, isalpha, tolower, etc.)
+#include <limits.h>     // Integer type limits (INT_MIN, INT_MAX, CHAR_BIT, etc.)
+#include <float.h>      // Floating-point type limits (FLT_EPSILON, DBL_MAX, etc.)
+#include <stdbool.h>    // Boolean type (`bool`, `true`, `false`) (C99 standard)
+#include <stdint.h>     // Fixed-width integer types (int8_t, uint32_t, etc.) (C99 standard)
+#include <stddef.h>     // Standard definitions (size_t, ptrdiff_t)
 ```
+**Explanation:** Header files contain declarations (function prototypes, macros, type definitions) for standard library functions. They don't contain the actual implementation (which is in library files linked during compilation). Including them ensures the compiler knows how to use these standard features.
 
 ---
 
-# Data Types & Variables
+# Data Types, Variables & Storage Classes
 
 ## Primitive Data Types
 
 ```c
 #include <stdio.h>
-#include <limits.h>
-#include <float.h>
+#include <limits.h>   // For INT_MIN, INT_MAX, etc.
+#include <float.h>    // For DBL_MAX, etc.
+#include <stdbool.h>  // For bool, true, false (C99)
+#include <stdint.h>   // For fixed-width integers (C99)
 
 int main() {
     // ═══════════════════════════════════════════════════
-    // INTEGER TYPES
+    // INTEGER TYPES (Signed by default)
     // ═══════════════════════════════════════════════════
-    
-    char c = 'A';                    // 1 byte, -128 to 127
-    unsigned char uc = 255;          // 1 byte, 0 to 255
-    
-    short s = 32000;                 // 2 bytes, -32768 to 32767
-    unsigned short us = 65000;       // 2 bytes, 0 to 65535
-    
-    int i = 2147483647;              // 4 bytes (usually)
-    unsigned int ui = 4294967295U;   // 4 bytes, 0 to 4294967295
-    
-    long l = 2147483647L;            // 4 or 8 bytes (platform dependent)
-    unsigned long ul = 4294967295UL; // 4 or 8 bytes
-    
-    long long ll = 9223372036854775807LL;  // 8 bytes (C99)
+    // char:   Typically 1 byte. Can hold a single character or small integer.
+    char c = 'A';                    // Stored as ASCII value (e.g., 65)
+    unsigned char uc = 255;          // 0 to 255 (if 1 byte)
+
+    // short:  Typically 2 bytes. Smaller range than int.
+    short s = 32000;
+    unsigned short us = 65000;
+
+    // int:    Typically 4 bytes. Most common integer type.
+    int i = 2147483647;
+    unsigned int ui = 4294967295U;   // 'U' suffix for unsigned literals
+
+    // long:   Typically 4 or 8 bytes (platform dependent). Guaranteed to be at least as wide as int.
+    long l = 2147483647L;            // 'L' suffix for long literals
+    unsigned long ul = 4294967295UL;
+
+    // long long: Guaranteed to be at least 8 bytes (C99). For very large integers.
+    long long ll = 9223372036854775807LL;  // 'LL' suffix for long long literals
     unsigned long long ull = 18446744073709551615ULL;
-    
+
     // ═══════════════════════════════════════════════════
-    // FLOATING POINT TYPES
+    // FLOATING POINT TYPES (Approximate real numbers)
     // ═══════════════════════════════════════════════════
-    
-    float f = 3.14f;                 // 4 bytes, ~7 decimal digits
-    double d = 3.141592653589793;    // 8 bytes, ~15 decimal digits
-    long double ld = 3.141592653589793238L;  // 10-16 bytes
-    
+    // float:   Typically 4 bytes. Single precision.
+    float f = 3.14f;                 // 'f' suffix for float literals
+
+    // double:  Typically 8 bytes. Double precision. Default for floating point literals.
+    double d = 3.141592653589793;
+
+    // long double: Typically 10-16 bytes. Extended precision.
+    long double ld = 3.141592653589793238L;  // 'L' suffix for long double literals
+
     // ═══════════════════════════════════════════════════
-    // BOOLEAN (C99)
+    // BOOLEAN (C99 standard, requires <stdbool.h>)
     // ═══════════════════════════════════════════════════
-    
-    _Bool b1 = 1;                    // 0 or 1
-    // OR with stdbool.h:
-    // bool b2 = true;
-    
+    bool b1 = true;
+    bool b2 = false; // Internally represented as 1 and 0
+
     // ═══════════════════════════════════════════════════
-    // PRINT SIZES
+    // FIXED-WIDTH INTEGERS (C99 standard, requires <stdint.h>)
+    // Guarantees specific bit widths regardless of platform.
+    // E.g., int32_t is always 32 bits, uint64_t always 64 bits.
+    // Useful for exact data representation (e.g., network protocols).
+    int8_t  _i8 = 127;
+    uint16_t _u16 = 65535;
+    int32_t _i32 = -2147483648;
+    uint64_t _u64 = 18446744073709551615ULL;
+
     // ═══════════════════════════════════════════════════
-    
+    // The `sizeof` operator: Returns the size in bytes of a type or variable.
+    // Its return type is `size_t` (an unsigned integer type defined in <stddef.h>).
+    // Use `%zu` format specifier for `size_t`.
+    // ═══════════════════════════════════════════════════
+    printf("\n--- Sizes of Data Types (on this system) ---\n");
     printf("Size of char: %zu bytes\n", sizeof(char));
+    printf("Size of short: %zu bytes\n", sizeof(short));
     printf("Size of int: %zu bytes\n", sizeof(int));
     printf("Size of long: %zu bytes\n", sizeof(long));
     printf("Size of long long: %zu bytes\n", sizeof(long long));
     printf("Size of float: %zu bytes\n", sizeof(float));
     printf("Size of double: %zu bytes\n", sizeof(double));
-    
+    printf("Size of long double: %zu bytes\n", sizeof(long double));
+    printf("Size of bool: %zu bytes\n", sizeof(bool));
+    printf("Size of int8_t: %zu bytes\n", sizeof(int8_t));
+
+
     // ═══════════════════════════════════════════════════
-    // LIMITS
+    // LIMITS of Data Types (from <limits.h> and <float.h>)
     // ═══════════════════════════════════════════════════
-    
+    printf("\n--- Limits of Data Types ---\n");
     printf("INT_MIN: %d\n", INT_MIN);
     printf("INT_MAX: %d\n", INT_MAX);
     printf("LONG_MIN: %ld\n", LONG_MIN);
     printf("LONG_MAX: %ld\n", LONG_MAX);
-    
+    printf("DBL_MAX: %e\n", DBL_MAX); // Largest representable double
+    printf("DBL_EPSILON: %e\n", DBL_EPSILON); // Smallest x such that 1.0 + x != 1.0
+                                             // Crucial for float comparisons.
+
     return 0;
 }
 ```
+**Explanation:**
+*   **Data Types:** C provides a set of fundamental data types to represent different kinds of values. Their exact sizes can vary between compilers and architectures, but minimum sizes are guaranteed by the C standard. `sizeof` is used to determine the size of any type or variable in bytes.
+*   **`unsigned`:** This keyword indicates that a variable can only hold non-negative values, effectively doubling its positive range (e.g., `char` from -128 to 127, `unsigned char` from 0 to 255).
+*   **Type Suffixes:** `U`, `L`, `LL`, `f`, `l` are used to explicitly specify the type of a literal constant, preventing unintended type promotions or overflows.
+*   **`stdbool.h` and `stdint.h`:** C99 introduced `bool` (true/false) and fixed-width integers (`intN_t`, `uintN_t`) for better code portability and precise control over data representation.
+*   **`limits.h` and `float.h`:** These headers define constants that represent the minimum and maximum values (and other properties) that various data types can hold. `DBL_EPSILON` is particularly important for understanding floating-point precision issues.
 
-## Type Modifiers
+## Storage Classes
+
+Storage classes in C determine the scope, lifetime, initial value, and storage location of variables.
 
 ```c
-// Signed vs Unsigned
-signed int x = -100;      // Can be negative
-unsigned int y = 100;     // Only positive
+#include <stdio.h>
+#include <stdlib.h> // For malloc/free
 
-// Short vs Long
-short int a = 10;         // Shorter range
-long int b = 10L;         // Longer range
+// ═══════════════════════════════════════════════════
+// 1. `auto` (Automatic Storage Class)
+//    - Default for local variables.
+//    - Stored on the stack.
+//    - Scope: Local to the block in which they are defined.
+//    - Lifetime: Created upon entering block, destroyed upon exiting.
+//    - Initial Value: Garbage (unless explicitly initialized).
+// ═══════════════════════════════════════════════════
 
-// Can omit 'int' keyword
-short a = 10;
-long b = 10L;
-unsigned c = 10U;
+void demonstrateAuto() {
+    auto int a = 10; // 'auto' is rarely used explicitly as it's the default
+    int b;           // Equivalent to auto int b; (contains garbage)
+
+    printf("Inside demonstrateAuto:\n");
+    printf("  a (auto, initialized): %d\n", a);
+    printf("  b (auto, uninitialized): %d (potentially garbage)\n", b);
+    // a and b are destroyed when function exits
+}
+
+// ═══════════════════════════════════════════════════
+// 2. `static` (Static Storage Class)
+//    - Scope: Depends on where it's declared (local or global).
+//    - Lifetime: Entire program duration.
+//    - Initial Value: 0 (or null for pointers) if uninitialized.
+//    - Storage: Data segment (initialized) or BSS segment (uninitialized).
+// ═══════════════════════════════════════════════════
+
+// Global static variable:
+// - Scope: File scope (only visible within this .c file).
+// - Lifetime: Program duration.
+static int fileScopeStatic = 50;
+
+void demonstrateStaticLocal() {
+    // Local static variable:
+    // - Scope: Local to the function.
+    // - Lifetime: Program duration (value persists between calls).
+    // - Initialized only ONCE at the start of the program.
+    static int count = 0;
+    count++;
+    printf("  Static local count: %d\n", count);
+}
+
+// ═══════════════════════════════════════════════════
+// 3. `extern` (External Storage Class)
+//    - Declares a variable defined in another file (or later in the same file).
+//    - Tells the compiler that the variable exists elsewhere.
+//    - Does not allocate memory; it's a declaration, not a definition.
+// ═══════════════════════════════════════════════════
+
+// Example: If `anotherGlobalVar` is defined in `other_file.c`:
+// extern int anotherGlobalVar; // Declares that 'anotherGlobalVar' exists
+
+// For this example, let's declare it within the same file for demonstration
+// (but typically extern is for cross-file declarations)
+int globalFromExtern = 99; // Definition
+
+void demonstrateExtern() {
+    extern int globalFromExtern; // Declaration: uses the global variable defined above
+    printf("  Value from extern declaration: %d\n", globalFromExtern);
+}
+
+
+// ═══════════════════════════════════════════════════
+// 4. `register` (Register Storage Class)
+//    - Suggests to the compiler to store the variable in a CPU register.
+//    - Faster access than memory, but limited number of registers.
+//    - Compiler usually ignores `register` for modern optimizations if it finds better ways.
+//    - Cannot take address of a `register` variable (`&` operator not allowed).
+// ═══════════════════════════════════════════════════
+
+void demonstrateRegister() {
+    register int counter = 0;
+    for (int i = 0; i < 5; i++) {
+        counter++;
+    }
+    printf("  Register variable counter: %d\n", counter);
+    // int* ptr = &counter; // ERROR: cannot take address of register variable
+}
+
+int main() {
+    printf("--- Storage Class Demonstrations ---\n");
+
+    demonstrateAuto();
+    printf("After demonstrateAuto, 'a' and 'b' are gone from stack.\n\n");
+
+    printf("File scope static variable: %d\n", fileScopeStatic); // Accessible in main
+    printf("Demonstrating static local variable:\n");
+    demonstrateStaticLocal(); // count = 1
+    demonstrateStaticLocal(); // count = 2 (value persists!)
+    demonstrateStaticLocal(); // count = 3
+    printf("\n");
+
+    demonstrateExtern();
+    printf("\n");
+
+    demonstrateRegister();
+    printf("\n");
+
+    return 0;
+}
 ```
+**Explanation of Storage Classes:**
+*   **`auto`**: The default for local variables. They reside on the *stack* and are destroyed when their scope ends. Their initial value is *garbage*.
+*   **`static`**:
+    *   **Local `static`**: Its value persists between function calls. It has local scope (only visible within its function) but global lifetime. Stored in the *data segment* (if initialized) or *BSS segment* (if uninitialized).
+    *   **Global `static`**: Limits the variable's visibility to the current translation unit (the `.c` file it's defined in). It has global lifetime and is stored in the data/BSS segment. This prevents naming conflicts when linking multiple `.c` files.
+*   **`extern`**: Used to declare a global variable that is *defined* in another source file or later in the current file. It informs the compiler that the variable exists but doesn't allocate memory for it. Essential for sharing global variables across multiple `.c` files.
+*   **`register`**: A hint to the compiler to store the variable in a CPU register for faster access. Modern compilers are often better at optimizing register usage than manual hints, so it's less commonly used. You *cannot* take the address of a `register` variable, as it doesn't reside in main memory.
 
 ## Constants
 
 ```c
 // Using const keyword
-const int MAX_SIZE = 100;
-const float PI = 3.14159f;
+// `const` variables are compile-time constants. Their value cannot be changed after initialization.
+// The compiler can sometimes optimize these by replacing their use with the actual value.
+const int MAX_USERS = 100;
+const float PI_CONST = 3.14159f;
 
-// Using #define (preprocessor)
+// Using #define (preprocessor macro)
+// `#define` performs a simple text substitution before compilation.
+// It doesn't participate in C's type system or scoping.
 #define BUFFER_SIZE 256
 #define NEWLINE '\n'
 
-// Enumeration
+// Enumeration (`enum`)
+// Creates a set of named integer constants. By default, they start from 0 and increment.
+// Can be explicitly assigned values. Improves readability.
 enum Day {
-    SUNDAY,      // 0
+    SUNDAY,      // 0 (default)
     MONDAY,      // 1
     TUESDAY,     // 2
     WEDNESDAY,   // 3
@@ -281,52 +453,101 @@ enum Color {
     GREEN = 5,
     BLUE = 10
 };
+
+// Example usage
+int main() {
+    printf("Max users: %d\n", MAX_USERS);
+    printf("Buffer size: %d\n", BUFFER_SIZE);
+
+    enum Day today = MONDAY;
+    printf("Today is day number: %d\n", today); // Prints 1
+
+    enum Color favoriteColor = BLUE;
+    printf("Favorite color value: %d\n", favoriteColor); // Prints 10
+
+    return 0;
+}
 ```
+**Explanation:**
+*   **`const` keyword:** Defines a variable whose value cannot be changed after initialization. It's type-checked by the compiler. Often preferred over `#define` for type safety and scope control.
+*   **`#define`:** A preprocessor directive for creating symbolic constants (macros). The preprocessor literally replaces the macro name with its value before compilation. No type checking is done. Can lead to subtle bugs if not used carefully (e.g., `SQUARE(x)` macro vs function).
+*   **`enum`:** A user-defined data type that consists of a set of named integer constants. Enhances code readability by providing meaningful names for integral values.
 
 ## Type Casting
 
 ```c
+#include <stdio.h>
+
 int main() {
     // ═══════════════════════════════════════════════════
-    // IMPLICIT CASTING (Automatic)
+    // IMPLICIT CASTING (Automatic Type Conversion)
+    // Occurs when the compiler automatically converts one data type to another,
+    // typically from a "smaller" type to a "larger" type to prevent data loss.
     // ═══════════════════════════════════════════════════
-    
+
     int i = 10;
-    float f = i;              // int → float (no data loss)
-    printf("%f\n", f);        // 10.000000
-    
+    float f = i;              // int (4 bytes) is promoted to float (4 bytes, but can represent 10.0 precisely)
+    printf("Implicit: int to float: %f\n", f);        // 10.000000
+
+    double d_val = 5.5;
+    int i_val = 10;
+    double result_implicit = d_val + i_val; // int i_val is implicitly converted to double
+    printf("Implicit: double + int: %f\n", result_implicit); // 15.500000
+
     // ═══════════════════════════════════════════════════
-    // EXPLICIT CASTING (Manual)
+    // EXPLICIT CASTING (Manual Type Conversion)
+    // Programmer explicitly tells the compiler to convert one data type to another.
+    // This is often necessary when converting to a "smaller" type (potential data loss)
+    // or to force a specific arithmetic operation.
+    // Syntax: (target_type) expression
     // ═══════════════════════════════════════════════════
-    
+
     float x = 9.8f;
-    int y = (int)x;           // float → int (data loss: .8)
-    printf("%d\n", y);        // 9
-    
+    int y = (int)x;           // float (9.8) explicitly converted to int (9). Fractional part is truncated.
+    printf("Explicit: float to int: %d\n", y);        // 9
+
     // ═══════════════════════════════════════════════════
     // COMMON CASTING SCENARIOS
     // ═══════════════════════════════════════════════════
-    
-    // Integer division
-    int a = 5, b = 2;
-    float result1 = a / b;                  // 2.0 (int division first!)
-    float result2 = (float)a / b;           // 2.5 (correct)
-    printf("Result1: %f, Result2: %f\n", result1, result2);
-    
-    // Character to ASCII
-    char c = 'A';
-    int ascii = (int)c;                     // 65
-    printf("ASCII of %c: %d\n", c, ascii);
-    
-    // Pointer casting
-    int num = 42;
-    void* ptr = &num;
-    int* intPtr = (int*)ptr;
-    printf("Value: %d\n", *intPtr);
-    
+
+    // Integer division vs. Floating-point division
+    int a_div = 5, b_div = 2;
+    float result1 = a_div / b_div;                  // `a_div / b_div` performs integer division (5/2 = 2).
+                                                    // The integer result (2) is then implicitly converted to float (2.0).
+    float result2 = (float)a_div / b_div;           // `(float)a_div` explicitly converts `a_div` to float (5.0f).
+                                                    // Then `5.0f / 2` performs floating-point division (5.0f / 2.0f = 2.5).
+    float result3 = a_div / (float)b_div;           // Same as result2, forcing floating-point division.
+    printf("Integer division then float: %f\n", result1); // 2.000000
+    printf("Float division (explicit cast): %f\n", result2); // 2.500000
+    printf("Float division (explicit cast on denom): %f\n", result3); // 2.500000
+
+
+    // Character to ASCII value
+    char char_val = 'A';
+    int ascii = (int)char_val;                      // 'A' (char) explicitly converted to 65 (int).
+    printf("ASCII of %c: %d\n", char_val, ascii); // ASCII of A: 65
+
+    // Pointer casting (crucial for dynamic memory allocation and generic functions)
+    // `void*` is a generic pointer that can point to any data type.
+    int num_ptr = 42;
+    void* generic_ptr = &num_ptr; // `int*` implicitly converts to `void*`
+    // printf("Value: %d\n", *generic_ptr); // ERROR: Cannot dereference a void* directly (compiler doesn't know its size)
+
+    // To use a void* pointer, you must explicitly cast it back to a specific type.
+    int* intPtr = (int*)generic_ptr;
+    printf("Value through casted pointer: %d\n", *intPtr); // Value: 42
+
+    char char_arr[] = "Hello";
+    void* char_generic_ptr = char_arr; // Points to the first character of the string
+    printf("Character at generic_ptr (after cast): %c\n", *((char*)char_generic_ptr)); // H
+
     return 0;
 }
 ```
+**Explanation:**
+*   **Implicit Casting (Coercion):** Done automatically by the compiler to ensure type compatibility in expressions or assignments. It generally promotes "smaller" types to "larger" types to avoid data loss (e.g., `int` to `float`). However, `int` to `float` can sometimes lose precision for very large integers.
+*   **Explicit Casting:** Done manually by the programmer using the `(type)` operator. This is necessary when you want to force a conversion that might involve data loss (e.g., `float` to `int` truncates the decimal part) or to specify how an arithmetic operation should behave (e.g., forcing floating-point division).
+*   **Pointer Casting:** Especially important with `void*` pointers, which are "generic" pointers that can hold the address of any data type. You must explicitly cast a `void*` to a specific data pointer type (`int*`, `char*`, etc.) before dereferencing it, as the compiler needs to know the size of the data it's pointing to.
 
 ---
 
@@ -335,175 +556,279 @@ int main() {
 ## Arithmetic Operators
 
 ```c
+#include <stdio.h>
+
 int main() {
     int a = 10, b = 3;
-    
-    printf("Addition: %d\n", a + b);        // 13
-    printf("Subtraction: %d\n", a - b);     // 7
-    printf("Multiplication: %d\n", a * b);  // 30
-    printf("Division: %d\n", a / b);        // 3 (integer division)
-    printf("Modulus: %d\n", a % b);         // 1 (remainder)
-    
-    // Integer vs Float division
+
+    printf("Addition (a + b): %d\n", a + b);        // 13
+    printf("Subtraction (a - b): %d\n", a - b);     // 7
+    printf("Multiplication (a * b): %d\n", a * b);  // 30
+    printf("Division (a / b): %d\n", a / b);        // 3 (integer division: 10 / 3 = 3)
+    printf("Modulus (a %% b): %d\n", a % b);         // 1 (remainder of 10 / 3)
+
+    // Integer vs Float division (revisited)
     float c = (float)a / b;
-    printf("Float division: %.2f\n", c);    // 3.33
-    
-    // Increment/Decrement
+    printf("Float division ((float)a / b): %.2f\n", c);    // 3.33
+
+    // Increment/Decrement Operators: Affect the variable's value by 1.
+    // Pre-increment/decrement: Modify, then use the value.
+    // Post-increment/decrement: Use the value, then modify.
     int x = 5;
-    printf("x++: %d\n", x++);  // Prints 5, then x becomes 6
-    printf("++x: %d\n", ++x);  // x becomes 7, then prints 7
-    
+    printf("x is 5.\n");
+    printf("x++ (post-increment): %d\n", x++);  // Prints 5, then x becomes 6
+    printf("Current x: %d\n", x);               // Prints 6
+    printf("++x (pre-increment): %d\n", ++x);   // x becomes 7, then prints 7
+    printf("Current x: %d\n", x);               // Prints 7
+
     int y = 5;
-    printf("y--: %d\n", y--);  // Prints 5, then y becomes 4
-    printf("--y: %d\n", --y);  // y becomes 3, then prints 3
-    
+    printf("y is 5.\n");
+    printf("y-- (post-decrement): %d\n", y--);  // Prints 5, then y becomes 4
+    printf("Current y: %d\n", y);               // Prints 4
+    printf("--y (pre-decrement): %d\n", --y);   // y becomes 3, then prints 3
+    printf("Current y: %d\n", y);               // Prints 3
+
     return 0;
 }
 ```
+**Explanation:**
+*   **`/` (Division):** For integer operands, `a / b` performs integer division (truncates any fractional part). For float/double operands (or if one operand is cast), it performs floating-point division.
+*   **`%` (Modulus):** Returns the remainder of an integer division. Can only be used with integer operands.
+*   **`++` and `--`:** These unary operators increment or decrement a variable by 1. The position (prefix or postfix) matters when they are used within an expression, as it determines whether the variable's value is used *before* or *after* the modification.
 
 ## Relational Operators
 
 ```c
+#include <stdio.h>
+
 int main() {
     int a = 10, b = 20;
-    
-    printf("a == b: %d\n", a == b);  // 0 (false)
-    printf("a != b: %d\n", a != b);  // 1 (true)
-    printf("a > b: %d\n", a > b);    // 0 (false)
-    printf("a < b: %d\n", a < b);    // 1 (true)
-    printf("a >= b: %d\n", a >= b);  // 0 (false)
-    printf("a <= b: %d\n", a <= b);  // 1 (true)
-    
+
+    // Relational operators return 0 for false and 1 for true in C.
+    printf("a == b (10 == 20): %d\n", a == b);  // 0 (false)
+    printf("a != b (10 != 20): %d\n", a != b);  // 1 (true)
+    printf("a > b (10 > 20): %d\n", a > b);    // 0 (false)
+    printf("a < b (10 < 20): %d\n", a < b);    // 1 (true)
+    printf("a >= b (10 >= 20): %d\n", a >= b);  // 0 (false)
+    printf("a <= b (10 <= 20): %d\n", a <= b);  // 1 (true)
+
     return 0;
 }
 ```
+**Explanation:** These operators compare two values. In C, `true` is represented by any non-zero integer, and `false` is represented by `0`. Relational operations typically yield `1` for true and `0` for false.
 
 ## Logical Operators
 
 ```c
+#include <stdio.h>
+
 int main() {
-    int a = 1, b = 0;  // 1 = true, 0 = false
-    
-    printf("a && b: %d\n", a && b);  // 0 (AND)
-    printf("a || b: %d\n", a || b);  // 1 (OR)
-    printf("!a: %d\n", !a);          // 0 (NOT)
-    
-    // Short-circuit evaluation
+    int a = 1, b = 0;  // In C, non-zero is true, 0 is false.
+
+    // && (Logical AND): Returns 1 if both operands are non-zero, else 0.
+    printf("a && b (1 && 0): %d\n", a && b);  // 0
+
+    // || (Logical OR): Returns 1 if at least one operand is non-zero, else 0.
+    printf("a || b (1 || 0): %d\n", a || b);  // 1
+
+    // ! (Logical NOT): Returns 1 if the operand is 0, else 0.
+    printf("!a (!1): %d\n", !a);          // 0
+    printf("!b (!0): %d\n", !b);          // 1
+
+    // Short-circuit evaluation:
+    // In `A && B`, if A is false (0), B is not evaluated.
+    // In `A || B`, if A is true (non-zero), B is not evaluated.
     int x = 5, y = 0;
-    if (y != 0 && x / y > 1) {  // Second part not evaluated!
-        printf("This won't crash\n");
+    // This condition `y != 0 && x / y > 1` would crash if `y != 0` wasn't checked first.
+    // Due to short-circuiting, `x / y` is never evaluated because `y != 0` is false.
+    if (y != 0 && x / y > 1) {
+        printf("This won't print as y is 0.\n");
+    } else {
+        printf("Short-circuiting prevented division by zero.\n");
     }
-    
+
     return 0;
 }
 ```
+**Explanation:** Logical operators combine or negate boolean (true/false) conditions. C uses `0` for false and any non-zero value for true.
+*   **Short-circuit Evaluation:** A critical optimization where the second operand of `&&` or `||` is not evaluated if the result can be determined solely from the first operand. This is often used to prevent runtime errors (like division by zero) or to optimize performance.
 
 ## Bitwise Operators
 
 ```c
+#include <stdio.h>
+
 int main() {
-    unsigned int a = 60;  // 0011 1100
-    unsigned int b = 13;  // 0000 1101
-    
-    printf("a & b: %u\n", a & b);   // 12 (0000 1100) AND
-    printf("a | b: %u\n", a | b);   // 61 (0011 1101) OR
-    printf("a ^ b: %u\n", a ^ b);   // 49 (0011 0001) XOR
-    printf("~a: %u\n", ~a);         // Bitwise NOT
-    printf("a << 2: %u\n", a << 2); // 240 (left shift)
-    printf("a >> 2: %u\n", a >> 2); // 15 (right shift)
-    
+    // These operators work on the individual bits of integer operands.
+    // Useful for low-level programming, optimizations, and specific algorithms.
+
+    unsigned int a = 60;  // Binary: 0011 1100
+    unsigned int b = 13;  // Binary: 0000 1101
+
+    // & (Bitwise AND): Sets bit if both corresponding bits are 1.
+    printf("a & b: %u (0000 1100 = 12)\n", a & b);   // 12
+
+    // | (Bitwise OR): Sets bit if at least one corresponding bit is 1.
+    printf("a | b: %u (0011 1101 = 61)\n", a | b);   // 61
+
+    // ^ (Bitwise XOR): Sets bit if corresponding bits are different.
+    printf("a ^ b: %u (0011 0001 = 49)\n", a ^ b);   // 49
+
+    // ~ (Bitwise NOT): Inverts all bits. Unsigned values behave as expected.
+    // For signed values, it's 2's complement negation - 1 (e.g., ~5 is -6).
+    // Using unsigned here for clearer bit inversion example.
+    printf("~a (bitwise NOT of 60): %u (depends on int size, usually large number)\n", ~a); // Example: if 32-bit int, 11111111111111111111111111000011 = 4294967235
+
+    // << (Left Shift): Shifts bits to the left, fills with zeros on the right.
+    // Equivalent to multiplying by 2 for each shift (if no overflow).
+    printf("a << 2 (60 << 2): %u (1111 0000 = 240)\n", a << 2); // 240
+
+    // >> (Right Shift): Shifts bits to the right.
+    // For unsigned: Fills with zeros on the left (logical shift).
+    // For signed: Fills with sign bit (arithmetic shift) or zeros (logical shift) - implementation defined.
+    printf("a >> 2 (60 >> 2): %u (0000 1111 = 15)\n", a >> 2); // 15
+
+    // Practical use: Checking if a number is even/odd quickly
+    int num = 7;
+    if (num & 1) { // If the least significant bit is 1, it's odd.
+        printf("%d is odd.\n", num);
+    } else {
+        printf("%d is even.\n", num);
+    }
+
     return 0;
 }
 ```
+**Explanation:** These operators manipulate data at the bit level.
+*   **`&`, `|`, `^`:** Perform bitwise AND, OR, and XOR operations respectively on corresponding bits of two operands.
+*   **`~` (Bitwise NOT):** Inverts all the bits of its operand. For unsigned integers, this behaves as expected. For signed integers, it's equivalent to `-(n+1)` due to two's complement representation.
+*   **`<<` (Left Shift):** Shifts bits to the left. `n << k` is generally equivalent to `n * (2^k)`. Overflows can occur if bits are shifted out of the most significant position.
+*   **`>>` (Right Shift):** Shifts bits to the right. `n >> k` is generally equivalent to `n / (2^k)`. Behavior for signed integers (whether it fills with sign bit or zero) is implementation-defined for negative numbers, but usually arithmetic shift (fills with sign bit). For unsigned integers, it always fills with zeros (logical shift).
 
 ## Assignment Operators
 
 ```c
+#include <stdio.h>
+
 int main() {
     int a = 10;
-    
-    a += 5;   // a = a + 5;  → 15
-    a -= 3;   // a = a - 3;  → 12
-    a *= 2;   // a = a * 2;  → 24
-    a /= 4;   // a = a / 4;  → 6
-    a %= 4;   // a = a % 4;  → 2
-    
-    // Bitwise compound assignment
-    a &= 3;   // a = a & 3;
-    a |= 4;   // a = a | 4;
-    a ^= 2;   // a = a ^ 2;
-    a <<= 1;  // a = a << 1;
-    a >>= 1;  // a = a >> 1;
-    
+    printf("Initial a: %d\n", a);
+
+    a += 5;   // Equivalent to: a = a + 5;  (a is now 15)
+    printf("a += 5: %d\n", a);
+
+    a -= 3;   // Equivalent to: a = a - 3;  (a is now 12)
+    printf("a -= 3: %d\n", a);
+
+    a *= 2;   // Equivalent to: a = a * 2;  (a is now 24)
+    printf("a *= 2: %d\n", a);
+
+    a /= 4;   // Equivalent to: a = a / 4;  (a is now 6)
+    printf("a /= 4: %d\n", a);
+
+    a %= 4;   // Equivalent to: a = a % 4;  (a is now 2)
+    printf("a %%= 4: %d\n", a);
+
+    // Bitwise compound assignment operators also exist:
+    // &=, |=, ^=, <<=, >>=
+    int b = 10; // Binary: 1010
+    b &= 3;     // b = b & 3; (1010 & 0011 = 0010 = 2)
+    printf("b &= 3: %d\n", b); // b is now 2
+
+    b |= 4;     // b = b | 4; (0010 | 0100 = 0110 = 6)
+    printf("b |= 4: %d\n", b); // b is now 6
+
+    b <<= 1;    // b = b << 1; (0110 << 1 = 1100 = 12)
+    printf("b <<= 1: %d\n", b); // b is now 12
+
     return 0;
 }
 ```
+**Explanation:** These are shorthand operators that perform an operation and then assign the result back to the left operand (e.g., `a += 5` is equivalent to `a = a + 5`). They exist for arithmetic, bitwise, and logical operators.
 
 ## Conditional (Ternary) Operator
 
 ```c
+#include <stdio.h>
+
 int main() {
     int a = 10, b = 20;
-    
-    // condition ? value_if_true : value_if_false
+
+    // Syntax: condition ? value_if_true : value_if_false
+    // If 'condition' is true (non-zero), the expression evaluates to 'value_if_true'.
+    // Otherwise, it evaluates to 'value_if_false'.
     int max = (a > b) ? a : b;
     printf("Max: %d\n", max);  // 20
-    
-    // Nested ternary (use sparingly!)
-    int x = 5;
-    char* result = (x > 0) ? "positive" : 
+
+    // Can be chained, but use sparingly for readability.
+    int x = 0;
+    char* result = (x > 0) ? "positive" :
                    (x < 0) ? "negative" : "zero";
-    printf("%s\n", result);
-    
+    printf("%d is %s\n", x, result); // 0 is zero
+
     return 0;
 }
 ```
+**Explanation:** The only ternary (three-operand) operator in C. It's a concise way to write simple `if-else` expressions, returning one of two values based on a condition.
 
 ## Operator Precedence (Highest to Lowest)
 
 ```c
 /*
- * OPERATOR PRECEDENCE TABLE
- * 
- * Priority  Operators              Description
+ * OPERATOR PRECEDENCE TABLE (Simplified common operators)
+ *
+ * Priority  Operators              Associativity   Description
  * ════════  ═══════════════════════════════════════════════
- * 1         ()  []  ->  .          Postfix
- * 2         ++  --  !  ~  +  -  *  Unary (prefix)
- * 3         *  /  %                Multiplicative
- * 4         +  -                   Additive
- * 5         <<  >>                 Bitwise shift
- * 6         <  <=  >  >=           Relational
- * 7         ==  !=                 Equality
- * 8         &                      Bitwise AND
- * 9         ^                      Bitwise XOR
- * 10        |                      Bitwise OR
- * 11        &&                     Logical AND
- * 12        ||                     Logical OR
- * 13        ?:                     Ternary
- * 14        =  +=  -=  etc.        Assignment
- * 15        ,                      Comma
+ * 1         ()  []  ->  .          Left-to-right   Postfix (function call, array subscript, member access)
+ * 2         ++  --  !  ~  +  -  *  Right-to-left   Unary (pre-increment/decrement, logical NOT, bitwise NOT, unary plus/minus, dereference)
+ *           (type) sizeof                           Cast, Sizeof
+ * 3         *  /  %                Left-to-right   Multiplicative
+ * 4         +  -                   Left-to-right   Additive
+ * 5         <<  >>                 Left-to-right   Bitwise shift
+ * 6         <  <=  >  >=           Left-to-right   Relational
+ * 7         ==  !=                 Left-to-right   Equality
+ * 8         &                      Left-to-right   Bitwise AND
+ * 9         ^                      Left-to-right   Bitwise XOR
+ * 10        |                      Left-to-right   Bitwise OR
+ * 11        &&                     Left-to-right   Logical AND
+ * 12        ||                     Left-to-right   Logical OR
+ * 13        ?:                     Right-to-left   Ternary
+ * 14        =  +=  -=  *= etc.     Right-to-left   Assignment
+ * 15        ,                      Left-to-right   Comma (evaluates expressions left-to-right, returns rightmost value)
  */
 
 int main() {
     int a = 10, b = 5, c = 2;
-    
-    // Example: 10 + 5 * 2 = 10 + 10 = 20 (not 30!)
+
+    // Example: 10 + 5 * 2
+    // Multiplication (*) has higher precedence than Addition (+).
+    // So, 5 * 2 is evaluated first (10), then 10 + 10 = 20.
     int result = a + b * c;
-    printf("%d\n", result);  // 20
-    
-    // Use parentheses for clarity
+    printf("a + b * c: %d\n", result);  // 20
+
+    // Use parentheses to override precedence or for clarity.
+    // (a + b) is evaluated first (15), then 15 * 2 = 30.
     int result2 = (a + b) * c;
-    printf("%d\n", result2);  // 30
-    
+    printf("(a + b) * c: %d\n", result2);  // 30
+
+    // Example of Associativity (Right-to-left for assignment)
+    int x, y, z;
+    x = y = z = 5; // Evaluates as x = (y = (z = 5));
+    printf("x=%d, y=%d, z=%d\n", x, y, z); // x=5, y=5, z=5
+
     return 0;
 }
 ```
+**Explanation:**
+*   **Precedence:** Determines which operator is evaluated first in an expression (e.g., `*` before `+`).
+*   **Associativity:** Determines the order of evaluation when operators of the same precedence appear in an expression (e.g., `a + b + c` is left-to-right, `a = b = c` is right-to-left).
+*   **Parentheses `()`:** Always override precedence and associativity, forcing a specific order of evaluation. Use them liberally to ensure correctness and improve code readability, even if the default precedence would produce the same result.
 
 ---
 
 # Input/Output
 
-## printf() - Formatted Output
+## `printf()` - Formatted Output
 
 ```c
 #include <stdio.h>
@@ -511,58 +836,70 @@ int main() {
 int main() {
     // ═══════════════════════════════════════════════════
     // BASIC FORMAT SPECIFIERS
+    // `printf` uses format specifiers to interpret and display variables.
     // ═══════════════════════════════════════════════════
-    
+
     int i = 42;
     unsigned int u = 42;
     float f = 3.14159f;
     double d = 3.14159265359;
     char c = 'A';
     char str[] = "Hello";
-    void* ptr = &i;
-    
-    printf("Integer: %d\n", i);
-    printf("Unsigned: %u\n", u);
-    printf("Hexadecimal: %x\n", i);
-    printf("Octal: %o\n", i);
-    printf("Float: %f\n", f);
-    printf("Double: %lf\n", d);
-    printf("Character: %c\n", c);
-    printf("String: %s\n", str);
-    printf("Pointer: %p\n", ptr);
-    
+    void* ptr = &i; // A generic pointer, address of 'i'
+
+    printf("Integer (d): %d\n", i);             // Decimal integer
+    printf("Unsigned (u): %u\n", u);            // Unsigned decimal integer
+    printf("Hexadecimal (x): %x (lowercase)\n", i); // Hexadecimal integer (lowercase letters)
+    printf("Hexadecimal (X): %X (uppercase)\n", i); // Hexadecimal integer (uppercase letters)
+    printf("Octal (o): %o\n", i);               // Octal integer
+    printf("Float (f): %f\n", f);               // Decimal floating point
+    printf("Double (lf): %lf\n", d);             // Double (historically 'lf' for scanf, 'f' for printf, but 'f' is fine for double too)
+    printf("Scientific (e): %e\n", d);           // Scientific notation (lowercase 'e')
+    printf("Character (c): %c\n", c);           // Single character
+    printf("String (s): %s\n", str);            // Null-terminated string
+    printf("Pointer (p): %p\n", ptr);           // Pointer address (implementation-defined format)
+    printf("Percent sign (%%): %%\n");            // To print a literal '%'
+
     // ═══════════════════════════════════════════════════
-    // WIDTH AND PRECISION
+    // WIDTH, PRECISION, AND FLAGS
+    // Control how the output is formatted (padding, decimal places, alignment).
+    // Syntax: %[flags][width][.precision][length]type
     // ═══════════════════════════════════════════════════
-    
-    printf("%5d\n", 42);       // "   42" (right-aligned, width 5)
-    printf("%-5d\n", 42);      // "42   " (left-aligned)
-    printf("%05d\n", 42);      // "00042" (zero-padded)
-    
-    printf("%.2f\n", 3.14159); // "3.14" (2 decimal places)
-    printf("%10.2f\n", 3.14);  // "      3.14" (width 10, precision 2)
-    
+
+    printf("\n--- Width, Precision, Flags ---\n");
+    printf("Width 5 for int: '%5d'\n", 42);         // "   42" (right-aligned, padded with spaces)
+    printf("Left-align width 5: '%-5d'\n", 42);     // "42   " (left-aligned)
+    printf("Zero-padded width 5: '%05d'\n", 42);    // "00042" (padded with zeros)
+
+    printf("Precision .2 for float: '%.2f'\n", 3.14159); // "3.14" (2 decimal places)
+    printf("Width 10, precision 2: '%10.2f'\n", 3.14);  // "      3.14" (width 10, precision 2)
+    printf("Precision for string: '%.3s'\n", "HelloWorld"); // "Hel" (print only first 3 characters)
+
     // ═══════════════════════════════════════════════════
-    // LONG AND LONG LONG
+    // LENGTH MODIFIERS (for specific integer types)
     // ═══════════════════════════════════════════════════
-    
-    long l = 1234567890L;
-    long long ll = 1234567890123456789LL;
-    
-    printf("Long: %ld\n", l);
-    printf("Long long: %lld\n", ll);
-    
-    // ═══════════════════════════════════════════════════
-    // SIZE_T (for sizeof results)
-    // ═══════════════════════════════════════════════════
-    
-    printf("Size: %zu bytes\n", sizeof(int));
-    
+    long l_val = 1234567890L;
+    long long ll_val = 1234567890123456789LL;
+    size_t s_val = sizeof(int); // `sizeof` returns `size_t`
+
+    printf("Long (ld): %ld\n", l_val);
+    printf("Long long (lld): %lld\n", ll_val);
+    printf("Size_t (zu): %zu bytes\n", s_val); // `size_t` is an unsigned integer type
+
     return 0;
 }
 ```
+**Explanation:**
+*   **Format Specifiers:** The heart of `printf`. They tell `printf` how to interpret the corresponding argument's type and how to format its output. Mismatched specifiers and argument types lead to *undefined behavior*.
+*   **Width:** Specifies the minimum field width for the output. If the value is shorter, it's padded (default: spaces, right-aligned).
+*   **Precision:**
+    *   For floating-point numbers: Number of digits after the decimal point.
+    *   For strings: Maximum number of characters to print.
+    *   For integers: Minimum number of digits to print (padded with leading zeros).
+*   **Flags:** Control alignment (`-`), zero-padding (`0`), sign display (`+`, ` `), etc.
+*   **Length Modifiers:** Used to specify the size of integer arguments (e.g., `l` for `long`, `ll` for `long long`, `z` for `size_t`). The `lf` modifier is for `double` with `scanf`, but for `printf`, `f` works for both `float` and `double` because `float` arguments are promoted to `double` in variadic functions.
 
-## scanf() - Formatted Input
+## `scanf()` - Formatted Input
 
 ```c
 #include <stdio.h>
@@ -570,97 +907,164 @@ int main() {
 int main() {
     int age;
     float height;
-    char name[50];
-    
+    char firstName[50]; // Character array for string input
+    char initial;
+    int num1, num2;
+
     // ═══════════════════════════════════════════════════
-    // BASIC INPUT
+    // BASIC INPUT - Using the address-of operator `&`
+    // `scanf` requires the ADDRESS of the variable to store the input.
+    // For arrays (like strings), the array name itself is an address, so `&` is not used.
     // ═══════════════════════════════════════════════════
-    
-    printf("Enter age: ");
-    scanf("%d", &age);  // Note: & (address-of operator)
-    
-    printf("Enter height: ");
-    scanf("%f", &height);
-    
+
+    printf("Enter age (integer): ");
+    scanf("%d", &age);  // `&age` provides the memory address of 'age'
+    printf("Age entered: %d\n", age);
+
+    printf("Enter height (float, e.g., 1.75): ");
+    scanf("%f", &height); // `&height`
+    printf("Height entered: %.2f\n", height);
+
+    printf("Enter your first name (no spaces): ");
+    scanf("%s", firstName); // `firstName` (array name) decays to a pointer to its first element
+    printf("First name entered: %s\n", firstName);
+
     // ═══════════════════════════════════════════════════
-    // STRING INPUT
+    // Multiple inputs in one `scanf` call
     // ═══════════════════════════════════════════════════
-    
-    printf("Enter name: ");
-    scanf("%s", name);  // No & for arrays!
-    
-    // Safer: limit input length
-    scanf("%49s", name);  // Read at most 49 chars
-    
+
+    printf("Enter two integers (e.g., 10 20): ");
+    scanf("%d %d", &num1, &num2);
+    printf("You entered: %d and %d\n", num1, num2);
+
     // ═══════════════════════════════════════════════════
-    // MULTIPLE INPUTS
+    // Issues with `scanf` and character input (newline in buffer)
+    // `scanf("%c", ...)` reads the next available character, which might be a leftover newline.
+    // The space before `%c` (` " %c" `) tells scanf to skip any whitespace characters
+    // (including spaces, tabs, and newlines) before reading the character.
     // ═══════════════════════════════════════════════════
-    
-    int x, y, z;
-    printf("Enter three numbers: ");
-    scanf("%d %d %d", &x, &y, &z);
-    
+
+    printf("Enter an initial (character): ");
+    scanf(" %c", &initial); // Note the space before %c!
+    printf("Initial entered: %c\n", initial);
+
     // ═══════════════════════════════════════════════════
-    // CLEAR INPUT BUFFER
+    // Input String Safely (limiting length)
+    // `%49s` reads at most 49 characters, ensuring space for the null terminator `\0`.
+    // This prevents buffer overflows.
     // ═══════════════════════════════════════════════════
-    
-    int num;
-    char ch;
-    
-    printf("Enter number: ");
-    scanf("%d", &num);
-    
-    // Clear newline left by scanf
-    while (getchar() != '\n');
-    
-    printf("Enter character: ");
-    scanf("%c", &ch);
-    
+    char safeName[50];
+    printf("Enter a name (max 49 chars): ");
+    scanf("%49s", safeName);
+    printf("Safe name: %s\n", safeName);
+
+
+    // ═══════════════════════════════════════════════════
+    // Reading an entire line with spaces using `scanf` (less common/idiomatic than `fgets`)
+    // ` %[^\n]` reads characters until a newline is encountered, then `*c` discards it.
+    // Make sure to clear the buffer before using this again after other `scanf` calls.
+    // ═══════════════════════════════════════════════════
+    char line[100];
+    printf("Enter a line of text (with spaces): ");
+    // Clear any leftover newline from previous scanf.
+    // while (getchar() != '\n' && getchar() != EOF); // Consume until newline or EOF
+    scanf(" %[^\n]%*c", line); // Reads up to newline, then discards the newline
+    printf("Line read: \"%s\"\n", line);
+
+
     return 0;
 }
 ```
+**Explanation:**
+*   **Address-of Operator (`&`):** `scanf` needs to know *where* in memory to store the input value. For simple variables (`int`, `float`, `char`, etc.), you must provide their memory address using `&`. Array names (like `firstName`) inherently represent the address of their first element, so `&` is not used for them.
+*   **Format Specifiers:** Similar to `printf`, but for input. `lf` is explicitly needed for `double` in `scanf` (whereas `f` works for `double` in `printf`).
+*   **Whitespace Handling:** `scanf` generally skips leading whitespace for numeric and string inputs (`%d`, `%f`, `%s`). However, `%c` *does not* skip leading whitespace, which can cause issues if a newline (`\n`) character is left in the input buffer from a previous `scanf` or `printf`. The space before `%c` (`" %c"`) resolves this.
+*   **Buffer Overflows:** `scanf("%s", ...)` is inherently unsafe as it doesn't know the size of the buffer and can write past its end if the input string is too long. To prevent this, limit the number of characters to read (e.g., `"%49s"`).
+*   **Reading Lines:** While `scanf(" %[^\n]%*c", ...)` can read lines with spaces, `fgets` is generally preferred for safety and ease of use when reading entire lines.
 
-## Other I/O Functions
+## Other I/O Functions (`getchar`, `putchar`, `gets`, `fgets`, `puts`)
 
 ```c
 #include <stdio.h>
+#include <string.h> // For strcspn
 
 int main() {
-    char str[100];
-    char ch;
-    
+    char ch_in, ch_out;
+    char str_buffer[100];
+
     // ═══════════════════════════════════════════════════
     // CHARACTER I/O
     // ═══════════════════════════════════════════════════
-    
+
+    printf("\n--- Character I/O ---\n");
     printf("Enter a character: ");
-    ch = getchar();  // Read single character
-    putchar(ch);     // Print single character
-    putchar('\n');
-    
+    ch_in = getchar();  // Reads a single character from stdin
+    printf("You entered: ");
+    putchar(ch_in);     // Prints a single character to stdout
+    putchar('\n');      // Prints a newline character
+
+    // Important: `getchar()` often leaves the newline character in the buffer.
+    // Clear the input buffer to prevent issues with subsequent inputs.
+    while ((ch_out = getchar()) != '\n' && ch_out != EOF);
+
     // ═══════════════════════════════════════════════════
     // STRING I/O
     // ═══════════════════════════════════════════════════
-    
-    printf("Enter a line: ");
-    gets(str);   // DEPRECATED! Unsafe!
-    
-    // Use fgets instead (safer)
-    fgets(str, sizeof(str), stdin);
-    puts(str);   // Print string with newline
-    
-    // Remove trailing newline from fgets
-    str[strcspn(str, "\n")] = '\0';
-    
+
+    printf("\n--- String I/O ---\n");
+
+    // --- `gets()` ---
+    // DEPRECATED and UNSAFE! Never use in modern C code.
+    // It reads an entire line but performs no bounds checking, making it highly susceptible
+    // to buffer overflows.
+    // char unsafe_str[10];
+    // printf("Enter an UNSAFE string: ");
+    // gets(unsafe_str); // AVOID! This can cause security vulnerabilities.
+
+    // --- `fgets()` ---
+    // The SAFE alternative to `gets()`.
+    // Syntax: `char *fgets(char *str, int size, FILE *stream);`
+    // `str`: buffer to store the string.
+    // `size`: maximum number of characters to read (including null terminator).
+    // `stream`: input stream (usually `stdin` for console input).
+    // Reads up to `size-1` characters or until newline/EOF. It *includes* the newline if read.
+    printf("Enter a safe string (max 99 chars, will include newline): ");
+    if (fgets(str_buffer, sizeof(str_buffer), stdin) != NULL) {
+        printf("fgets read: \"%s\"", str_buffer); // Note: It prints the newline from input
+    }
+
+    // `fgets` often captures the newline character from the input.
+    // You might want to remove it for cleaner string processing.
+    // `strcspn` finds the index of the first occurrence of any character from a set.
+    str_buffer[strcspn(str_buffer, "\n")] = '\0'; // Replace newline with null terminator
+    printf("After removing newline: \"%s\"\n", str_buffer);
+
+    // --- `puts()` ---
+    // Prints a null-terminated string to stdout, followed by a newline character.
+    // It automatically adds a newline, so you don't need `\n` in the string itself.
+    printf("Using puts(): ");
+    puts(str_buffer); // Prints content of str_buffer and adds a newline
+
+    // `fgetc`, `fputc`, `fscanf`, `fprintf` are file-specific versions
+    // `fgetc` reads char from FILE stream
+    // `fputc` writes char to FILE stream
+    // `fscanf` reads formatted input from FILE stream
+    // `fprintf` writes formatted output to FILE stream
+
     return 0;
 }
 ```
+**Explanation:**
+*   **`getchar()` / `putchar()`:** Used for single-character input/output. `getchar()` reads the next character from the standard input buffer (including newlines). `putchar()` writes a single character to standard output.
+*   **`gets()`:** **Extremely dangerous and deprecated.** It reads an entire line from standard input until a newline, but it *doesn't* take a buffer size argument. This makes it impossible to prevent buffer overflows if the user enters more characters than the buffer can hold, leading to security vulnerabilities. **NEVER USE `gets()`**.
+*   **`fgets()`:** The **safe replacement** for `gets()`. It takes a maximum size argument, preventing buffer overflows. A key difference is that `fgets()` *includes* the newline character (`\n`) if it's read from the input, which often needs to be explicitly removed by the programmer (e.g., using `strcspn`).
+*   **`puts()`:** A simple function to print a null-terminated string to standard output. It automatically appends a newline character to the output.
 
 ---
 
 # Control Flow
 
-## if-else Statements
+## `if-else` Statements
 
 ```c
 #include <stdio.h>
@@ -669,83 +1073,99 @@ int main() {
     int age;
     printf("Enter age: ");
     scanf("%d", &age);
-    
+
     // ═══════════════════════════════════════════════════
-    // SIMPLE IF
+    // SIMPLE IF STATEMENT
+    // Executes a block of code if the condition is true (non-zero).
     // ═══════════════════════════════════════════════════
-    
+
     if (age >= 18) {
+        printf("Condition: age >= 18 is true.\n");
         printf("You are an adult.\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // IF-ELSE
+    // IF-ELSE STATEMENT
+    // Executes one block if condition is true, another if false.
     // ═══════════════════════════════════════════════════
-    
+
     if (age >= 18) {
         printf("Adult\n");
     } else {
         printf("Minor\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // IF-ELSE IF-ELSE
+    // IF-ELSE IF-ELSE LADDER
+    // Checks multiple conditions sequentially. Only the first true block executes.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Age group: ");
     if (age < 13) {
         printf("Child\n");
-    } else if (age < 20) {
+    } else if (age < 20) { // Condition: age is 13-19
         printf("Teenager\n");
-    } else if (age < 60) {
+    } else if (age < 60) { // Condition: age is 20-59
         printf("Adult\n");
-    } else {
+    } else {              // Condition: age is 60 or older
         printf("Senior\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // NESTED IF
+    // NESTED IF STATEMENTS
+    // An `if` (or `else if`) statement inside another.
     // ═══════════════════════════════════════════════════
-    
+
     int marks;
-    printf("Enter marks: ");
+    printf("Enter marks (0-100): ");
     scanf("%d", &marks);
-    
-    if (marks >= 40) {
+
+    if (marks >= 0 && marks <= 100) { // Outer check for valid marks
         if (marks >= 90) {
             printf("Grade A+\n");
         } else if (marks >= 80) {
             printf("Grade A\n");
         } else if (marks >= 70) {
             printf("Grade B\n");
-        } else {
+        } else if (marks >= 60) {
             printf("Grade C\n");
+        } else {
+            printf("Fail\n");
         }
     } else {
-        printf("Fail\n");
+        printf("Invalid marks entered.\n");
     }
-    
+
     return 0;
 }
 ```
+**Explanation:**
+*   **`if`:** Executes a block of code if its condition evaluates to true (any non-zero value).
+*   **`else`:** Provides an alternative block of code to execute if the `if` condition is false.
+*   **`else if`:** Allows checking multiple conditions in sequence. Once a condition is true, its block executes, and the rest of the `else if` / `else` ladder is skipped.
+*   **Nesting:** `if-else` statements can be nested to handle more complex decision logic.
 
-## switch Statement
+## `switch` Statement
 
 ```c
 #include <stdio.h>
 
 int main() {
     int day;
-    printf("Enter day (1-7): ");
+    printf("Enter day number (1-7): ");
     scanf("%d", &day);
-    
+
     // ═══════════════════════════════════════════════════
-    // BASIC SWITCH
+    // BASIC SWITCH STATEMENT
+    // Evaluates an expression (must be an integer type) and compares its value
+    // against `case` labels.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Using basic switch: ");
     switch (day) {
         case 1:
             printf("Monday\n");
-            break;
+            break; // Exits the switch block
         case 2:
             printf("Tuesday\n");
             break;
@@ -764,21 +1184,24 @@ int main() {
         case 7:
             printf("Sunday\n");
             break;
-        default:
-            printf("Invalid day\n");
+        default: // Executed if no case matches
+            printf("Invalid day number\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // FALL-THROUGH (no break)
+    // FALL-THROUGH BEHAVIOR (when `break` is omitted)
+    // If `break` is missing, execution "falls through" to the next `case` block.
+    // This can be used intentionally to group cases.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Using switch with fall-through: ");
     switch (day) {
         case 1:
         case 2:
         case 3:
         case 4:
         case 5:
-            printf("Weekday\n");
+            printf("Weekday\n"); // If day is 1, it falls through to 2, 3, 4, then executes here.
             break;
         case 6:
         case 7:
@@ -787,15 +1210,19 @@ int main() {
         default:
             printf("Invalid\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // SWITCH WITH CHAR
+    // SWITCH WITH CHARACTER
+    // Character literals are essentially integer values (their ASCII codes).
     // ═══════════════════════════════════════════════════
-    
+
     char grade;
-    printf("Enter grade: ");
-    scanf(" %c", &grade);  // Space before %c to skip whitespace
-    
+    // Clear buffer after previous scanf
+    while (getchar() != '\n');
+    printf("Enter grade (A, B, C, D, F): ");
+    scanf(" %c", &grade); // Space before %c to consume leftover newline
+
+    printf("Grade status: ");
     switch (grade) {
         case 'A':
             printf("Excellent\n");
@@ -815,14 +1242,19 @@ int main() {
         default:
             printf("Invalid grade\n");
     }
-    
+
     return 0;
 }
 ```
+**Explanation:**
+*   **`switch`:** A multi-way branching statement that allows choosing one of many code blocks to execute based on the value of an integer expression.
+*   **`case`:** Labels a block of code to be executed if the switch expression matches its constant value. `case` labels must be integral constant expressions (integers, chars, enums).
+*   **`break`:** Essential for exiting the `switch` statement after a `case` block is executed. Without `break`, execution "falls through" to the next `case` label.
+*   **`default`:** An optional label that specifies the code to be executed if none of the `case` labels match the switch expression.
 
 ## Loops
 
-### for Loop
+### `for` Loop
 
 ```c
 #include <stdio.h>
@@ -830,2162 +1262,341 @@ int main() {
 int main() {
     // ═══════════════════════════════════════════════════
     // BASIC FOR LOOP
+    // Syntax: `for (initialization; condition; update)`
+    // 1. Initialization: Executed once at the beginning.
+    // 2. Condition: Checked before each iteration. If false, loop terminates.
+    // 3. Update: Executed after each iteration.
     // ═══════════════════════════════════════════════════
-    
-    for (int i = 0; i < 5; i++) {
+
+    printf("Basic for loop (0-4): ");
+    for (int i = 0; i < 5; i++) { // i is block-scoped (C99)
         printf("%d ", i);  // 0 1 2 3 4
     }
     printf("\n");
-    
+
     // ═══════════════════════════════════════════════════
     // REVERSE LOOP
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Reverse loop (5-1): ");
     for (int i = 5; i > 0; i--) {
         printf("%d ", i);  // 5 4 3 2 1
     }
     printf("\n");
-    
+
     // ═══════════════════════════════════════════════════
     // STEP BY 2
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Loop step by 2 (0-8): ");
     for (int i = 0; i < 10; i += 2) {
         printf("%d ", i);  // 0 2 4 6 8
     }
     printf("\n");
-    
+
     // ═══════════════════════════════════════════════════
-    // MULTIPLE VARIABLES
+    // MULTIPLE VARIABLES in loop control (using comma operator)
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Loop with multiple variables:\n");
     for (int i = 0, j = 10; i < j; i++, j--) {
-        printf("i=%d j=%d\n", i, j);
+        printf("  i=%d j=%d\n", i, j);
     }
-    
+
     // ═══════════════════════════════════════════════════
     // NESTED LOOPS
+    // One loop inside another. Inner loop completes all its iterations for each
+    // iteration of the outer loop.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Nested loops (3x3 grid):\n");
     for (int i = 1; i <= 3; i++) {
         for (int j = 1; j <= 3; j++) {
             printf("(%d,%d) ", i, j);
         }
         printf("\n");
     }
-    
+
     // ═══════════════════════════════════════════════════
-    // INFINITE LOOP (use with break)
+    // INFINITE LOOP (requires `break` to exit)
+    // Condition is always true (or omitted).
     // ═══════════════════════════════════════════════════
-    
-    for (;;) {
-        printf("Enter 0 to exit: ");
+
+    printf("\nInfinite loop example (enter 0 to exit):\n");
+    for (;;) { // Or `for(;;)`
+        printf("Enter a number: ");
         int n;
         scanf("%d", &n);
-        if (n == 0) break;
+        if (n == 0) {
+            printf("Exiting infinite loop.\n");
+            break; // Exits the loop
+        }
     }
-    
+
     return 0;
 }
 ```
+**Explanation:**
+*   The `for` loop is ideal for situations where you know the number of iterations in advance or have a clear initialization, condition, and update sequence.
+*   **Initialization:** Executed once at the beginning of the loop. Variables declared here (`int i = 0;`) have scope only within the loop (from C99 onwards).
+*   **Condition:** Evaluated before *each* iteration. If true (non-zero), the loop body executes. If false (zero), the loop terminates.
+*   **Update:** Executed *after* each iteration of the loop body.
+*   Any of the three parts (initialization, condition, update) can be omitted, but the semicolons are required. Omitting the condition makes it an infinite loop.
 
-### while Loop
+### `while` Loop
 
 ```c
 #include <stdio.h>
 
 int main() {
     // ═══════════════════════════════════════════════════
-    // BASIC WHILE
+    // BASIC WHILE LOOP
+    // Syntax: `while (condition)`
+    // The condition is checked *before* each iteration.
+    // If the condition is initially false, the loop body never executes.
     // ═══════════════════════════════════════════════════
-    
-    int i = 0;
+
+    printf("Basic while loop (0-4): ");
+    int i = 0; // Initialize loop control variable *before* the loop
     while (i < 5) {
         printf("%d ", i);
-        i++;
+        i++; // Update loop control variable *inside* the loop
     }
     printf("\n");
-    
+
     // ═══════════════════════════════════════════════════
-    // INPUT VALIDATION
+    // INPUT VALIDATION (Loop continues until valid input)
     // ═══════════════════════════════════════════════════
-    
+
     int age;
-    printf("Enter age (1-100): ");
+    printf("\nEnter age (1-100): ");
     scanf("%d", &age);
-    
-    while (age < 1 || age > 100) {
-        printf("Invalid! Enter again: ");
+
+    while (age < 1 || age > 100) { // Keep looping while age is invalid
+        printf("Invalid age! Please enter a value between 1 and 100: ");
         scanf("%d", &age);
     }
-    
+    printf("Valid age entered: %d\n", age);
+
     // ═══════════════════════════════════════════════════
     // SENTINEL-CONTROLLED LOOP
+    // Loop continues until a specific "sentinel" value is entered.
     // ═══════════════════════════════════════════════════
-    
-    int num;
+
+    int num_sum;
     int sum = 0;
-    
-    printf("Enter numbers (0 to stop):\n");
-    scanf("%d", &num);
-    
-    while (num != 0) {
-        sum += num;
-        scanf("%d", &num);
+
+    printf("\nEnter numbers to sum (enter 0 to stop):\n");
+    // "Priming read" - read the first value before the loop.
+    // This allows the condition to be checked correctly for the first time.
+    scanf("%d", &num_sum);
+
+    while (num_sum != 0) { // Loop as long as the number is not 0
+        sum += num_sum;
+        scanf("%d", &num_sum); // Read next value at end of loop
     }
-    
-    printf("Sum: %d\n", sum);
-    
+
+    printf("Sum of entered numbers: %d\n", sum);
+
     return 0;
 }
 ```
+**Explanation:**
+*   The `while` loop is suitable when the number of iterations is unknown and depends on a condition being met.
+*   **Condition:** Evaluated *before* each iteration. If true (non-zero), the loop body executes. If false (zero), the loop terminates.
+*   It's crucial to initialize any variables used in the condition *before* the loop and to ensure the condition *changes* inside the loop to avoid an infinite loop.
 
-### do-while Loop
+### `do-while` Loop
 
 ```c
 #include <stdio.h>
 
 int main() {
     // ═══════════════════════════════════════════════════
-    // BASIC DO-WHILE (executes at least once)
+    // BASIC DO-WHILE LOOP
+    // Syntax: `do { ... } while (condition);`
+    // The loop body executes *at least once*, then the condition is checked.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("Basic do-while loop (0-4): ");
     int i = 0;
     do {
         printf("%d ", i);
         i++;
-    } while (i < 5);
+    } while (i < 5); // Condition checked *after* first iteration
     printf("\n");
-    
+
+    // Example where do-while executes once even if condition is false initially:
+    printf("Do-while with false initial condition: ");
+    int j = 10;
+    do {
+        printf("%d ", j); // This will execute once, printing 10
+        j++;
+    } while (j < 5); // Condition is immediately false, so loop stops after first iteration
+    printf("\n");
+
+
     // ═══════════════════════════════════════════════════
-    // MENU-DRIVEN PROGRAM
+    // MENU-DRIVEN PROGRAM (Common use case for do-while)
+    // Ensures the menu is displayed at least once.
     // ═══════════════════════════════════════════════════
-    
+
     int choice;
-    
+
     do {
         printf("\n=== MENU ===\n");
         printf("1. Add\n");
         printf("2. Subtract\n");
         printf("3. Multiply\n");
         printf("4. Exit\n");
-        printf("Enter choice: ");
+        printf("Enter your choice: ");
         scanf("%d", &choice);
-        
+
         switch (choice) {
-            case 1:
-                printf("Addition selected\n");
-                break;
-            case 2:
-                printf("Subtraction selected\n");
-                break;
-            case 3:
-                printf("Multiplication selected\n");
-                break;
-            case 4:
-                printf("Exiting...\n");
-                break;
-            default:
-                printf("Invalid choice\n");
+            case 1: printf("Addition selected\n"); break;
+            case 2: printf("Subtraction selected\n"); break;
+            case 3: printf("Multiplication selected\n"); break;
+            case 4: printf("Exiting...\n"); break;
+            default: printf("Invalid choice, please try again.\n");
         }
-    } while (choice != 4);
-    
+    } while (choice != 4); // Continue looping until the user chooses to exit
+
     return 0;
 }
 ```
+**Explanation:**
+*   The `do-while` loop guarantees that the loop body executes at least once, even if the condition is initially false.
+*   **Execution Flow:** The loop body is executed, *then* the condition is evaluated. If the condition is true (non-zero), the loop continues. If false (zero), the loop terminates.
+*   This makes it particularly useful for scenarios like menu-driven programs, where you want to display options and get input at least once before checking if the user wants to continue.
 
-## break and continue
+## `break` and `continue` Statements
 
 ```c
 #include <stdio.h>
 
 int main() {
     // ═══════════════════════════════════════════════════
-    // BREAK - Exit loop immediately
+    // `break` - Terminates the innermost loop or switch statement immediately.
+    // Execution resumes at the statement immediately following the loop/switch.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("--- `break` example ---\n");
+    printf("Counting up to 10, but stops at 5:\n");
     for (int i = 0; i < 10; i++) {
         if (i == 5) {
-            break;  // Exit loop when i is 5
+            printf("  Breaking loop at i = %d\n", i);
+            break;  // Exits the `for` loop entirely
         }
-        printf("%d ", i);  // 0 1 2 3 4
+        printf("%d ", i);  // Prints 0 1 2 3 4
     }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // CONTINUE - Skip to next iteration
-    // ═══════════════════════════════════════════════════
-    
-    for (int i = 0; i < 10; i++) {
-        if (i % 2 == 0) {
-            continue;  // Skip even numbers
-        }
-        printf("%d ", i);  // 1 3 5 7 9
-    }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // BREAK IN NESTED LOOPS (only breaks inner loop)
-    // ═══════════════════════════════════════════════════
-    
+    printf("\nLoop finished after break.\n\n");
+
+    // `break` in nested loops only affects the innermost loop
+    printf("`break` in nested loops (outer loop continues):\n");
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (j == 2) break;  // Breaks inner loop only
+            if (j == 1) {
+                printf("  Inner loop break (i=%d, j=%d)\n", i, j);
+                break; // Breaks only the inner `for` loop
+            }
             printf("(%d,%d) ", i, j);
         }
-        printf("\n");
+        printf("\n"); // This printf is part of the outer loop
     }
-    
+    printf("Nested loops finished.\n\n");
+
+
     // ═══════════════════════════════════════════════════
-    // FIND FIRST OCCURRENCE
+    // `continue` - Skips the remainder of the current iteration of the loop.
+    // Execution proceeds to the next iteration (evaluating the loop condition/update).
     // ═══════════════════════════════════════════════════
-    
-    int arr[] = {10, 20, 30, 40, 50};
-    int target = 30;
-    int found = 0;
-    
-    for (int i = 0; i < 5; i++) {
-        if (arr[i] == target) {
-            printf("Found at index %d\n", i);
-            found = 1;
-            break;
+
+    printf("--- `continue` example ---\n");
+    printf("Printing odd numbers up to 9:\n");
+    for (int i = 0; i < 10; i++) {
+        if (i % 2 == 0) { // If i is even...
+            continue;    // ...skip the rest of this iteration and go to the next.
         }
+        printf("%d ", i);  // Prints 1 3 5 7 9 (even numbers are skipped)
     }
-    
-    if (!found) {
-        printf("Not found\n");
-    }
-    
+    printf("\nLoop finished after continue.\n\n");
+
     return 0;
 }
 ```
+**Explanation:**
+*   **`break`:** Provides an immediate exit from the innermost `for`, `while`, `do-while` loop, or `switch` statement. Control transfers to the statement immediately following the terminated construct.
+*   **`continue`:** Skips the rest of the current iteration of the innermost loop and proceeds to the next iteration. For `for` loops, this means the update expression is evaluated next. For `while`/`do-while` loops, the condition is evaluated next.
 
-## goto Statement (Avoid in Modern Code)
+## `goto` Statement (Generally Avoid in Modern Code)
 
 ```c
 #include <stdio.h>
 
 int main() {
     // ═══════════════════════════════════════════════════
-    // GOTO - Jump to labeled statement
+    // `goto` - Unconditional jump to a labeled statement within the same function.
+    // Labels are identifiers followed by a colon.
     // ═══════════════════════════════════════════════════
-    
+
+    printf("--- `goto` example ---\n");
     int i = 0;
-    
-start:
+
+start_loop: // This is a label
     printf("%d ", i);
     i++;
-    
+
     if (i < 5) {
-        goto start;  // Jump back to 'start' label
+        goto start_loop; // Jump back to the `start_loop` label
     }
     printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // BREAK FROM NESTED LOOPS (one valid use case)
-    // ═══════════════════════════════════════════════════
-    
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (i == 1 && j == 1) {
-                goto end;  // Break out of both loops
-            }
-            printf("(%d,%d) ", i, j);
-        }
-    }
-    
-end:
-    printf("\nExited nested loops\n");
-    
-    // NOTE: In modern C, avoid goto. Use functions/flags instead.
-    
-    return 0;
-}
-```
-
----
-
-*[Part 1 Complete - Functions, Arrays, Strings, Pointers continue in next section]*
-# C Programming Guide - Part 2
-
-# Functions
-
-## Function Basics
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// FUNCTION DECLARATION (Prototype)
-// ═══════════════════════════════════════════════════════════
-
-int add(int a, int b);           // Declaration
-void greet(void);                // No parameters
-double square(double x);
-
-// ═══════════════════════════════════════════════════════════
-// MAIN FUNCTION
-// ═══════════════════════════════════════════════════════════
-
-int main() {
-    int result = add(5, 3);
-    printf("Sum: %d\n", result);
-    
-    greet();
-    
-    double sq = square(4.5);
-    printf("Square: %.2f\n", sq);
-    
-    return 0;
-}
-
-// ═══════════════════════════════════════════════════════════
-// FUNCTION DEFINITIONS
-// ═══════════════════════════════════════════════════════════
-
-int add(int a, int b) {
-    return a + b;
-}
-
-void greet(void) {
-    printf("Hello, World!\n");
-}
-
-double square(double x) {
-    return x * x;
-}
-```
-
-## Pass by Value vs Pass by Reference
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// PASS BY VALUE (Copy of value)
-// ═══════════════════════════════════════════════════════════
-
-void modifyValue(int x) {
-    x = 100;  // Only modifies local copy
-    printf("Inside function: %d\n", x);
-}
-
-// ═══════════════════════════════════════════════════════════
-// PASS BY REFERENCE (Using pointers)
-// ═══════════════════════════════════════════════════════════
-
-void modifyReference(int* x) {
-    *x = 100;  // Modifies original value
-    printf("Inside function: %d\n", *x);
-}
-
-// ═══════════════════════════════════════════════════════════
-// SWAP FUNCTION
-// ═══════════════════════════════════════════════════════════
-
-void swap(int* a, int* b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-int main() {
-    int num = 50;
-    
-    // Pass by value - original unchanged
-    modifyValue(num);
-    printf("After modifyValue: %d\n", num);  // Still 50
-    
-    // Pass by reference - original changed
-    modifyReference(&num);
-    printf("After modifyReference: %d\n", num);  // Now 100
-    
-    // Swap example
-    int x = 10, y = 20;
-    printf("Before swap: x=%d, y=%d\n", x, y);
-    swap(&x, &y);
-    printf("After swap: x=%d, y=%d\n", x, y);
-    
-    return 0;
-}
-```
-
-## Recursion
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// FACTORIAL
-// ═══════════════════════════════════════════════════════════
-
-int factorial(int n) {
-    if (n <= 1) return 1;         // Base case
-    return n * factorial(n - 1);  // Recursive call
-}
-
-// ═══════════════════════════════════════════════════════════
-// FIBONACCI
-// ═══════════════════════════════════════════════════════════
-
-int fibonacci(int n) {
-    if (n <= 1) return n;
-    return fibonacci(n - 1) + fibonacci(n - 2);
-}
-
-// ═══════════════════════════════════════════════════════════
-// GCD (Greatest Common Divisor)
-// ═══════════════════════════════════════════════════════════
-
-int gcd(int a, int b) {
-    if (b == 0) return a;
-    return gcd(b, a % b);
-}
-
-// ═══════════════════════════════════════════════════════════
-// POWER FUNCTION
-// ═══════════════════════════════════════════════════════════
-
-int power(int base, int exp) {
-    if (exp == 0) return 1;
-    return base * power(base, exp - 1);
-}
-
-int main() {
-    printf("5! = %d\n", factorial(5));         // 120
-    printf("fib(7) = %d\n", fibonacci(7));     // 13
-    printf("gcd(48, 18) = %d\n", gcd(48, 18)); // 6
-    printf("2^5 = %d\n", power(2, 5));         // 32
-    
-    return 0;
-}
-```
-
----
-
-# Arrays
-
-## One-Dimensional Arrays
-
-```c
-#include <stdio.h>
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // DECLARATION & INITIALIZATION
-    // ═══════════════════════════════════════════════════
-    
-    int arr1[5];                           // Uninitialized
-    int arr2[5] = {1, 2, 3, 4, 5};        // Full initialization
-    int arr3[5] = {1, 2};                  // Partial (rest = 0)
-    int arr4[] = {1, 2, 3, 4, 5};         // Size inferred
-    
-    // ═══════════════════════════════════════════════════
-    // ACCESSING ELEMENTS
-    // ═══════════════════════════════════════════════════
-    
-    arr1[0] = 10;
-    arr1[1] = 20;
-    printf("arr1[0] = %d\n", arr1[0]);
-    
-    // ═══════════════════════════════════════════════════
-    // ITERATING THROUGH ARRAY
-    // ═══════════════════════════════════════════════════
-    
-    int numbers[5] = {10, 20, 30, 40, 50};
-    
-    // Method 1: Using index
-    for (int i = 0; i < 5; i++) {
-        printf("%d ", numbers[i]);
-    }
-    printf("\n");
-    
-    // Method 2: Using sizeof
-    int size = sizeof(numbers) / sizeof(numbers[0]);
-    for (int i = 0; i < size; i++) {
-        printf("%d ", numbers[i]);
-    }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // COMMON OPERATIONS
-    // ═══════════════════════════════════════════════════
-    
-    // Sum of elements
-    int sum = 0;
-    for (int i = 0; i < 5; i++) {
-        sum += numbers[i];
-    }
-    printf("Sum: %d\n", sum);
-    
-    // Find maximum
-    int max = numbers[0];
-    for (int i = 1; i < 5; i++) {
-        if (numbers[i] > max) {
-            max = numbers[i];
-        }
-    }
-    printf("Max: %d\n", max);
-    
-    // Linear search
-    int target = 30;
-    int found = -1;
-    for (int i = 0; i < 5; i++) {
-        if (numbers[i] == target) {
-            found = i;
-            break;
-        }
-    }
-    printf("Found at index: %d\n", found);
-    
-    return 0;
-}
-```
-
-## Multi-Dimensional Arrays
-
-```c
-#include <stdio.h>
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // 2D ARRAY DECLARATION
-    // ═══════════════════════════════════════════════════
-    
-    int matrix[3][4] = {
-        {1, 2, 3, 4},
-        {5, 6, 7, 8},
-        {9, 10, 11, 12}
-    };
-    
-    // ═══════════════════════════════════════════════════
-    // ACCESSING ELEMENTS
-    // ═══════════════════════════════════════════════════
-    
-    printf("Element at [1][2]: %d\n", matrix[1][2]);  // 7
-    
-    // ═══════════════════════════════════════════════════
-    // ITERATING 2D ARRAY
-    // ═══════════════════════════════════════════════════
-    
-    int rows = 3, cols = 4;
-    
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            printf("%3d ", matrix[i][j]);
-        }
-        printf("\n");
-    }
-    
-    // ═══════════════════════════════════════════════════
-    // 3D ARRAY
-    // ═══════════════════════════════════════════════════
-    
-    int cube[2][3][4] = {
-        {{1,2,3,4}, {5,6,7,8}, {9,10,11,12}},
-        {{13,14,15,16}, {17,18,19,20}, {21,22,23,24}}
-    };
-    
-    printf("cube[1][2][3] = %d\n", cube[1][2][3]);  // 24
-    
-    return 0;
-}
-```
-
-## Passing Arrays to Functions
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// 1D ARRAY AS PARAMETER
-// ═══════════════════════════════════════════════════════════
-
-void printArray(int arr[], int size) {
-    for (int i = 0; i < size; i++) {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
-}
-
-int sumArray(int arr[], int size) {
-    int sum = 0;
-    for (int i = 0; i < size; i++) {
-        sum += arr[i];
-    }
-    return sum;
-}
-
-// ═══════════════════════════════════════════════════════════
-// 2D ARRAY AS PARAMETER (must specify column size)
-// ═══════════════════════════════════════════════════════════
-
-void print2DArray(int arr[][4], int rows) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%d ", arr[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-int main() {
-    int numbers[] = {1, 2, 3, 4, 5};
-    int size = sizeof(numbers) / sizeof(numbers[0]);
-    
-    printArray(numbers, size);
-    printf("Sum: %d\n", sumArray(numbers, size));
-    
-    int matrix[3][4] = {{1,2,3,4}, {5,6,7,8}, {9,10,11,12}};
-    print2DArray(matrix, 3);
-    
-    return 0;
-}
-```
-
----
-
-# Strings
-
-## String Basics
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // STRING DECLARATION
-    // ═══════════════════════════════════════════════════
-    
-    char str1[] = "Hello";              // Array notation
-    char str2[20] = "World";            // With size
-    char str3[] = {'H','e','l','l','o','\0'};  // Character by character
-    
-    // ═══════════════════════════════════════════════════
-    // STRING INPUT/OUTPUT
-    // ═══════════════════════════════════════════════════
-    
-    char name[50];
-    
-    printf("Enter name: ");
-    scanf("%s", name);           // Stops at whitespace
-    printf("Hello, %s!\n", name);
-    
-    // Reading line with spaces
-    printf("Enter full name: ");
-    scanf(" %[^\n]", name);      // Read until newline
-    // OR: fgets(name, sizeof(name), stdin);
-    
-    // ═══════════════════════════════════════════════════
-    // STRING LENGTH
-    // ═══════════════════════════════════════════════════
-    
-    printf("Length: %lu\n", strlen(str1));  // 5
-    
-    return 0;
-}
-```
-
-## String Functions
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-int main() {
-    char str1[50] = "Hello";
-    char str2[50] = "World";
-    char str3[50];
-    
-    // ═══════════════════════════════════════════════════
-    // COPY
-    // ═══════════════════════════════════════════════════
-    
-    strcpy(str3, str1);          // str3 = "Hello"
-    strncpy(str3, str1, 3);      // Copy first 3 chars
-    
-    // ═══════════════════════════════════════════════════
-    // CONCATENATION
-    // ═══════════════════════════════════════════════════
-    
-    strcat(str1, str2);          // str1 = "HelloWorld"
-    strncat(str1, str2, 3);      // Append first 3 chars
-    
-    // ═══════════════════════════════════════════════════
-    // COMPARISON
-    // ═══════════════════════════════════════════════════
-    
-    int cmp = strcmp("ABC", "ABC");  // 0 (equal)
-    cmp = strcmp("ABC", "XYZ");      // < 0 (first < second)
-    cmp = strcmp("XYZ", "ABC");      // > 0 (first > second)
-    
-    // Case-insensitive comparison
-    cmp = strcasecmp("Hello", "HELLO");  // 0 (Linux/Mac)
-    // Windows: _stricmp
-    
-    // ═══════════════════════════════════════════════════
-    // SEARCH
-    // ═══════════════════════════════════════════════════
-    
-    char text[] = "Hello World";
-    
-    // Find character
-    char* ptr = strchr(text, 'o');        // First 'o'
-    printf("Found at: %ld\n", ptr - text);  // 4
-    
-    ptr = strrchr(text, 'o');             // Last 'o'
-    printf("Found at: %ld\n", ptr - text);  // 7
-    
-    // Find substring
-    ptr = strstr(text, "World");
-    if (ptr != NULL) {
-        printf("Found: %s\n", ptr);
-    }
-    
-    // ═══════════════════════════════════════════════════
-    // TOKENIZATION
-    // ═══════════════════════════════════════════════════
-    
-    char sentence[] = "Hello,World,C,Programming";
-    char* token = strtok(sentence, ",");
-    
-    while (token != NULL) {
-        printf("%s\n", token);
-        token = strtok(NULL, ",");
-    }
-    
-    return 0;
-}
-```
-
-## Custom String Functions
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// STRING LENGTH
-// ═══════════════════════════════════════════════════════════
-
-int stringLength(char* str) {
-    int len = 0;
-    while (str[len] != '\0') {
-        len++;
-    }
-    return len;
-}
-
-// ═══════════════════════════════════════════════════════════
-// STRING COPY
-// ═══════════════════════════════════════════════════════════
-
-void stringCopy(char* dest, char* src) {
-    int i = 0;
-    while (src[i] != '\0') {
-        dest[i] = src[i];
-        i++;
-    }
-    dest[i] = '\0';
-}
-
-// ═══════════════════════════════════════════════════════════
-// STRING COMPARISON
-// ═══════════════════════════════════════════════════════════
-
-int stringCompare(char* s1, char* s2) {
-    int i = 0;
-    while (s1[i] != '\0' && s2[i] != '\0') {
-        if (s1[i] != s2[i]) {
-            return s1[i] - s2[i];
-        }
-        i++;
-    }
-    return s1[i] - s2[i];
-}
-
-// ═══════════════════════════════════════════════════════════
-// STRING REVERSE
-// ═══════════════════════════════════════════════════════════
-
-void stringReverse(char* str) {
-    int len = stringLength(str);
-    for (int i = 0; i < len / 2; i++) {
-        char temp = str[i];
-        str[i] = str[len - 1 - i];
-        str[len - 1 - i] = temp;
-    }
-}
-
-int main() {
-    char str1[50] = "Hello";
-    char str2[50];
-    
-    printf("Length: %d\n", stringLength(str1));
-    
-    stringCopy(str2, str1);
-    printf("Copied: %s\n", str2);
-    
-    printf("Compare: %d\n", stringCompare("ABC", "ABC"));
-    
-    stringReverse(str1);
-    printf("Reversed: %s\n", str1);
-    
-    return 0;
-}
-```
 
----
+    printf("Execution after loop.\n\n");
 
-# Pointers
-
-## Pointer Basics
-
-```c
-#include <stdio.h>
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // POINTER DECLARATION & INITIALIZATION
-    // ═══════════════════════════════════════════════════
-    
-    int x = 10;
-    int* ptr = &x;    // ptr stores address of x
-    
-    printf("Value of x: %d\n", x);
-    printf("Address of x: %p\n", &x);
-    printf("Value of ptr: %p\n", ptr);
-    printf("Value at ptr: %d\n", *ptr);  // Dereferencing
-    
-    // ═══════════════════════════════════════════════════
-    // MODIFYING THROUGH POINTER
-    // ═══════════════════════════════════════════════════
-    
-    *ptr = 20;  // Changes x to 20
-    printf("New value of x: %d\n", x);
-    
-    // ═══════════════════════════════════════════════════
-    // NULL POINTER
-    // ═══════════════════════════════════════════════════
-    
-    int* nullPtr = NULL;
-    if (nullPtr == NULL) {
-        printf("Pointer is null\n");
-    }
-    
-    // ═══════════════════════════════════════════════════
-    // POINTER ARITHMETIC
-    // ═══════════════════════════════════════════════════
-    
-    int arr[] = {10, 20, 30, 40, 50};
-    int* p = arr;  // Points to first element
-    
-    printf("*p = %d\n", *p);      // 10
-    printf("*(p+1) = %d\n", *(p+1)); // 20
-    printf("*(p+2) = %d\n", *(p+2)); // 30
-    
-    p++;  // Move to next element
-    printf("*p after increment: %d\n", *p);  // 20
-    
-    return 0;
-}
-```
-
-## Pointers and Arrays
-
-```c
-#include <stdio.h>
-
-int main() {
-    int arr[] = {10, 20, 30, 40, 50};
-    int* ptr = arr;  // Array name is a pointer
-    
-    // ═══════════════════════════════════════════════════
-    // ARRAY ACCESS USING POINTERS
-    // ═══════════════════════════════════════════════════
-    
-    // Method 1: Array notation
-    printf("%d %d %d\n", arr[0], arr[1], arr[2]);
-    
-    // Method 2: Pointer notation
-    printf("%d %d %d\n", *ptr, *(ptr+1), *(ptr+2));
-    
-    // Method 3: Array with pointer
-    printf("%d %d %d\n", ptr[0], ptr[1], ptr[2]);
-    
-    // ═══════════════════════════════════════════════════
-    // ITERATING WITH POINTERS
-    // ═══════════════════════════════════════════════════
-    
-    int size = sizeof(arr) / sizeof(arr[0]);
-    
-    for (int i = 0; i < size; i++) {
-        printf("%d ", *(ptr + i));
-    }
-    printf("\n");
-    
-    // Using pointer increment
-    ptr = arr;  // Reset pointer
-    for (int i = 0; i < size; i++) {
-        printf("%d ", *ptr);
-        ptr++;
-    }
-    printf("\n");
-    
-    return 0;
-}
-```
-
-## Pointer to Pointer
-
-```c
-#include <stdio.h>
-
-int main() {
-    int x = 100;
-    int* ptr1 = &x;        // Pointer to int
-    int** ptr2 = &ptr1;    // Pointer to pointer
-    
-    printf("x = %d\n", x);
-    printf("*ptr1 = %d\n", *ptr1);
-    printf("**ptr2 = %d\n", **ptr2);
-    
-    // Modify through double pointer
-    **ptr2 = 200;
-    printf("x after modification: %d\n", x);
-    
-    return 0;
-}
-```
-
-## Function Pointers
-
-```c
-#include <stdio.h>
-
-int add(int a, int b) {
-    return a + b;
-}
-
-int subtract(int a, int b) {
-    return a - b;
-}
-
-int multiply(int a, int b) {
-    return a * b;
-}
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // FUNCTION POINTER DECLARATION
-    // ═══════════════════════════════════════════════════
-    
-    int (*operation)(int, int);  // Pointer to function
-    
-    // ═══════════════════════════════════════════════════
-    // USING FUNCTION POINTER
-    // ═══════════════════════════════════════════════════
-    
-    operation = add;
-    printf("10 + 5 = %d\n", operation(10, 5));
-    
-    operation = subtract;
-    printf("10 - 5 = %d\n", operation(10, 5));
-    
-    operation = multiply;
-    printf("10 * 5 = %d\n", operation(10, 5));
-    
-    return 0;
-}
-```
-
----
-
-# Structures & Unions
-
-## Structures
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-// ═══════════════════════════════════════════════════════════
-// STRUCTURE DEFINITION
-// ═══════════════════════════════════════════════════════════
-
-struct Student {
-    int id;
-    char name[50];
-    float marks;
-};
-
-// Using typedef
-typedef struct {
-    int x;
-    int y;
-} Point;
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // STRUCTURE VARIABLE DECLARATION
-    // ═══════════════════════════════════════════════════
-    
-    struct Student s1;
-    Point p1;
-    
-    // ═══════════════════════════════════════════════════
-    // INITIALIZATION
-    // ═══════════════════════════════════════════════════
-    
-    // Method 1: Member-by-member
-    s1.id = 101;
-    strcpy(s1.name, "Alice");
-    s1.marks = 85.5;
-    
-    // Method 2: During declaration
-    struct Student s2 = {102, "Bob", 90.0};
-    
-    // Method 3: Designated initializers (C99)
-    struct Student s3 = {.id = 103, .name = "Charlie", .marks = 88.0};
-    
-    // ═══════════════════════════════════════════════════
-    // ACCESSING MEMBERS
-    // ═══════════════════════════════════════════════════
-    
-    printf("ID: %d, Name: %s, Marks: %.2f\n", s1.id, s1.name, s1.marks);
-    
-    // ═══════════════════════════════════════════════════
-    // ARRAY OF STRUCTURES
-    // ═══════════════════════════════════════════════════
-    
-    struct Student students[3] = {
-        {101, "Alice", 85.5},
-        {102, "Bob", 90.0},
-        {103, "Charlie", 88.0}
-    };
-    
-    for (int i = 0; i < 3; i++) {
-        printf("%d: %s - %.2f\n", 
-               students[i].id, students[i].name, students[i].marks);
-    }
-    
-    // ═══════════════════════════════════════════════════
-    // POINTER TO STRUCTURE
-    // ═══════════════════════════════════════════════════
-    
-    struct Student* ptr = &s1;
-    
-    // Access using pointer
-    printf("ID: %d\n", (*ptr).id);   // Method 1
-    printf("Name: %s\n", ptr->name); // Method 2 (arrow operator)
-    
-    // ═══════════════════════════════════════════════════
-    // NESTED STRUCTURES
-    // ═══════════════════════════════════════════════════
-    
-    struct Date {
-        int day, month, year;
-    };
-    
-    struct Employee {
-        int id;
-        char name[50];
-        struct Date joinDate;
-    };
-    
-    struct Employee emp = {101, "John", {15, 6, 2023}};
-    printf("Joined: %d/%d/%d\n", 
-           emp.joinDate.day, emp.joinDate.month, emp.joinDate.year);
-    
-    return 0;
-}
-```
-
-## Unions
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// UNION DEFINITION (Shares memory among members)
-// ═══════════════════════════════════════════════════════════
-
-union Data {
-    int i;
-    float f;
-    char str[20];
-};
-
-int main() {
-    union Data data;
-    
-    // ═══════════════════════════════════════════════════
-    // USING UNION
-    // ═══════════════════════════════════════════════════
-    
-    data.i = 10;
-    printf("data.i: %d\n", data.i);
-    
-    data.f = 3.14;  // Overwrites previous value!
-    printf("data.f: %f\n", data.f);
-    printf("data.i: %d\n", data.i);  // Garbage now!
-    
-    // ═══════════════════════════════════════════════════
-    // SIZE COMPARISON
-    // ═══════════════════════════════════════════════════
-    
-    struct Example1 {
-        int i;
-        float f;
-        char c;
-    };
-    
-    union Example2 {
-        int i;
-        float f;
-        char c;
-    };
-    
-    printf("Size of struct: %zu\n", sizeof(struct Example1));  // 12
-    printf("Size of union: %zu\n", sizeof(union Example2));    // 4
-    
-    return 0;
-}
-```
-
----
-
-# Dynamic Memory Allocation
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-    // ═══════════════════════════════════════════════════
-    // malloc() - Allocate memory
-    // ═══════════════════════════════════════════════════
-    
-    int* ptr1 = (int*)malloc(5 * sizeof(int));
-    if (ptr1 == NULL) {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
-    
-    for (int i = 0; i < 5; i++) {
-        ptr1[i] = i * 10;
-        printf("%d ", ptr1[i]);
-    }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // calloc() - Allocate and initialize to zero
-    // ═══════════════════════════════════════════════════
-    
-    int* ptr2 = (int*)calloc(5, sizeof(int));
-    if (ptr2 == NULL) {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
-    
-    for (int i = 0; i < 5; i++) {
-        printf("%d ", ptr2[i]);  // All zeros
-    }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // realloc() - Resize allocated memory
-    // ═══════════════════════════════════════════════════
-    
-    ptr1 = (int*)realloc(ptr1, 10 * sizeof(int));
-    if (ptr1 == NULL) {
-        printf("Reallocation failed!\n");
-        return 1;
-    }
-    
-    for (int i = 5; i < 10; i++) {
-        ptr1[i] = i * 10;
-    }
-    
-    for (int i = 0; i < 10; i++) {
-        printf("%d ", ptr1[i]);
-    }
-    printf("\n");
-    
-    // ═══════════════════════════════════════════════════
-    // free() - Deallocate memory (ALWAYS DO THIS!)
-    // ═══════════════════════════════════════════════════
-    
-    free(ptr1);
-    free(ptr2);
-    ptr1 = NULL;  // Good practice
-    ptr2 = NULL;
-    
-    // ═══════════════════════════════════════════════════
-    // DYNAMIC 2D ARRAY
-    // ═══════════════════════════════════════════════════
-    
-    int rows = 3, cols = 4;
-    int** matrix = (int**)malloc(rows * sizeof(int*));
-    
-    for (int i = 0; i < rows; i++) {
-        matrix[i] = (int*)malloc(cols * sizeof(int));
-    }
-    
-    // Use matrix
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            matrix[i][j] = i * cols + j;
-            printf("%2d ", matrix[i][j]);
-        }
-        printf("\n");
-    }
-    
-    // Free matrix
-    for (int i = 0; i < rows; i++) {
-        free(matrix[i]);
-    }
-    free(matrix);
-    
-    return 0;
-}
-```
-
----
-
-# File Handling
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-    FILE* fp;
-    
-    // ═══════════════════════════════════════════════════
-    // WRITING TO FILE
-    // ═══════════════════════════════════════════════════
-    
-    fp = fopen("output.txt", "w");  // Write mode
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        return 1;
-    }
-    
-    fprintf(fp, "Hello, File!\n");
-    fprintf(fp, "Number: %d\n", 42);
-    fputs("Another line\n", fp);
-    fputc('A', fp);
-    
-    fclose(fp);
-    
-    // ═══════════════════════════════════════════════════
-    // READING FROM FILE
-    // ═══════════════════════════════════════════════════
-    
-    fp = fopen("output.txt", "r");  // Read mode
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        return 1;
-    }
-    
-    char buffer[100];
-    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-        printf("%s", buffer);
-    }
-    
-    fclose(fp);
-    
     // ═══════════════════════════════════════════════════
-    // APPEND MODE
+    // A rare, potentially acceptable use case: Breaking out of deeply nested loops.
+    // This avoids using multiple `break` statements or complex flag variables.
+    // Even here, consider refactoring into functions.
     // ═══════════════════════════════════════════════════
-    
-    fp = fopen("output.txt", "a");  // Append mode
-    fprintf(fp, "Appended line\n");
-    fclose(fp);
-    
-    // ═══════════════════════════════════════════════════
-    // BINARY FILE I/O
-    // ═══════════════════════════════════════════════════
-    
-    int numbers[] = {1, 2, 3, 4, 5};
-    
-    // Write binary
-    fp = fopen("data.bin", "wb");
-    fwrite(numbers, sizeof(int), 5, fp);
-    fclose(fp);
-    
-    // Read binary
-    int readNumbers[5];
-    fp = fopen("data.bin", "rb");
-    fread(readNumbers, sizeof(int), 5, fp);
-    fclose(fp);
-    
-    for (int i = 0; i < 5; i++) {
-        printf("%d ", readNumbers[i]);
-    }
-    printf("\n");
-    
-    return 0;
-}
-```
-
----
-
-# Preprocessor Directives
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// MACRO DEFINITIONS
-// ═══════════════════════════════════════════════════════════
-
-#define PI 3.14159
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define SQUARE(x) ((x) * (x))
-
-// ═══════════════════════════════════════════════════════════
-// CONDITIONAL COMPILATION
-// ═══════════════════════════════════════════════════════════
-
-#define DEBUG 1
-
-#if DEBUG
-    #define LOG(msg) printf("DEBUG: %s\n", msg)
-#else
-    #define LOG(msg)
-#endif
-
-// ═══════════════════════════════════════════════════════════
-// HEADER GUARDS
-// ═══════════════════════════════════════════════════════════
-
-#ifndef MYHEADER_H
-#define MYHEADER_H
-// ... header content ...
-#endif
-
-int main() {
-    printf("PI = %f\n", PI);
-    printf("MAX(5, 10) = %d\n", MAX(5, 10));
-    printf("SQUARE(4) = %d\n", SQUARE(4));
-    
-    LOG("This is a debug message");
-    
-    // Predefined macros
-    printf("File: %s\n", __FILE__);
-    printf("Line: %d\n", __LINE__);
-    printf("Date: %s\n", __DATE__);
-    printf("Time: %s\n", __TIME__);
-    
-    return 0;
-}
-```
-
----
-
-*[Part 2 Complete - Interview topics continue in Part 3]*
-# C Programming Guide - Part 3: Interview Topics
-
-# Time & Space Complexity
-
-## Big O Notation
-
-```c
-/*
- * TIME COMPLEXITY EXAMPLES
- * 
- * O(1)      - Constant      - Array access, arithmetic
- * O(log n)  - Logarithmic   - Binary search
- * O(n)      - Linear        - Single loop
- * O(n log n)- Linearithmic  - Merge sort, Quick sort
- * O(n²)     - Quadratic     - Nested loops
- * O(n³)     - Cubic         - Triple nested loops
- * O(2^n)    - Exponential   - Fibonacci (naive)
- * O(n!)     - Factorial     - Permutations
- */
-
-// O(1) - Constant
-int getElement(int arr[], int index) {
-    return arr[index];
-}
-
-// O(n) - Linear
-int sumArray(int arr[], int n) {
-    int sum = 0;
-    for (int i = 0; i < n; i++) {
-        sum += arr[i];
-    }
-    return sum;
-}
 
-// O(n²) - Quadratic
-void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n-1; i++) {
-        for (int j = 0; j < n-i-1; j++) {
-            if (arr[j] > arr[j+1]) {
-                int temp = arr[j];
-                arr[j] = arr[j+1];
-                arr[j+1] = temp;
+    printf("--- `goto` for exiting nested loops ---\n");
+    int found_value = 0;
+    for (int x = 0; x < 3; x++) {
+        for (int y = 0; y < 3; y++) {
+            for (int z = 0; z < 3; z++) {
+                printf("(%d,%d,%d) ", x, y, z);
+                if (x == 1 && y == 1 && z == 1) {
+                    found_value = 1;
+                    goto end_nested_loops; // Jumps out of all three loops
+                }
             }
         }
     }
-}
 
-// O(log n) - Logarithmic
-int binarySearch(int arr[], int n, int target) {
-    int left = 0, right = n - 1;
-    
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-        
-        if (arr[mid] == target) return mid;
-        if (arr[mid] < target) left = mid + 1;
-        else right = mid - 1;
+end_nested_loops: // Label for `goto`
+    if (found_value) {
+        printf("\nTarget found and exited nested loops with goto.\n");
+    } else {
+        printf("\nTarget not found.\n");
     }
-    
-    return -1;
-}
-```
 
----
+    // ═══════════════════════════════════════════════════
+    // General Advice: AVOID `goto`.
+    // - Makes code harder to read and debug ("spaghetti code").
+    // - Obscures program flow.
+    // - Can lead to resource leaks if jumps bypass cleanup code.
+    // Structured control flow (`if`, `else`, `while`, `for`, `switch`, `break`, `continue`, functions)
+    // is almost always preferable.
+    // ═══════════════════════════════════════════════════
 
-# Common Patterns
-
-## Pattern 1: Two Pointers
-
-```c
-#include <stdio.h>
-
-// Pair with given sum in sorted array
-int findPair(int arr[], int n, int target) {
-    int left = 0, right = n - 1;
-    
-    while (left < right) {
-        int sum = arr[left] + arr[right];
-        
-        if (sum == target) {
-            printf("Pair: %d, %d\n", arr[left], arr[right]);
-            return 1;
-        } else if (sum < target) {
-            left++;
-        } else {
-            right--;
-        }
-    }
-    
-    return 0;
-}
-
-// Remove duplicates from sorted array
-int removeDuplicates(int arr[], int n) {
-    if (n == 0) return 0;
-    
-    int unique = 0;
-    for (int i = 1; i < n; i++) {
-        if (arr[i] != arr[unique]) {
-            unique++;
-            arr[unique] = arr[i];
-        }
-    }
-    
-    return unique + 1;
-}
-```
-
-## Pattern 2: Sliding Window
-
-```c
-// Maximum sum subarray of size k
-int maxSumSubarray(int arr[], int n, int k) {
-    if (n < k) return -1;
-    
-    int windowSum = 0;
-    for (int i = 0; i < k; i++) {
-        windowSum += arr[i];
-    }
-    
-    int maxSum = windowSum;
-    
-    for (int i = k; i < n; i++) {
-        windowSum += arr[i] - arr[i - k];
-        if (windowSum > maxSum) {
-            maxSum = windowSum;
-        }
-    }
-    
-    return maxSum;
-}
-```
-
-## Pattern 3: Fast & Slow Pointers (Floyd's Cycle)
-
-```c
-typedef struct Node {
-    int data;
-    struct Node* next;
-} Node;
-
-// Detect cycle in linked list
-int hasCycle(Node* head) {
-    if (head == NULL) return 0;
-    
-    Node* slow = head;
-    Node* fast = head;
-    
-    while (fast != NULL && fast->next != NULL) {
-        slow = slow->next;
-        fast = fast->next->next;
-        
-        if (slow == fast) {
-            return 1;  // Cycle detected
-        }
-    }
-    
     return 0;
 }
 ```
+**Explanation:**
+*   **`goto`:** An unconditional jump statement that transfers control to a specified label within the same function.
+*   **Labels:** An identifier followed by a colon (`:`), marking a destination for `goto`.
+*   **Why to Avoid:** `goto` statements lead to "spaghetti code" that is notoriously difficult to follow, debug, and maintain. They violate structured programming principles.
+*   **Rare Exceptions:** In very specific scenarios, like breaking out of multiple nested loops or implementing error handling/cleanup routines, `goto` might be used by experienced C programmers when other structured approaches become overly cumbersome. However, even these cases often have cleaner solutions (e.g., refactoring into functions, using flags). For SDE interviews, it's best to show proficiency in structured control flow.
 
 ---
 
-# Bit Manipulation
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// BASIC BIT OPERATIONS
-// ═══════════════════════════════════════════════════════════
-
-// Set bit at position i
-int setBit(int num, int i) {
-    return num | (1 << i);
-}
-
-// Clear bit at position i
-int clearBit(int num, int i) {
-    return num & ~(1 << i);
-}
-
-// Toggle bit at position i
-int toggleBit(int num, int i) {
-    return num ^ (1 << i);
-}
-
-// Check if bit at position i is set
-int checkBit(int num, int i) {
-    return (num & (1 << i)) != 0;
-}
-
-// ═══════════════════════════════════════════════════════════
-// COMMON BIT TRICKS
-// ═══════════════════════════════════════════════════════════
-
-// Check if number is power of 2
-int isPowerOfTwo(int n) {
-    return n > 0 && (n & (n - 1)) == 0;
-}
-
-// Count set bits (Brian Kernighan's Algorithm)
-int countSetBits(int n) {
-    int count = 0;
-    while (n) {
-        n &= (n - 1);  // Removes rightmost set bit
-        count++;
-    }
-    return count;
-}
-
-// Find single number (all others appear twice)
-int findSingle(int arr[], int n) {
-    int result = 0;
-    for (int i = 0; i < n; i++) {
-        result ^= arr[i];  // XOR cancels duplicates
-    }
-    return result;
-}
-
-// Swap two numbers without temp variable
-void swap(int* a, int* b) {
-    *a = *a ^ *b;
-    *b = *a ^ *b;
-    *a = *a ^ *b;
-}
-
-// Get rightmost set bit
-int getRightmostSetBit(int n) {
-    return n & -n;
-}
-
-// Turn off rightmost set bit
-int turnOffRightmost(int n) {
-    return n & (n - 1);
-}
-
-// Check if number is odd
-int isOdd(int n) {
-    return n & 1;
-}
-
-// Multiply by 2^k
-int multiplyByPowerOf2(int n, int k) {
-    return n << k;
-}
-
-// Divide by 2^k
-int divideByPowerOf2(int n, int k) {
-    return n >> k;
-}
-
-int main() {
-    printf("Set bit 2 in 5: %d\n", setBit(5, 2));        // 7
-    printf("Clear bit 2 in 7: %d\n", clearBit(7, 2));    // 3
-    printf("Toggle bit 1 in 5: %d\n", toggleBit(5, 1));  // 7
-    printf("Check bit 2 in 5: %d\n", checkBit(5, 2));    // 1
-    
-    printf("Is 16 power of 2? %d\n", isPowerOfTwo(16));  // 1
-    printf("Count bits in 7: %d\n", countSetBits(7));    // 3
-    
-    return 0;
-}
-```
-
----
-
-# Recursion
-
-```c
-#include <stdio.h>
-
-// ═══════════════════════════════════════════════════════════
-// TAIL RECURSION
-// ═══════════════════════════════════════════════════════════
-
-// Factorial with tail recursion
-int factorialTail(int n, int acc) {
-    if (n <= 1) return acc;
-    return factorialTail(n - 1, n * acc);
-}
-
-int factorial(int n) {
-    return factorialTail(n, 1);
-}
-
-// ═══════════════════════════════════════════════════════════
-// BACKTRACKING
-// ═══════════════════════════════════════════════════════════
-
-// Generate all permutations
-void permute(int arr[], int l, int r) {
-    if (l == r) {
-        for (int i = 0; i <= r; i++) {
-            printf("%d ", arr[i]);
-        }
-        printf("\n");
-        return;
-    }
-    
-    for (int i = l; i <= r; i++) {
-        // Swap
-        int temp = arr[l];
-        arr[l] = arr[i];
-        arr[i] = temp;
-        
-        permute(arr, l + 1, r);
-        
-        // Backtrack
-        temp = arr[l];
-        arr[l] = arr[i];
-        arr[i] = temp;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════
-// DIVIDE AND CONQUER
-// ═══════════════════════════════════════════════════════════
-
-// Merge sort
-void merge(int arr[], int l, int m, int r) {
-    int n1 = m - l + 1;
-    int n2 = r - m;
-    
-    int L[n1], R[n2];
-    
-    for (int i = 0; i < n1; i++) L[i] = arr[l + i];
-    for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
-    
-    int i = 0, j = 0, k = l;
-    
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k++] = L[i++];
-        } else {
-            arr[k++] = R[j++];
-        }
-    }
-    
-    while (i < n1) arr[k++] = L[i++];
-    while (j < n2) arr[k++] = R[j++];
-}
-
-void mergeSort(int arr[], int l, int r) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        mergeSort(arr, l, m);
-        mergeSort(arr, m + 1, r);
-        merge(arr, l, m, r);
-    }
-}
-```
-
----
-
-# Memory Layout
-
-```c
-/*
- * MEMORY LAYOUT OF C PROGRAM
- * 
- * ┌──────────────────────┐  High Address
- * │   Command Line Args  │
- * │   & Environment Vars │
- * ├──────────────────────┤
- * │        Stack         │  ← Grows downward
- * │   (Local variables)  │
- * │   (Function calls)   │
- * ├──────────────────────┤
- * │          ↓           │
- * │                      │
- * │          ↑           │
- * ├──────────────────────┤
- * │        Heap          │  ← Grows upward
- * │   (Dynamic memory)   │
- * ├──────────────────────┤
- * │   Uninitialized Data │
- * │        (BSS)         │
- * │ (Global uninit vars) │
- * ├──────────────────────┤
- * │   Initialized Data   │
- * │ (Global/static vars) │
- * ├──────────────────────┤
- * │   Text (Code)        │
- * │  (Instructions)      │
- * └──────────────────────┘  Low Address
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-
-int globalVar = 10;          // Initialized data segment
-int uninitVar;               // BSS segment
-static int staticVar = 20;   // Initialized data segment
-
-void function() {
-    int localVar = 30;       // Stack
-    static int staticLocal = 40;  // Initialized data segment
-    
-    int* heapVar = (int*)malloc(sizeof(int));  // Heap
-    *heapVar = 50;
-    
-    printf("Addresses:\n");
-    printf("Global: %p\n", &globalVar);
-    printf("Uninit: %p\n", &uninitVar);
-    printf("Static: %p\n", &staticVar);
-    printf("Local: %p\n", &localVar);
-    printf("Static Local: %p\n", &staticLocal);
-    printf("Heap: %p\n", heapVar);
-    printf("Function: %p\n", function);
-    
-    free(heapVar);
-}
-```
-
----
-
-# Common Pitfalls & Best Practices
-
-## Pitfall 1: Array Index Out of Bounds
-
-```c
-// ❌ WRONG
-int arr[5];
-arr[5] = 10;  // Out of bounds! Undefined behavior
-
-// ✅ CORRECT
-int arr[5];
-arr[4] = 10;  // Last valid index is n-1
-```
-
-## Pitfall 2: Uninitialized Variables
-
-```c
-// ❌ WRONG
-int x;
-printf("%d\n", x);  // Garbage value!
-
-// ✅ CORRECT
-int x = 0;
-printf("%d\n", x);
-```
-
-## Pitfall 3: Memory Leaks
-
-```c
-// ❌ WRONG
-void function() {
-    int* ptr = (int*)malloc(sizeof(int));
-    *ptr = 10;
-    // No free() - memory leak!
-}
-
-// ✅ CORRECT
-void function() {
-    int* ptr = (int*)malloc(sizeof(int));
-    *ptr = 10;
-    free(ptr);
-    ptr = NULL;
-}
-```
-
-## Pitfall 4: Dangling Pointers
-
-```c
-// ❌ WRONG
-int* ptr = (int*)malloc(sizeof(int));
-free(ptr);
-*ptr = 10;  // Dangling pointer! Undefined behavior
-
-// ✅ CORRECT
-int* ptr = (int*)malloc(sizeof(int));
-free(ptr);
-ptr = NULL;  // Set to NULL after free
-if (ptr != NULL) {
-    *ptr = 10;
-}
-```
-
-## Pitfall 5: Buffer Overflow
-
-```c
-// ❌ WRONG
-char str[5];
-scanf("%s", str);  // User can input more than 5 chars!
-
-// ✅ CORRECT
-char str[5];
-scanf("%4s", str);  // Limit input to 4 chars + null terminator
-```
-
-## Pitfall 6: Integer Division
-
-```c
-// ❌ WRONG
-int a = 5, b = 2;
-float result = a / b;  // Result is 2.0 (integer division first!)
-
-// ✅ CORRECT
-int a = 5, b = 2;
-float result = (float)a / b;  // Result is 2.5
-```
-
-## Pitfall 7: Comparing Floats
-
-```c
-// ❌ WRONG
-float a = 0.1 + 0.1 + 0.1;
-if (a == 0.3) {  // Might fail due to floating-point precision!
-    printf("Equal\n");
-}
-
-// ✅ CORRECT
-#include <math.h>
-float a = 0.1 + 0.1 + 0.1;
-float epsilon = 0.00001;
-if (fabs(a - 0.3) < epsilon) {
-    printf("Equal\n");
-}
-```
-
----
-
-# Interview Questions
-
-## Q1: Reverse a String
-
-```c
-void reverseString(char* str) {
-    int len = strlen(str);
-    for (int i = 0; i < len / 2; i++) {
-        char temp = str[i];
-        str[i] = str[len - 1 - i];
-        str[len - 1 - i] = temp;
-    }
-}
-```
-
-## Q2: Check if String is Palindrome
-
-```c
-int isPalindrome(char* str) {
-    int left = 0;
-    int right = strlen(str) - 1;
-    
-    while (left < right) {
-        if (str[left] != str[right]) {
-            return 0;
-        }
-        left++;
-        right--;
-    }
-    
-    return 1;
-}
-```
-
-## Q3: Find Maximum in Array
-
-```c
-int findMax(int arr[], int n) {
-    int max = arr[0];
-    for (int i = 1; i < n; i++) {
-        if (arr[i] > max) {
-            max = arr[i];
-        }
-    }
-    return max;
-}
-```
-
-## Q4: Rotate Array by K positions
-
-```c
-void reverse(int arr[], int start, int end) {
-    while (start < end) {
-        int temp = arr[start];
-        arr[start] = arr[end];
-        arr[end] = temp;
-        start++;
-        end--;
-    }
-}
-
-void rotateArray(int arr[], int n, int k) {
-    k = k % n;  // Handle k > n
-    reverse(arr, 0, n - 1);
-    reverse(arr, 0, k - 1);
-    reverse(arr, k, n - 1);
-}
-```
-
-## Q5: Find Missing Number in Array (1 to n)
-
-```c
-int findMissing(int arr[], int n) {
-    int expectedSum = (n + 1) * (n + 2) / 2;
-    int actualSum = 0;
-    
-    for (int i = 0; i < n; i++) {
-        actualSum += arr[i];
-    }
-    
-    return expectedSum - actualSum;
-}
-```
-
-## Q6: Remove Duplicates from Sorted Array
-
-```c
-int removeDuplicates(int arr[], int n) {
-    if (n == 0) return 0;
-    
-    int unique = 0;
-    for (int i = 1; i < n; i++) {
-        if (arr[i] != arr[unique]) {
-            unique++;
-            arr[unique] = arr[i];
-        }
-    }
-    
-    return unique + 1;
-}
-```
-
-## Q7: Merge Two Sorted Arrays
-
-```c
-void merge(int arr1[], int n1, int arr2[], int n2, int result[]) {
-    int i = 0, j = 0, k = 0;
-    
-    while (i < n1 && j < n2) {
-        if (arr1[i] <= arr2[j]) {
-            result[k++] = arr1[i++];
-        } else {
-            result[k++] = arr2[j++];
-        }
-    }
-    
-    while (i < n1) result[k++] = arr1[i++];
-    while (j < n2) result[k++] = arr2[j++];
-}
-```
-
-## Q8: Find Second Largest Element
-
-```c
-int findSecondLargest(int arr[], int n) {
-    if (n < 2) return -1;
-    
-    int first = arr[0], second = -1;
-    
-    for (int i = 1; i < n; i++) {
-        if (arr[i] > first) {
-            second = first;
-            first = arr[i];
-        } else if (arr[i] > second && arr[i] != first) {
-            second = arr[i];
-        }
-    }
-    
-    return second;
-}
-```
-
-## Q9: Check if Array is Sorted
-
-```c
-int isSorted(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        if (arr[i] > arr[i + 1]) {
-            return 0;
-        }
-    }
-    return 1;
-}
-```
-
-## Q10: Count Frequency of Elements
-
-```c
-void countFrequency(int arr[], int n) {
-    int visited[n];
-    for (int i = 0; i < n; i++) {
-        visited[i] = 0;
-    }
-    
-    for (int i = 0; i < n; i++) {
-        if (visited[i] == 1) continue;
-        
-        int count = 1;
-        for (int j = i + 1; j < n; j++) {
-            if (arr[i] == arr[j]) {
-                count++;
-                visited[j] = 1;
-            }
-        }
-        
-        printf("%d occurs %d times\n", arr[i], count);
-    }
-}
-```
-
----
-
-# Practice Strategy
-
-## Phase 1: Fundamentals (Week 1-2)
-- Master syntax, data types, operators
-- Understand pointers thoroughly
-- Practice basic array problems
-- Learn string manipulation
-
-## Phase 2: Data Structures (Week 3-4)
-- Implement linked list, stack, queue
-- Understand structures and unions
-- Master dynamic memory allocation
-- Practice file handling
-
-## Phase 3: Algorithms (Week 5-6)
-- Sorting algorithms (bubble, merge, quick)
-- Searching (binary search)
-- Recursion and backtracking
-- Bit manipulation tricks
-
-## Phase 4: Interview Prep (Week 7-8)
-- Solve 50+ coding problems
-- Practice pattern recognition
-- Time yourself on problems
-- Mock interviews
-
----
-
-# Key Interview Topics Checklist
-
-**Core Concepts:**
-- [ ] Pointers and pointer arithmetic
-- [ ] Dynamic memory allocation
-- [ ] Structures and unions
-- [ ] Function pointers
-- [ ] Preprocessor directives
-
-**Common Algorithms:**
-- [ ] Binary search
-- [ ] Merge sort
-- [ ] Quick sort
-- [ ] Two pointer technique
-- [ ] Sliding window
-
-**Bit Manipulation:**
-- [ ] Set/clear/toggle bit
-- [ ] Check power of 2
-- [ ] Count set bits
-- [ ] XOR properties
-
-**String Operations:**
-- [ ] Reverse string
-- [ ] Palindrome check
-- [ ] Anagram check
-- [ ] String tokenization
-
-**Array Problems:**
-- [ ] Rotate array
-- [ ] Remove duplicates
-- [ ] Find missing number
-- [ ] Kadane's algorithm
-- [ ] Two sum problem
-
----
-
-# Final Tips for Interviews
-
-1. **Always check edge cases:**
-   - Empty array/string
-   - Single element
-   - All elements same
-   - Negative numbers
-   - NULL pointers
-
-2. **Memory management:**
-   - Always free allocated memory
-   - Check malloc return value
-   - Avoid memory leaks
-
-3. **Code clarity:**
-   - Use meaningful variable names
-   - Add comments for complex logic
-   - Follow consistent indentation
-
-4. **Testing:**
-   - Test with small inputs first
-   - Consider boundary conditions
-   - Dry run your code
-
-5. **Communication:**
-   - Think aloud during interviews
-   - Explain your approach first
-   - Ask clarifying questions
-
----
-
-**End of Complete C Programming Guide for SDE Placements** 🚀
