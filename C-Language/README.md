@@ -1599,4 +1599,1643 @@ end_nested_loops: // Label for `goto`
 *   **Rare Exceptions:** In very specific scenarios, like breaking out of multiple nested loops or implementing error handling/cleanup routines, `goto` might be used by experienced C programmers when other structured approaches become overly cumbersome. However, even these cases often have cleaner solutions (e.g., refactoring into functions, using flags). For SDE interviews, it's best to show proficiency in structured control flow.
 
 ---
+# Part 2: Advanced C Concepts
 
+# Functions & the Call Stack
+
+## Function Basics
+
+```c
+#include <stdio.h>
+#include <assert.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// FUNCTION ANATOMY
+// A function consists of:
+// 1. Return type: The data type of the value returned (void if nothing)
+// 2. Function name: Identifier following C naming conventions
+// 3. Parameter list: Comma-separated list of parameters (can be empty)
+// 4. Function body: The code block executed when function is called
+// ═══════════════════════════════════════════════════════════════════════
+
+// Function declaration (prototype) - tells compiler about function signature
+int add(int a, int b);  // Parameters: 'a' and 'b' are formal parameters
+
+// Function definition - provides the implementation
+int add(int a, int b) {
+    return a + b;  // Return statement sends value back to caller
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DIFFERENT FUNCTION TYPES
+// ═══════════════════════════════════════════════════════════════════════
+
+// 1. Function with no parameters and no return value
+void printHeader(void) {  // 'void' parameter list means no parameters
+    printf("════════════════════════════\n");
+    printf("    Welcome to C Programming\n");
+    printf("════════════════════════════\n");
+}
+
+// 2. Function with parameters but no return value
+void printSum(int x, int y) {
+    printf("Sum of %d and %d is: %d\n", x, y, x + y);
+}
+
+// 3. Function with no parameters but with return value
+int getRandomNumber(void) {
+    static int seed = 5;  // Static variable persists between calls
+    seed = (seed * 1103515245 + 12345) % 2147483648;  // Simple LCG
+    return seed % 100;  // Return number between 0-99
+}
+
+// 4. Function with parameters and return value
+float calculateAverage(int arr[], int size) {
+    if (size <= 0) return 0.0f;  // Guard clause
+    
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += arr[i];
+    }
+    return (float)sum / size;  // Cast to float for accurate division
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FUNCTION WITH MULTIPLE RETURN POINTS
+// ═══════════════════════════════════════════════════════════════════════
+
+int findMax(int a, int b, int c) {
+    // Multiple return statements are allowed
+    // Function exits at first return encountered
+    if (a >= b && a >= c) return a;
+    if (b >= a && b >= c) return b;
+    return c;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INLINE FUNCTIONS (C99)
+// Suggests to compiler to expand function body at call site
+// Reduces function call overhead for small, frequently called functions
+// ═══════════════════════════════════════════════════════════════════════
+
+inline int square(int x) {
+    return x * x;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STATIC FUNCTIONS
+// Limits function scope to current translation unit (file)
+// Provides encapsulation and prevents naming conflicts
+// ═══════════════════════════════════════════════════════════════════════
+
+static int helperFunction(int x) {
+    return x * 2;  // Only accessible within this file
+}
+
+int main() {
+    // Function calls - arguments are actual parameters
+    int result = add(5, 3);  // 5 and 3 are actual parameters (arguments)
+    printf("add(5, 3) = %d\n", result);
+    
+    printHeader();
+    printSum(10, 20);
+    
+    printf("Random number: %d\n", getRandomNumber());
+    printf("Another random: %d\n", getRandomNumber());
+    
+    int numbers[] = {10, 20, 30, 40, 50};
+    float avg = calculateAverage(numbers, 5);
+    printf("Average: %.2f\n", avg);
+    
+    printf("Max of (15, 27, 9): %d\n", findMax(15, 27, 9));
+    printf("Square of 7: %d\n", square(7));
+    
+    return 0;
+}
+```
+
+**Key Concepts Explained:**
+- **Function Declaration vs Definition:** Declaration tells the compiler about the function's existence and signature. Definition provides the actual implementation.
+- **Formal vs Actual Parameters:** Formal parameters are placeholders in function definition. Actual parameters (arguments) are the real values passed during function call.
+- **Return Statement:** Immediately exits the function and optionally returns a value to the caller.
+- **`void` Keyword:** Used to indicate "no value" - either no parameters or no return value.
+- **`inline` Functions:** A hint to the compiler to replace function calls with the function body itself, eliminating call overhead.
+- **`static` Functions:** Restrict function visibility to the current source file, providing encapsulation.
+
+## Pass by Value vs Pass by Reference (Simulated)
+
+```c
+#include <stdio.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// C ONLY SUPPORTS PASS BY VALUE
+// However, we can simulate pass by reference using pointers
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─────────────────────────────────────────────────────────────────────
+// PASS BY VALUE - A copy of the value is passed
+// ─────────────────────────────────────────────────────────────────────
+
+void modifyValue(int x) {
+    printf("  Inside modifyValue: x = %d (address: %p)\n", x, (void*)&x);
+    x = 100;  // This modifies the LOCAL COPY only
+    printf("  Inside modifyValue after modification: x = %d\n", x);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SIMULATED PASS BY REFERENCE - Pass address (pointer)
+// The pointer itself is passed by value, but it points to the original
+// ─────────────────────────────────────────────────────────────────────
+
+void modifyValueByPointer(int *ptr) {
+    printf("  Inside modifyValueByPointer: ptr points to %p\n", (void*)ptr);
+    printf("  Value at that address: %d\n", *ptr);
+    *ptr = 100;  // Modifies the value at the address ptr points to
+    printf("  After modification, value at address: %d\n", *ptr);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SWAPPING VALUES - Classic example showing the difference
+// ─────────────────────────────────────────────────────────────────────
+
+// This DOESN'T work - swaps local copies only
+void swapWrong(int a, int b) {
+    printf("  swapWrong - Before: a=%d, b=%d\n", a, b);
+    int temp = a;
+    a = b;
+    b = temp;
+    printf("  swapWrong - After: a=%d, b=%d (only local copies swapped)\n", a, b);
+}
+
+// This WORKS - swaps values at the addresses
+void swapCorrect(int *a, int *b) {
+    printf("  swapCorrect - Values before: *a=%d, *b=%d\n", *a, *b);
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+    printf("  swapCorrect - Values after: *a=%d, *b=%d\n", *a, *b);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ARRAYS ARE SPECIAL - Array name decays to pointer
+// ─────────────────────────────────────────────────────────────────────
+
+void modifyArray(int arr[], int size) {  // arr[] is actually int*
+    printf("  Inside modifyArray: arr points to %p\n", (void*)arr);
+    for (int i = 0; i < size; i++) {
+        arr[i] *= 2;  // This DOES modify the original array
+    }
+}
+
+// To demonstrate that array parameter is really a pointer
+void arrayIsPointer(int *arr, int size) {  // Equivalent to int arr[]
+    printf("  Size of arr parameter: %zu bytes (pointer size)\n", sizeof(arr));
+    arr[0] = 999;  // Still modifies original
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STRUCT PASS BY VALUE vs POINTER
+// ─────────────────────────────────────────────────────────────────────
+
+typedef struct {
+    int x;
+    int y;
+    char name[20];
+} Point;
+
+// Pass by value - entire struct is copied (expensive for large structs!)
+void movePointByValue(Point p, int dx, int dy) {
+    printf("  Size being copied: %zu bytes\n", sizeof(Point));
+    p.x += dx;  // Modifies local copy only
+    p.y += dy;
+    printf("  Inside function: Point at (%d, %d)\n", p.x, p.y);
+}
+
+// Pass by pointer - only 8 bytes (on 64-bit) copied, more efficient
+void movePointByPointer(Point *p, int dx, int dy) {
+    printf("  Size being copied: %zu bytes (pointer)\n", sizeof(Point*));
+    p->x += dx;  // Modifies original struct
+    p->y += dy;
+    printf("  Inside function: Point at (%d, %d)\n", p->x, p->y);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// RETURNING MULTIPLE VALUES (using pointers)
+// ─────────────────────────────────────────────────────────────────────
+
+// Function that returns multiple values through pointer parameters
+int divmod(int dividend, int divisor, int *quotient, int *remainder) {
+    if (divisor == 0) {
+        return -1;  // Error code
+    }
+    *quotient = dividend / divisor;
+    *remainder = dividend % divisor;
+    return 0;  // Success code
+}
+
+int main() {
+    printf("════════════════════════════════════════════════════════\n");
+    printf("PASS BY VALUE VS SIMULATED PASS BY REFERENCE\n");
+    printf("════════════════════════════════════════════════════════\n\n");
+
+    // ─── Pass by Value Demo ───
+    printf("1. PASS BY VALUE:\n");
+    int num = 42;
+    printf("Original num: %d (address: %p)\n", num, (void*)&num);
+    modifyValue(num);
+    printf("After modifyValue: num = %d (unchanged!)\n\n", num);
+
+    // ─── Simulated Pass by Reference Demo ───
+    printf("2. SIMULATED PASS BY REFERENCE (using pointers):\n");
+    num = 42;
+    printf("Original num: %d (address: %p)\n", num, (void*)&num);
+    modifyValueByPointer(&num);
+    printf("After modifyValueByPointer: num = %d (changed!)\n\n", num);
+
+    // ─── Swap Demo ───
+    printf("3. SWAPPING VALUES:\n");
+    int x = 10, y = 20;
+    printf("Original: x=%d, y=%d\n", x, y);
+    
+    swapWrong(x, y);
+    printf("After swapWrong: x=%d, y=%d (unchanged!)\n", x, y);
+    
+    swapCorrect(&x, &y);
+    printf("After swapCorrect: x=%d, y=%d (swapped!)\n\n", x, y);
+
+    // ─── Array Demo ───
+    printf("4. ARRAYS (always passed as pointers):\n");
+    int arr[] = {1, 2, 3, 4, 5};
+    printf("Original array address: %p\n", (void*)arr);
+    printf("Original array: ");
+    for (int i = 0; i < 5; i++) printf("%d ", arr[i]);
+    printf("\n");
+    
+    modifyArray(arr, 5);
+    printf("After modifyArray: ");
+    for (int i = 0; i < 5; i++) printf("%d ", arr[i]);
+    printf(" (modified!)\n");
+    
+    arrayIsPointer(arr, 5);
+    printf("After arrayIsPointer: arr[0] = %d\n\n", arr[0]);
+
+    // ─── Struct Demo ───
+    printf("5. STRUCT PASSING:\n");
+    Point pt = {5, 10, "Origin"};
+    printf("Original point: (%d, %d)\n", pt.x, pt.y);
+    
+    movePointByValue(pt, 3, 4);
+    printf("After movePointByValue: (%d, %d) (unchanged!)\n", pt.x, pt.y);
+    
+    movePointByPointer(&pt, 3, 4);
+    printf("After movePointByPointer: (%d, %d) (changed!)\n\n", pt.x, pt.y);
+
+    // ─── Multiple Return Values Demo ───
+    printf("6. RETURNING MULTIPLE VALUES:\n");
+    int quot, rem;
+    if (divmod(17, 5, &quot, &rem) == 0) {
+        printf("17 / 5 = %d remainder %d\n", quot, rem);
+    }
+
+    return 0;
+}
+```
+
+**Critical Understanding:**
+- **C is ALWAYS pass by value:** Even when passing pointers, the pointer value (address) itself is copied.
+- **Simulating Pass by Reference:** By passing addresses (pointers), we can modify the original data.
+- **Arrays are Special:** Array names decay to pointers when passed to functions, so modifications affect the original.
+- **Performance Implications:** Passing large structs by value is expensive (entire struct is copied). Pass pointers for efficiency.
+- **Multiple Returns:** Use pointer parameters to return multiple values from a function.
+
+## The Call Stack Deep Dive
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// UNDERSTANDING THE CALL STACK
+// The call stack is a LIFO (Last In, First Out) data structure that stores:
+// 1. Function parameters
+// 2. Return addresses (where to return after function completes)
+// 3. Local variables
+// 4. Saved register values
+// Each function call creates a new "stack frame" or "activation record"
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─────────────────────────────────────────────────────────────────────
+// VISUALIZING STACK FRAMES
+// ─────────────────────────────────────────────────────────────────────
+
+void showStackAddress(const char* varName, void* address) {
+    static void* firstAddress = NULL;
+    if (firstAddress == NULL) {
+        firstAddress = address;
+    }
+    
+    long offset = (char*)firstAddress - (char*)address;
+    printf("  %-20s: %p [Offset from first: %+ld bytes]\n", 
+           varName, address, offset);
+}
+
+void functionC(int c_param) {
+    printf("\n=== In functionC (Stack Frame 4) ===\n");
+    int c_local1 = 300;
+    int c_local2 = 301;
+    
+    showStackAddress("c_param", &c_param);
+    showStackAddress("c_local1", &c_local1);
+    showStackAddress("c_local2", &c_local2);
+    
+    printf("functionC executing with param: %d\n", c_param);
+    // When functionC returns, its stack frame is destroyed
+}
+
+void functionB(int b_param) {
+    printf("\n=== In functionB (Stack Frame 3) ===\n");
+    int b_local = 200;
+    
+    showStackAddress("b_param", &b_param);
+    showStackAddress("b_local", &b_local);
+    
+    printf("functionB calling functionC...\n");
+    functionC(b_param + 10);
+    
+    printf("Back in functionB after functionC returned\n");
+}
+
+void functionA(int a_param) {
+    printf("\n=== In functionA (Stack Frame 2) ===\n");
+    int a_local = 100;
+    
+    showStackAddress("a_param", &a_param);
+    showStackAddress("a_local", &a_local);
+    
+    printf("functionA calling functionB...\n");
+    functionB(a_param + 5);
+    
+    printf("Back in functionA after functionB returned\n");
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STACK OVERFLOW DEMONSTRATION
+// ─────────────────────────────────────────────────────────────────────
+
+int recursionDepth = 0;
+
+void infiniteRecursion(int n) {
+    recursionDepth++;
+    
+    // Show progress every 10000 calls
+    if (recursionDepth % 10000 == 0) {
+        int local = n;  // Local variable to consume stack space
+        printf("Recursion depth: %d, Stack address: %p\n", 
+               recursionDepth, (void*)&local);
+    }
+    
+    // WARNING: This will cause stack overflow!
+    // Uncomment carefully and be ready to terminate
+    // infiniteRecursion(n + 1);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// PROPER RECURSION WITH BASE CASE
+// ─────────────────────────────────────────────────────────────────────
+
+unsigned long factorial(int n, int depth) {
+    // Visualize stack growth
+    int local_n = n;
+    printf("%*sFactorial(%d) - Stack at: %p\n", 
+           depth * 2, "", n, (void*)&local_n);
+    
+    // BASE CASE - stops recursion
+    if (n <= 1) {
+        printf("%*sReturning 1 (base case)\n", depth * 2, "");
+        return 1;
+    }
+    
+    // RECURSIVE CASE
+    unsigned long result = n * factorial(n - 1, depth + 1);
+    printf("%*sReturning %d * factorial(%d) = %lu\n", 
+           depth * 2, "", n, n-1, result);
+    return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// TAIL RECURSION OPTIMIZATION
+// ─────────────────────────────────────────────────────────────────────
+
+// Non-tail recursive (accumulates multiplication after recursive call)
+int multiplyNonTail(int a, int b) {
+    if (b == 0) return 0;
+    return a + multiplyNonTail(a, b - 1);  // Operation AFTER recursive call
+}
+
+// Tail recursive (last operation is the recursive call)
+// Compiler can optimize this to iteration (tail call optimization)
+int multiplyTailHelper(int a, int b, int accumulator) {
+    if (b == 0) return accumulator;
+    return multiplyTailHelper(a, b - 1, accumulator + a);  // Last operation
+}
+
+int multiplyTail(int a, int b) {
+    return multiplyTailHelper(a, b, 0);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STACK VS HEAP ALLOCATION
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateStackVsHeap() {
+    printf("\n=== STACK vs HEAP ALLOCATION ===\n");
+    
+    // Stack allocation - automatic, fast, limited size
+    int stackArray[5] = {1, 2, 3, 4, 5};  // Allocated on stack
+    printf("Stack array address: %p\n", (void*)stackArray);
+    
+    // Heap allocation - manual, slower, larger size available
+    int* heapArray = (int*)malloc(5 * sizeof(int));  // Allocated on heap
+    if (heapArray != NULL) {
+        printf("Heap array address:  %p\n", (void*)heapArray);
+        
+        // Initialize heap array
+        for (int i = 0; i < 5; i++) {
+            heapArray[i] = (i + 1) * 10;
+        }
+        
+        // Stack addresses typically grow downward (high to low)
+        // Heap addresses typically grow upward (low to high)
+        printf("\nAddress comparison:\n");
+        printf("Stack variable:   %p\n", (void*)&stackArray);
+        printf("Heap memory:      %p\n", (void*)heapArray);
+        
+        if ((void*)&stackArray > (void*)heapArray) {
+            printf("Stack is at higher address (typical)\n");
+        }
+        
+        free(heapArray);  // MUST free heap memory manually
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// VARIABLE LIFETIME AND SCOPE
+// ─────────────────────────────────────────────────────────────────────
+
+int* dangerousFunction() {
+    int local = 42;  // Local variable on stack
+    return &local;   // WARNING: Returning address of local variable!
+}  // 'local' is destroyed here, returned pointer is now dangling
+
+int* safeFunction() {
+    int* heapVar = (int*)malloc(sizeof(int));  // Heap allocation
+    *heapVar = 42;
+    return heapVar;  // Safe: heap memory persists after function returns
+}  // Caller must remember to free() the returned pointer
+
+// ─────────────────────────────────────────────────────────────────────
+// DEMONSTRATING STACK FRAME CLEANUP
+// ─────────────────────────────────────────────────────────────────────
+
+void showStackCleanup() {
+    int beforeCall;
+    printf("\n=== STACK FRAME CLEANUP DEMO ===\n");
+    printf("Variable before calls: %p\n", (void*)&beforeCall);
+    
+    // Make a function call
+    void innerFunction() {
+        int innerVar1 = 111;
+        int innerVar2 = 222;
+        printf("Inside inner: var1=%p, var2=%p\n", 
+               (void*)&innerVar1, (void*)&innerVar2);
+    }
+    
+    innerFunction();
+    
+    // After return, the stack space is reclaimed
+    int afterCall;
+    printf("Variable after calls:  %p (likely reusing same stack space)\n", 
+           (void*)&afterCall);
+}
+
+int main() {
+    printf("════════════════════════════════════════════════════════\n");
+    printf("THE CALL STACK IN ACTION\n");
+    printf("════════════════════════════════════════════════════════\n");
+    
+    // Show main's stack frame
+    printf("\n=== In main (Stack Frame 1) ===\n");
+    int main_local = 10;
+    showStackAddress("main_local", &main_local);
+    
+    // Demonstrate nested function calls and stack growth
+    printf("\nCalling functionA...\n");
+    functionA(5);
+    printf("\nBack in main after all functions returned\n");
+    
+    // Demonstrate recursion and stack
+    printf("\n════════════════════════════════════════════════════════\n");
+    printf("RECURSION AND THE STACK\n");
+    printf("════════════════════════════════════════════════════════\n");
+    
+    printf("\nCalculating factorial(5):\n");
+    printf("Result: %lu\n", factorial(5, 0));
+    
+    // Stack vs Heap
+    demonstrateStackVsHeap();
+    
+    // Stack cleanup
+    showStackCleanup();
+    
+    // Warning about stack overflow (commented out for safety)
+    printf("\n════════════════════════════════════════════════════════\n");
+    printf("STACK OVERFLOW (demonstration commented out for safety)\n");
+    printf("Uncomment infiniteRecursion() call to see stack overflow\n");
+    printf("════════════════════════════════════════════════════════\n");
+    // infiniteRecursion(0);  // WARNING: Will crash program!
+    
+    return 0;
+}
+```
+
+**Call Stack Key Concepts:**
+- **Stack Frames:** Each function call creates a new frame containing local variables, parameters, and return address.
+- **LIFO Nature:** Last function called is first to return (Last In, First Out).
+- **Stack Growth:** Stack typically grows downward in memory (from high to low addresses).
+- **Automatic Cleanup:** When function returns, its entire stack frame is automatically reclaimed.
+- **Stack Overflow:** Occurs when stack space is exhausted (too many function calls or large local variables).
+- **Stack vs Heap:** Stack is fast but limited; heap is slower but provides more space and persistent allocation.
+
+## Function Pointers
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// FUNCTION POINTERS - Pointers that store addresses of functions
+// Enables:
+// 1. Callbacks and event handlers
+// 2. Dynamic function dispatch
+// 3. Implementing polymorphism in C
+// 4. Function tables/arrays for state machines
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─────────────────────────────────────────────────────────────────────
+// BASIC FUNCTION POINTER SYNTAX
+// ─────────────────────────────────────────────────────────────────────
+
+// Regular functions to point to
+int add(int a, int b) {
+    return a + b;
+}
+
+int subtract(int a, int b) {
+    return a - b;
+}
+
+int multiply(int a, int b) {
+    return a * b;
+}
+
+int divide_int(int a, int b) {
+    if (b == 0) {
+        printf("Error: Division by zero!\n");
+        return 0;
+    }
+    return a / b;
+}
+
+void demonstrateBasicFunctionPointers() {
+    printf("\n=== BASIC FUNCTION POINTERS ===\n");
+    
+    // Declaring a function pointer
+    // Syntax: return_type (*pointer_name)(parameter_types)
+    int (*operation)(int, int);
+    
+    // Method 1: Assign function address explicitly
+    operation = &add;  // & is optional for function names
+    printf("5 + 3 = %d\n", operation(5, 3));
+    
+    // Method 2: Assign without & (function name decays to pointer)
+    operation = subtract;
+    printf("5 - 3 = %d\n", (*operation)(5, 3));  // * is optional when calling
+    
+    // Both calling methods work
+    operation = multiply;
+    printf("5 * 3 = %d (called with operation())\n", operation(5, 3));
+    printf("5 * 3 = %d (called with (*operation)())\n", (*operation)(5, 3));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// TYPEDEF FOR FUNCTION POINTERS (Improves readability)
+// ─────────────────────────────────────────────────────────────────────
+
+// Define a type for function pointers
+typedef int (*BinaryOperation)(int, int);
+typedef void (*VoidFunction)(void);
+typedef void (*Callback)(int);
+
+void demonstrateTypedefFunctionPointers() {
+    printf("\n=== TYPEDEF FUNCTION POINTERS ===\n");
+    
+    // Much cleaner syntax with typedef
+    BinaryOperation op = add;
+    printf("Using typedef: 10 + 20 = %d\n", op(10, 20));
+    
+    // Can easily swap functions
+    op = multiply;
+    printf("Same variable, different function: 10 * 20 = %d\n", op(10, 20));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// FUNCTION POINTER ARRAYS (Jump tables, dispatch tables)
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateFunctionPointerArrays() {
+    printf("\n=== FUNCTION POINTER ARRAYS ===\n");
+    
+    // Array of function pointers - useful for calculators, state machines
+    BinaryOperation operations[] = {add, subtract, multiply, divide_int};
+    const char* op_names[] = {"Add", "Subtract", "Multiply", "Divide"};
+    
+    int a = 12, b = 4;
+    
+    for (int i = 0; i < 4; i++) {
+        printf("%s: %d and %d = %d\n", 
+               op_names[i], a, b, operations[i](a, b));
+    }
+    
+    // Calculator using function pointer array
+    printf("\nSimple Calculator:\n");
+    printf("0: Add, 1: Sub, 2: Mul, 3: Div\n");
+    printf("Enter operation (0-3): ");
+    int choice = 2;  // Simulating user input
+    printf("%d\n", choice);  // Echo the choice
+    
+    if (choice >= 0 && choice < 4) {
+        printf("Result: %d\n", operations[choice](20, 5));
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// CALLBACKS - Passing functions as arguments
+// ─────────────────────────────────────────────────────────────────────
+
+// Generic array processor that accepts a callback
+void processArray(int arr[], int size, void (*process)(int)) {
+    for (int i = 0; i < size; i++) {
+        process(arr[i]);
+    }
+}
+
+// Different callback functions
+void printValue(int value) {
+    printf("%d ", value);
+}
+
+void printSquare(int value) {
+    printf("%d ", value * value);
+}
+
+void printHex(int value) {
+    printf("0x%X ", value);
+}
+
+// Generic sorting function using comparison callback
+void bubbleSortGeneric(void* arr, int size, int elemSize,
+                       int (*compare)(const void*, const void*)) {
+    char* array = (char*)arr;  // Treat as byte array for generic access
+    void* temp = malloc(elemSize);  // Temporary storage for swapping
+    
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            void* elem1 = array + j * elemSize;
+            void* elem2 = array + (j + 1) * elemSize;
+            
+            if (compare(elem1, elem2) > 0) {
+                // Swap elements
+                memcpy(temp, elem1, elemSize);
+                memcpy(elem1, elem2, elemSize);
+                memcpy(elem2, temp, elemSize);
+            }
+        }
+    }
+    free(temp);
+}
+
+// Comparison functions for different sorting orders
+int compareAscending(const void* a, const void* b) {
+    return *(int*)a - *(int*)b;
+}
+
+int compareDescending(const void* a, const void* b) {
+    return *(int*)b - *(int*)a;
+}
+
+void demonstrateCallbacks() {
+    printf("\n=== CALLBACKS ===\n");
+    
+    int arr[] = {1, 2, 3, 4, 5};
+    
+    printf("Original values: ");
+    processArray(arr, 5, printValue);
+    printf("\n");
+    
+    printf("Squared values:  ");
+    processArray(arr, 5, printSquare);
+    printf("\n");
+    
+    printf("Hex values:      ");
+    processArray(arr, 5, printHex);
+    printf("\n");
+    
+    // Sorting with callbacks
+    int numbers[] = {64, 34, 25, 12, 22, 11, 90};
+    int n = 7;
+    
+    printf("\nOriginal array: ");
+    for (int i = 0; i < n; i++) printf("%d ", numbers[i]);
+    printf("\n");
+    
+    bubbleSortGeneric(numbers, n, sizeof(int), compareAscending);
+    printf("Sorted ascending: ");
+    for (int i = 0; i < n; i++) printf("%d ", numbers[i]);
+    printf("\n");
+    
+    bubbleSortGeneric(numbers, n, sizeof(int), compareDescending);
+    printf("Sorted descending: ");
+    for (int i = 0; i < n; i++) printf("%d ", numbers[i]);
+    printf("\n");
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// FUNCTION POINTERS IN STRUCTS (Object-oriented style programming)
+// ─────────────────────────────────────────────────────────────────────
+
+typedef struct {
+    int x, y;
+    
+    // Function pointers as "methods"
+    void (*print)(int, int);
+    int (*calculate_distance)(int, int);
+} Point;
+
+void printPoint(int x, int y) {
+    printf("Point(%d, %d)\n", x, y);
+}
+
+int manhattanDistance(int x, int y) {
+    return abs(x) + abs(y);
+}
+
+// "Constructor" function
+Point createPoint(int x, int y) {
+    Point p = {
+        .x = x,
+        .y = y,
+        .print = printPoint,
+        .calculate_distance = manhattanDistance
+    };
+    return p;
+}
+
+void demonstrateStructFunctionPointers() {
+    printf("\n=== FUNCTION POINTERS IN STRUCTS ===\n");
+    
+    Point p1 = createPoint(3, 4);
+    
+    // Call "methods" through function pointers
+    printf("Point p1: ");
+    p1.print(p1.x, p1.y);
+    
+    printf("Distance from origin: %d\n", 
+           p1.calculate_distance(p1.x, p1.y));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STATE MACHINE USING FUNCTION POINTERS
+// ─────────────────────────────────────────────────────────────────────
+
+typedef enum {
+    STATE_IDLE,
+    STATE_RUNNING,
+    STATE_PAUSED,
+    STATE_STOPPED
+} State;
+
+typedef State (*StateHandler)(void);
+
+State handleIdle(void) {
+    printf("State: IDLE -> Starting...\n");
+    return STATE_RUNNING;
+}
+
+State handleRunning(void) {
+    static int counter = 0;
+    printf("State: RUNNING (iteration %d)\n", ++counter);
+    if (counter >= 3) {
+        counter = 0;
+        return STATE_PAUSED;
+    }
+    return STATE_RUNNING;
+}
+
+State handlePaused(void) {
+    printf("State: PAUSED -> Stopping...\n");
+    return STATE_STOPPED;
+}
+
+State handleStopped(void) {
+    printf("State: STOPPED (terminal state)\n");
+    return STATE_STOPPED;
+}
+
+void demonstrateStateMachine() {
+    printf("\n=== STATE MACHINE WITH FUNCTION POINTERS ===\n");
+    
+    // Function pointer table indexed by state
+    StateHandler stateHandlers[] = {
+        handleIdle,
+        handleRunning,
+        handlePaused,
+        handleStopped
+    };
+    
+    State currentState = STATE_IDLE;
+    
+    // Run state machine for several iterations
+    for (int i = 0; i < 8; i++) {
+        currentState = stateHandlers[currentState]();
+        
+        if (currentState == STATE_STOPPED) {
+            printf("State machine terminated.\n");
+            break;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// RETURNING FUNCTION POINTERS FROM FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────
+
+BinaryOperation getOperation(char op) {
+    switch(op) {
+        case '+': return add;
+        case '-': return subtract;
+        case '*': return multiply;
+        case '/': return divide_int;
+        default:  return NULL;
+    }
+}
+
+void demonstrateFunctionReturningFunctionPointer() {
+    printf("\n=== FUNCTIONS RETURNING FUNCTION POINTERS ===\n");
+    
+    char operators[] = {'+', '-', '*', '/'};
+    
+    for (int i = 0; i < 4; i++) {
+        BinaryOperation op = getOperation(operators[i]);
+        if (op != NULL) {
+            printf("10 %c 3 = %d\n", operators[i], op(10, 3));
+        }
+    }
+}
+
+int main() {
+    printf("════════════════════════════════════════════════════════\n");
+    printf("FUNCTION POINTERS - ADVANCED C PROGRAMMING\n");
+    printf("════════════════════════════════════════════════════════\n");
+    
+    demonstrateBasicFunctionPointers();
+    demonstrateTypedefFunctionPointers();
+    demonstrateFunctionPointerArrays();
+    demonstrateCallbacks();
+    demonstrateStructFunctionPointers();
+    demonstrateStateMachine();
+    demonstrateFunctionReturningFunctionPointer();
+    
+    return 0;
+}
+```
+
+**Function Pointer Mastery:**
+- **Syntax:** `return_type (*name)(params)` - The parentheses around `*name` are crucial.
+- **typedef:** Makes function pointer syntax much more readable.
+- **Callbacks:** Enable generic programming by passing behavior as arguments.
+- **Jump Tables:** Arrays of function pointers for efficient dispatch based on index.
+- **Virtual Functions:** Simulating OOP by storing function pointers in structs.
+- **State Machines:** Clean implementation using function pointer tables.
+
+---
+
+# Arrays & Array-Pointer Duality
+
+## Static Arrays
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// ARRAYS IN C - FUNDAMENTAL CONCEPTS
+// Arrays are:
+// 1. Contiguous blocks of memory
+// 2. Fixed size (determined at compile time for static arrays)
+// 3. Zero-indexed
+// 4. Not bounds-checked (can access beyond array limits - undefined behavior)
+// 5. Array name represents the address of first element
+// ═══════════════════════════════════════════════════════════════════════
+
+void demonstrateArrayBasics() {
+    printf("\n=== ARRAY BASICS ===\n");
+    
+    // ─────────────────────────────────────────────────────────────────
+    // ARRAY DECLARATION AND INITIALIZATION
+    // ─────────────────────────────────────────────────────────────────
+    
+    // Method 1: Declare then initialize
+    int arr1[5];  // Uninitialized - contains garbage values
+    arr1[0] = 10;
+    arr1[1] = 20;
+    arr1[2] = 30;
+    arr1[3] = 40;
+    arr1[4] = 50;
+    
+    // Method 2: Initialize at declaration
+    int arr2[5] = {10, 20, 30, 40, 50};
+    
+    // Method 3: Partial initialization (rest filled with zeros)
+    int arr3[5] = {10, 20};  // arr3 = {10, 20, 0, 0, 0}
+    
+    // Method 4: Zero initialization
+    int arr4[5] = {0};  // All elements set to 0
+    
+    // Method 5: Compiler deduces size
+    int arr5[] = {1, 2, 3, 4, 5};  // Size = 5
+    
+    // Method 6: Designated initializers (C99)
+    int arr6[5] = {[0] = 10, [2] = 30, [4] = 50};  // {10, 0, 30, 0, 50}
+    
+    // Print arrays to demonstrate initialization
+    printf("arr2 (full init):    ");
+    for (int i = 0; i < 5; i++) printf("%d ", arr2[i]);
+    printf("\n");
+    
+    printf("arr3 (partial init): ");
+    for (int i = 0; i < 5; i++) printf("%d ", arr3[i]);
+    printf("\n");
+    
+    printf("arr6 (designated):   ");
+    for (int i = 0; i < 5; i++) printf("%d ", arr6[i]);
+    printf("\n");
+    
+    // ─────────────────────────────────────────────────────────────────
+    // ARRAY SIZE AND MEMORY LAYOUT
+    // ─────────────────────────────────────────────────────────────────
+    
+    printf("\n--- Array Memory Layout ---\n");
+    int arr[5] = {100, 200, 300, 400, 500};
+    
+    printf("Array size: %zu bytes\n", sizeof(arr));
+    printf("Element size: %zu bytes\n", sizeof(arr[0]));
+    printf("Number of elements: %zu\n", sizeof(arr) / sizeof(arr[0]));
+    
+    printf("\nMemory addresses (contiguous):\n");
+    for (int i = 0; i < 5; i++) {
+        printf("arr[%d] = %3d at address %p\n", i, arr[i], (void*)&arr[i]);
+    }
+    
+    // Notice: addresses differ by sizeof(int), typically 4 bytes
+    printf("\nAddress difference: %ld bytes\n", 
+           (char*)&arr[1] - (char*)&arr[0]);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// MULTIDIMENSIONAL ARRAYS
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateMultidimensionalArrays() {
+    printf("\n=== MULTIDIMENSIONAL ARRAYS ===\n");
+    
+    // 2D array - stored in row-major order (rows are contiguous)
+    int matrix[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    
+    // Alternative initialization (flattened)
+    int matrix2[3][4] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    
+    // Partial initialization
+    int matrix3[3][4] = {{1, 2}, {5}};  // Rest filled with zeros
+    
+    // Print 2D array
+    printf("Matrix:\n");
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%3d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+    
+    // Memory layout of 2D array (row-major order)
+    printf("\n2D Array Memory Layout (Row-Major):\n");
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("matrix[%d][%d] = %2d at %p\n", 
+                   i, j, matrix[i][j], (void*)&matrix[i][j]);
+        }
+    }
+    
+    // Accessing 2D array as 1D (since it's contiguous)
+    printf("\nAccessing as 1D array:\n");
+    int* ptr = &matrix[0][0];  // or (int*)matrix
+    for (int i = 0; i < 12; i++) {
+        printf("%d ", ptr[i]);
+    }
+    printf("\n");
+    
+    // 3D arrays and beyond
+    int cube[2][3][4] = {
+        {{1,2,3,4}, {5,6,7,8}, {9,10,11,12}},
+        {{13,14,15,16}, {17,18,19,20}, {21,22,23,24}}
+    };
+    
+    printf("\n3D Array first element: %d\n", cube[0][0][0]);
+    printf("3D Array size: %zu bytes\n", sizeof(cube));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// VARIABLE LENGTH ARRAYS (VLAs) - C99
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateVLAs(int n) {
+    printf("\n=== VARIABLE LENGTH ARRAYS (C99) ===\n");
+    
+    // VLA - size determined at runtime
+    // Note: VLAs are allocated on stack, be careful with large sizes!
+    int vla[n];  // Size = n (runtime value)
+    
+    // Initialize VLA
+    for (int i = 0; i < n; i++) {
+        vla[i] = i * i;
+    }
+    
+    printf("VLA of size %d: ", n);
+    for (int i = 0; i < n; i++) {
+        printf("%d ", vla[i]);
+    }
+    printf("\n");
+    
+    // 2D VLA
+    int rows = 3, cols = 4;
+    int vla2d[rows][cols];
+    
+    // Initialize 2D VLA
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            vla2d[i][j] = i * cols + j;
+        }
+    }
+    
+    printf("\n2D VLA (%dx%d):\n", rows, cols);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%3d ", vla2d[i][j]);
+        }
+        printf("\n");
+    }
+    
+    // Warning: sizeof(VLA) is computed at runtime
+    printf("\nVLA size (computed at runtime): %zu bytes\n", sizeof(vla));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ARRAY BOUNDS AND COMMON PITFALLS
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateArrayBounds() {
+    printf("\n=== ARRAY BOUNDS AND SAFETY ===\n");
+    
+    int arr[5] = {10, 20, 30, 40, 50};
+    
+    printf("Valid array access:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("arr[%d] = %d\n", i, arr[i]);
+    }
+    
+    // WARNING: No bounds checking in C!
+    printf("\n⚠️  DANGEROUS: Accessing out of bounds:\n");
+    printf("arr[-1] = %d (before array)\n", arr[-1]);  // Undefined behavior!
+    printf("arr[5] = %d (after array)\n", arr[5]);     // Undefined behavior!
+    
+    // Buffer overflow example (DANGEROUS - commented for safety)
+    // char buffer[10];
+    // strcpy(buffer, "This string is way too long for the buffer!");  // OVERFLOW!
+    
+    // Safe alternative using strncpy
+    char safeBuffer[10];
+    strncpy(safeBuffer, "Hello", sizeof(safeBuffer) - 1);
+    safeBuffer[sizeof(safeBuffer) - 1] = '\0';  // Ensure null termination
+    printf("\nSafe string copy: %s\n", safeBuffer);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ARRAY INITIALIZATION PATTERNS AND TECHNIQUES
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateArrayPatterns() {
+    printf("\n=== ARRAY PATTERNS AND TECHNIQUES ===\n");
+    
+    // Initialize with a pattern
+    int fibonacci[10];
+    fibonacci[0] = 0;
+    fibonacci[1] = 1;
+    for (int i = 2; i < 10; i++) {
+        fibonacci[i] = fibonacci[i-1] + fibonacci[i-2];
+    }
+    
+    printf("Fibonacci sequence: ");
+    for (int i = 0; i < 10; i++) {
+        printf("%d ", fibonacci[i]);
+    }
+    printf("\n");
+    
+    // Creating a frequency table
+    int freq[256] = {0};  // For ASCII characters
+    char str[] = "hello world";
+    
+    for (int i = 0; str[i] != '\0'; i++) {
+        freq[(unsigned char)str[i]]++;
+    }
+    
+    printf("\nCharacter frequencies in \"%s\":\n", str);
+    for (int i = 0; i < 256; i++) {
+        if (freq[i] > 0) {
+            printf("'%c': %d times\n", i, freq[i]);
+        }
+    }
+    
+    // Lookup table for fast computation
+    const int squares[11] = {0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100};
+    printf("\nSquare lookup table: 7^2 = %d\n", squares[7]);
+    
+    // Circular buffer pattern
+    int circularBuffer[5] = {0};
+    int writeIndex = 0;
+    
+    printf("\nCircular buffer writes:\n");
+    for (int value = 1; value <= 8; value++) {
+        circularBuffer[writeIndex] = value;
+        printf("Write %d at index %d\n", value, writeIndex);
+        writeIndex = (writeIndex + 1) % 5;  // Wrap around
+    }
+    
+    printf("Final buffer state: ");
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", circularBuffer[i]);
+    }
+    printf("\n");
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// CONST ARRAYS AND ARRAY PARAMETERS
+// ─────────────────────────────────────────────────────────────────────
+
+void processArray(const int arr[], int size) {
+    // arr[0] = 100;  // ERROR: cannot modify const array
+    
+    // Can still read values
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += arr[i];
+    }
+    printf("Sum of array elements: %d\n", sum);
+}
+
+void modifyArray(int arr[], int size) {
+    // CAN modify array elements (arr is a pointer to non-const)
+    for (int i = 0; i < size; i++) {
+        arr[i] *= 2;
+    }
+}
+
+void demonstrate2DArrayParameter(int rows, int cols, int arr[][cols]) {
+    // For 2D arrays as parameters, must specify all dimensions except first
+    // Or use VLA syntax (C99)
+    printf("2D array parameter:\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d ", arr[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void demonstrateConstArrays() {
+    printf("\n=== CONST ARRAYS ===\n");
+    
+    // Const array - elements cannot be modified
+    const int constArr[] = {1, 2, 3, 4, 5};
+    // constArr[0] = 10;  // ERROR: assignment of read-only location
+    
+    int normalArr[] = {1, 2, 3, 4, 5};
+    
+    printf("Before modification: ");
+    for (int i = 0; i < 5; i++) printf("%d ", normalArr[i]);
+    printf("\n");
+    
+    modifyArray(normalArr, 5);
+    
+    printf("After modification:  ");
+    for (int i = 0; i < 5; i++) printf("%d ", normalArr[i]);
+    printf("\n");
+    
+    processArray(constArr, 5);  // Pass const array to function
+    
+    // 2D array example
+    int matrix[2][3] = {{1,2,3}, {4,5,6}};
+    demonstrate2DArrayParameter(2, 3, matrix);
+}
+
+int main() {
+    printf("════════════════════════════════════════════════════════\n");
+    printf("COMPREHENSIVE ARRAY GUIDE\n");
+    printf("════════════════════════════════════════════════════════\n");
+    
+    demonstrateArrayBasics();
+    demonstrateMultidimensionalArrays();
+    demonstrateVLAs(7);
+    demonstrateArrayBounds();
+    demonstrateArrayPatterns();
+    demonstrateConstArrays();
+    
+    return 0;
+}
+```
+
+## Array-Pointer Relationship
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// ═══════════════════════════════════════════════════════════════════════
+// THE ARRAY-POINTER DUALITY
+// Key Concepts:
+// 1. Array name "decays" to pointer to first element in most contexts
+// 2. Pointer arithmetic is scaled by the size of pointed-to type
+// 3. Array notation arr[i] is syntactic sugar for *(arr + i)
+// 4. Arrays and pointers are NOT the same (different types, behaviors)
+// ═══════════════════════════════════════════════════════════════════════
+
+void demonstrateArrayPointerBasics() {
+    printf("\n=== ARRAY-POINTER RELATIONSHIP BASICS ===\n");
+    
+    int arr[5] = {10, 20, 30, 40, 50};
+    int *ptr = arr;  // Array name decays to pointer to first element
+    
+    // CRITICAL: arr and &arr[0] are equivalent in most contexts
+    printf("arr     = %p (array name as pointer)\n", (void*)arr);
+    printf("&arr[0] = %p (address of first element)\n", (void*)&arr[0]);
+    printf("ptr     = %p (pointer to first element)\n", (void*)ptr);
+    
+    // But &arr is different - it's pointer to entire array!
+    printf("&arr    = %p (address of entire array)\n", (void*)&arr);
+    
+    // Size difference reveals the distinction
+    printf("\nsizeof(arr) = %zu bytes (entire array)\n", sizeof(arr));
+    printf("sizeof(ptr) = %zu bytes (just a pointer)\n", sizeof(ptr));
+    
+    // ─────────────────────────────────────────────────────────────────
+    // ARRAY INDEXING vs POINTER ARITHMETIC
+    // ─────────────────────────────────────────────────────────────────
+    
+    printf("\n--- Array Indexing vs Pointer Arithmetic ---\n");
+    
+    // These are ALL equivalent ways to access array elements:
+    printf("arr[2]     = %d\n", arr[2]);        // Array indexing
+    printf("*(arr + 2) = %d\n", *(arr + 2));    // Pointer arithmetic
+    printf("ptr[2]     = %d\n", ptr[2]);        // Pointer used with array syntax
+    printf("*(ptr + 2) = %d\n", *(ptr + 2));    // Pointer arithmetic
+    printf("2[arr]     = %d\n", 2[arr]);        // Weird but valid! (arr[2] = 2[arr])
+    
+    // Pointer arithmetic in action
+    printf("\nPointer arithmetic traversal:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("ptr + %d points to %d at address %p\n", 
+               i, *(ptr + i), (void*)(ptr + i));
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// POINTER ARITHMETIC DEEP DIVE
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstratePointerArithmetic() {
+    printf("\n=== POINTER ARITHMETIC IN DETAIL ===\n");
+    
+    // Different data types to show scaling
+    char charArr[] = "ABCDE";
+    int intArr[] = {100, 200, 300, 400, 500};
+    double doubleArr[] = {1.1, 2.2, 3.3, 4.4, 5.5};
+    
+    char *charPtr = charArr;
+    int *intPtr = intArr;
+    double *doublePtr = doubleArr;
+    
+    printf("Pointer arithmetic scaling by type size:\n");
+    printf("Type    | Size | ptr | ptr+1 | Difference\n");
+    printf("--------|------|-----|-------|------------\n");
+    
+    printf("char    | %zu   | %p | %p | %ld bytes\n", 
+           sizeof(char), (void*)charPtr, (void*)(charPtr + 1),
+           (char*)(charPtr + 1) - charPtr);
+    
+    printf("int     | %zu   | %p | %p | %ld bytes\n",
+           sizeof(int), (void*)intPtr, (void*)(intPtr + 1),
+           (char*)(intPtr + 1) - (char*)intPtr);
+    
+    printf("double  | %zu   | %p | %p | %ld bytes\n",
+           sizeof(double), (void*)doublePtr, (void*)(doublePtr + 1),
+           (char*)(doublePtr + 1) - (char*)doublePtr);
+    
+    // ─────────────────────────────────────────────────────────────────
+    // POINTER SUBTRACTION
+    // ─────────────────────────────────────────────────────────────────
+    
+    printf("\n--- Pointer Subtraction ---\n");
+    int *start = &intArr[0];
+    int *end = &intArr[4];
+    
+    ptrdiff_t diff = end - start;  // Type for pointer differences
+    printf("end - start = %td elements\n", diff);
+    printf("Actual byte difference: %ld bytes\n", 
+           (char*)end - (char*)start);
+    
+    // Finding element index using pointer subtraction
+    int *current = &intArr[2];
+    printf("Index of current element: %td\n", current - intArr);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ARRAYS vs POINTERS: KEY DIFFERENCES
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateArrayPointerDifferences() {
+    printf("\n=== ARRAYS vs POINTERS: KEY DIFFERENCES ===\n");
+    
+    int arr[5] = {1, 2, 3, 4, 5};
+    int *ptr = arr;
+    int *heapPtr = (int*)malloc(5 * sizeof(int));
+    
+    // Difference 1: sizeof operator
+    printf("1. sizeof behavior:\n");
+    printf("   sizeof(arr) = %zu (whole array)\n", sizeof(arr));
+    printf("   sizeof(ptr) = %zu (pointer size)\n", sizeof(ptr));
+    
+    // Difference 2: & operator
+    printf("\n2. Address-of operator:\n");
+    printf("   &arr = %p (address of array)\n", (void*)&arr);
+    printf("   &ptr = %p (address of pointer variable)\n", (void*)&ptr);
+    printf("   arr  = %p (array decays to pointer)\n", (void*)arr);
+    printf("   ptr  = %p (pointer value)\n", (void*)ptr);
+    
+    // Difference 3: Assignment
+    printf("\n3. Assignment:\n");
+    // arr = ptr;  // ERROR: Cannot assign to array
+    ptr = arr;     // OK: Can assign to pointer
+    printf("   Arrays cannot be assigned to (arr = ptr is illegal)\n");
+    printf("   Pointers can be reassigned (ptr = arr is OK)\n");
+    
+    // Difference 4: Arithmetic on array name vs pointer
+    printf("\n4. Arithmetic:\n");
+    // arr++;  // ERROR: Cannot modify array name
+    ptr++;     // OK: Can modify pointer
+    printf("   Cannot do arr++ (array name is not modifiable)\n");
+    printf("   Can do ptr++ (pointer is modifiable)\n");
+    ptr = arr; // Reset ptr
+    
+    // Difference 5: String literals
+    printf("\n5. String literal behavior:\n");
+    char strArr[] = "Hello";  // Array: modifiable copy
+    char *strPtr = "World";   // Pointer: to read-only string literal
+    
+    strArr[0] = 'h';  // OK: Array is modifiable
+    // strPtr[0] = 'w';  // UNDEFINED: Attempting to modify string literal
+    
+    printf("   char strArr[] = \"Hello\"; // Modifiable array\n");
+    printf("   char *strPtr = \"World\";  // Pointer to read-only literal\n");
+    
+    free(heapPtr);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// PASSING ARRAYS TO FUNCTIONS - THE DECAY
+// ─────────────────────────────────────────────────────────────────────
+
+void functionWithArrayParam(int arr[10]) {  // The 10 is ignored!
+    printf("In function - sizeof(arr): %zu (pointer size, not array!)\n", 
+           sizeof(arr));
+}
+
+void functionWithPointerParam(int *arr) {  // Equivalent to above
+    printf("In function - sizeof(arr): %zu (pointer size)\n", 
+           sizeof(arr));
+}
+
+// For 2D arrays, need to specify column dimension
+void function2DArray(int arr[][4], int rows) {  // Must specify columns
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%d ", arr[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Alternative: pass as pointer with manual indexing
+void function2DAsPointer(int *arr, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d ", arr[i * cols + j]);  // Manual 2D indexing
+        }
+        printf("\n");
+    }
+}
+
+void demonstrateArrayDecay() {
+    printf("\n=== ARRAY DECAY IN FUNCTION CALLS ===\n");
+    
+    int arr[10] = {0};
+    printf("In main - sizeof(arr): %zu (full array)\n", sizeof(arr));
+    
+    functionWithArrayParam(arr);
+    functionWithPointerParam(arr);
+    
+    // 2D array example
+    printf("\n2D Array Passing:\n");
+    int matrix[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    
+    printf("Method 1 - Array notation:\n");
+    function2DArray(matrix, 3);
+    
+    printf("\nMethod 2 - Pointer with manual indexing:\n");
+    function2DAsPointer(&matrix[0][0], 3, 4);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// DYNAMIC ARRAYS USING POINTERS
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstrateDynamicArrays() {
+    printf("\n=== DYNAMIC ARRAYS USING POINTERS ===\n");
+    
+    // Dynamic 1D array
+    int n = 5;
+    int *dynamicArr = (int*)malloc(n * sizeof(int));
+    
+    if (dynamicArr == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+    
+    // Initialize and use like regular array
+    for (int i = 0; i < n; i++) {
+        dynamicArr[i] = i * 10;  // Can use array notation!
+    }
+    
+    printf("Dynamic array: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", dynamicArr[i]);
+    }
+    printf("\n");
+    
+    // Dynamic 2D array - Method 1: Array of pointers
+    int rows = 3, cols = 4;
+    int **dynamic2D = (int**)malloc(rows * sizeof(int*));
+    for (int i = 0; i < rows; i++) {
+        dynamic2D[i] = (int*)malloc(cols * sizeof(int));
+    }
+    
+    // Initialize 2D array
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            dynamic2D[i][j] = i * cols + j;
+        }
+    }
+    
+    printf("\nDynamic 2D array (array of pointers):\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%2d ", dynamic2D[i][j]);
+        }
+        printf("\n");
+    }
+    
+    // Clean up 2D array
+    for (int i = 0; i < rows; i++) {
+        free(dynamic2D[i]);
+    }
+    free(dynamic2D);
+    
+    // Dynamic 2D array - Method 2: Single allocation (contiguous)
+    int *dynamic2DFlat = (int*)malloc(rows * cols * sizeof(int));
+    
+    // Access using manual indexing
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            dynamic2DFlat[i * cols + j] = i * cols + j;
+        }
+    }
+    
+    printf("\nDynamic 2D array (contiguous):\n");
+    for (int i = 0; i < rows * cols; i++) {
+        if (i % cols == 0 && i > 0) printf("\n");
+        printf("%2d ", dynamic2DFlat[i]);
+    }
+    printf("\n");
+    
+    free(dynamicArr);
+    free(dynamic2DFlat);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// POINTER TO ARRAY vs ARRAY OF POINTERS
+// ─────────────────────────────────────────────────────────────────────
+
+void demonstratePointerToArray() {
+    printf("\n=== POINTER TO ARRAY vs ARRAY OF POINTERS ===\n");
+    
+    // Array of pointers
+    int *arrOfPtrs[3];  // Array of 3 pointers to int
+    int a = 10, b = 20, c = 30;
+    arrOfPtrs[0] = &a;
+    arrOfPtrs[1] = &b;
+    arrOfPtrs[2] = &c;
+    
+    printf("Array of pointers:\n");
+    for (int i = 0; i < 3; i++) {
+        printf("arrOfPtrs[%d] points to %d\n", i, *arrOfPtrs[i]);
+    }
+    
+    // Pointer to array
+    int arr[3] = {100, 200, 300};
+    int (*ptrToArr)[3] = &arr;  // Pointer to array of 3 ints
+    
+    printf("\nPointer to array:\n");
+    printf("(*ptrToArr)[0] = %d\n", (*ptrToArr)[0]);
+    printf("(*ptrToArr)[1] = %d\n", (*ptrToArr)[1]);
+    printf("(*ptrToArr)[2] = %d\n", (*ptrToArr)[2]);
+    
+    // Pointer arithmetic with pointer to array
+    int matrix[2][3] = {{1,2,3}, {4,5,6}};
+    int (*ptrToRow)[3] = matrix;  // Points to first row
+    
+    printf("\nPointer to array in 2D context:\n");
+    printf("First row: ");
+    for (int i = 0; i < 3; i++) {
+        printf("%d ", (*ptrToRow)[i]);
+    }
+    
+    ptrToRow++;  // Move to next row (advances by entire row)
+    printf("\nSecond row: ");
+    for (int i = 0; i < 3; i++) {
+        printf("%d ", (*ptrToRow)[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    printf("════════════════════════════════════════════════════════\n");
+    printf("ARRAY-POINTER DUALITY: THE HEART OF C\n");
+    printf("════════════════════════════════════════════════════════\n");
+    
+    demonstrateArrayPointerBasics();
+    demonstratePointerArithmetic();
+    demonstrateArrayPointerDifferences();
+    demonstrateArrayDecay();
+    demonstrateDynamicArrays();
+    demonstratePointerToArray();
+    
+    return 0;
+}
+```
+
+**Array-Pointer Mastery Points:**
+- **Array Decay:** Arrays decay to pointers in most contexts (except with `sizeof` and `&` operators).
+- **Pointer Arithmetic:** Scaled by the size of the pointed-to type.
+- **Equivalence:** `arr[i]` is exactly equivalent to `*(arr + i)`.
+- **Key Differences:** Arrays have fixed size and location; pointers are variables that can be reassigned.
+- **Function Parameters:** Array parameters are actually pointer parameters.
+- **Dynamic Arrays:** Use pointers with `malloc`/`free` for runtime-sized arrays.
+
+---
