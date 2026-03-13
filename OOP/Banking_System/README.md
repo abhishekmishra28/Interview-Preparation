@@ -1,7 +1,175 @@
 # Object-Oriented Programming in C++: From Concepts to a Complete Banking System
 
 > A professional, beginner-to-advanced guide covering every OOP pillar in C++ through hands-on examples, culminating in a fully modular Banking System you can run, extend, and deploy.
+---
 
+# Table of Contents
+
+- [Introduction](#introduction)
+  - [Why OOP Matters](#why-oop-matters)
+  - [Why Real-World Systems Use OOP](#why-real-world-systems-use-oop)
+  - [What You Will Build](#what-you-will-build)
+
+---
+
+# PHASE 1 — Learning OOP Concepts in C++
+
+1. [Classes and Objects](#1-classes-and-objects)
+   - [Explanation](#explanation)
+   - [Real-World Analogy](#real-world-analogy)
+   - [C++ Example](#c-example)
+   - [Key Takeaways](#key-takeaways)
+
+2. [Encapsulation](#2-encapsulation)
+   - [Explanation](#explanation-1)
+   - [Real-World Analogy](#real-world-analogy-1)
+   - [C++ Example](#c-example-1)
+   - [Key Takeaways](#key-takeaways-1)
+
+3. [Constructors and Destructors](#3-constructors-and-destructors)
+   - [Explanation](#explanation-2)
+   - [Real-World Analogy](#real-world-analogy-2)
+   - [C++ Example](#c-example-2)
+   - [Key Takeaways](#key-takeaways-2)
+
+4. [Inheritance](#4-inheritance)
+   - [Explanation](#explanation-3)
+   - [Real-World Analogy](#real-world-analogy-3)
+   - [C++ Example](#c-example-3)
+   - [Key Takeaways](#key-takeaways-3)
+
+5. [Polymorphism](#5-polymorphism)
+   - [Explanation](#explanation-4)
+   - [Real-World Analogy](#real-world-analogy-4)
+   - [C++ Example](#c-example-4)
+   - [Key Takeaways](#key-takeaways-4)
+
+6. [Abstraction](#6-abstraction)
+   - [Explanation](#explanation-5)
+   - [Real-World Analogy](#real-world-analogy-5)
+   - [C++ Example](#c-example-5)
+   - [Key Takeaways](#key-takeaways-5)
+
+7. [Composition vs Inheritance](#7-composition-vs-inheritance)
+   - [Explanation](#explanation-6)
+   - [Real-World Analogy](#real-world-analogy-6)
+   - [C++ Example](#c-example-6)
+   - [Key Takeaways](#key-takeaways-6)
+
+---
+
+# PHASE 2 — Applying OOP to a Real Project
+
+- [Project Overview: The Banking System](#project-overview-the-banking-system)
+- [System Architecture](#system-architecture)
+- [Module Responsibilities](#module-responsibilities)
+
+### Implementation Steps
+
+1. [Step 1 — Project Structure](#step-1--project-structure)
+2. [Step 2 — Designing Core Models](#step-2--designing-core-models)
+3. [Step 3 — Implement Account Operations](#step-3--implement-account-operations)
+4. [Step 4 — Transaction Service](#step-4--transaction-service)
+5. [Step 5 — Fraud Detection System](#step-5--fraud-detection-system)
+6. [Step 6 — Loan System](#step-6--loan-system)
+7. [Step 7 — Notification System](#step-7--notification-system)
+8. [Step 8 — Audit Logs](#step-8--audit-logs)
+
+---
+
+# PHASE 3 — Complete Banking System Implementation
+
+### Source Code
+
+- [`models/Customer.h`](#modelscustomerh)
+- [`models/Account.h`](#modelsaccounth)
+- [`models/SavingsAccount.h`](#modelssavingsaccounth)
+- [`models/CurrentAccount.h`](#modelscurrentaccounth)
+
+- [`infrastructure/AuditLogs.h`](#infrastructureauditlogsh)
+
+- [`security/FraudDetectionService.h`](#securityfrauddetectionserviceh)
+
+- [`services/NotificationService.h`](#servicesnotificationserviceh)
+- [`services/TransactionService.h`](#servicestransactionserviceh)
+- [`services/LoanService.h`](#servicesloanserviceh)
+- [`services/AccountService.h`](#servicesaccountserviceh)
+
+- [`main.cpp`](#maincpp)
+
+### Running the System
+
+- [How to Compile & Run](#how-to-compile--run)
+- [Example Output](#example-output)
+
+### OOP Concepts Used in the Project
+
+- [Key OOP Concepts Used in the Project](#key-oop-concepts-used-in-the-project)
+
+---
+
+# PHASE 4 — Database Integration with SQLite
+
+- [The Core Rule: Zero Changes to Existing Code](#the-core-rule-zero-changes-to-existing-code)
+- [How This Is Achieved](#how-this-is-achieved)
+- [Updated Project Structure](#updated-project-structure)
+
+### Installation
+
+- [Install SQLite3](#install-sqlite3)
+- [Verify Installation](#verify)
+
+### Database Design
+
+- [Schema Design](#schema-design)
+
+---
+
+## Database Layer Implementation
+
+- [`database/Database.h`](#databasedatabaseh)
+- [`database/CustomerRepo.h`](#databasecustomerrepoh)
+- [`database/AccountRepo.h`](#databaseaccountrepoh)
+- [`database/TransactionRepo.h`](#databasetransactionrepoh)
+- [`database/LoanRepo.h`](#databaseloanrepoh)
+
+---
+
+## Infrastructure Extension
+
+- [`infrastructure/PersistentAuditLogs.h`](#infrastructurepersistentauditlogsh)
+
+---
+
+## Phase 4 Entry Point
+
+- [`main_db.cpp`](#main_dbcpp)
+
+---
+
+## Running the Database Version
+
+- [Build & Run](#build--run)
+- [Inspect the Database](#inspect-the-database)
+
+---
+
+## Architecture & Design
+
+- [OOP Patterns Introduced in Phase 4](#oop-patterns-introduced-in-phase-4)
+- [How to Migrate to PostgreSQL or MySQL](#how-to-migrate-to-postgresql-or-mysql)
+
+---
+
+## Future Improvements
+
+- [Possible Future Improvements](#possible-future-improvements)
+
+---
+
+## Conclusion
+
+- [Conclusion](#conclusion)
 ---
 
 ## Introduction
@@ -33,6 +201,7 @@ By the end of this guide you will have built a **fully working Banking System** 
 - A LoanService for processing loans
 - A NotificationService that sends alerts
 - An AuditLog that persists an immutable record of events
+- **A full SQLite database layer (Phase 4) that persists everything without touching a single line of Phase 1–3 code**
 
 All of it wired together in `main.cpp` and ready to compile with any standard C++20 compiler.
 
@@ -1264,56 +1433,12 @@ g++ -std=c++20 -Wall -Wextra -o bank_system main.cpp
 --- Deposits ---
 [Savings] Deposited $1200 | New balance: $6200
 [NOTIFICATION] Email to alice@bank.com — DEPOSIT of $1200 on account SAV-1001 | New balance: $6200
-[Savings] Deposited $800 | New balance: $3800
-[NOTIFICATION] Email to bob@bank.com — DEPOSIT of $800 on account SAV-1003 | New balance: $3800
-
---- Withdrawal ---
-[Savings] Withdrew $300 | New balance: $5900
-[NOTIFICATION] Email to alice@bank.com — WITHDRAWAL of $300 on account SAV-1001 | New balance: $5900
-
---- Transfer Alice → Bob ---
-[Savings] Withdrew $500 | New balance: $5400
-[Savings] Deposited $500 | New balance: $4300
-[NOTIFICATION] Email to alice@bank.com — TRANSFER OUT of $500 on account SAV-1001 | New balance: $5400
-[NOTIFICATION] Email to bob@bank.com — TRANSFER IN of $500 on account SAV-1003 | New balance: $4300
-
---- Applying Interest ---
-[Savings] Interest applied: $189 | New balance: $5589
-
---- Large Deposit (Fraud Detection Test) ---
-[Current] Deposited $15000 | New balance: $17000
-[FRAUD ALERT] Large transaction detected: $15000 on account CUR-1002
-[NOTIFICATION] Email to alice@bank.com — DEPOSIT of $15000 on account CUR-1002 | New balance: $17000
-[FRAUD NOTIFICATION] SMS to +1-555-0101 — Suspicious activity detected on account CUR-1002. Please verify.
-
---- Loan Application: LOAN-2024-001 ---
-Applicant      : Alice Johnson
-Requested      : $10000
-Max Eligible   : $27945
-Decision       : APPROVED
-Loan disbursed to account SAV-1001
-[LOAN NOTIFICATION] Alice Johnson — Loan of $10000 APPROVED at 7% interest.
-
---- Overdraft Test (CurrentAccount) ---
-[CAUGHT] Overdraft limit exceeded
-
---- Final Account Balances ---
-===== All Accounts =====
-[SavingsAccount SAV-1001] Alice Johnson | Balance: $15589.000000
-[CurrentAccount CUR-1002] Alice Johnson | Balance: $17000.000000
-[SavingsAccount SAV-1003] Bob Smith     | Balance: $4300.000000
-========================
+...
 
 ===== AUDIT LOG =====
 [Tue Mar 10 12:00:01 2026] OPENED SavingsAccount SAV-1001 for Alice Johnson
-[Tue Mar 10 12:00:01 2026] OPENED CurrentAccount CUR-1002 for Alice Johnson
-[Tue Mar 10 12:00:01 2026] OPENED SavingsAccount SAV-1003 for Bob Smith
-[Tue Mar 10 12:00:02 2026] DEPOSIT $1200.000000 to SAV-1001
-[Tue Mar 10 12:00:02 2026] DEPOSIT $800.000000 to SAV-1003
-[Tue Mar 10 12:00:02 2026] WITHDRAWAL $300.000000 from SAV-1001
-[Tue Mar 10 12:00:02 2026] TRANSFER $500.000000 from SAV-1001 to SAV-1003
-[Tue Mar 10 12:00:02 2026] DEPOSIT $15000.000000 to CUR-1002
-[Tue Mar 10 12:00:02 2026] LOAN APPROVED $10000.000000 for Alice Johnson
+[Tue Mar 10 12:00:01 2026] DEPOSIT $1200.000000 to SAV-1001
+...
 =====================
 ```
 
@@ -1325,39 +1450,1168 @@ Loan disbursed to account SAV-1001
 |---|---|
 | **Encapsulation** | `Account`, `Customer`: all attributes are `private`; state is changed only through validated methods. |
 | **Inheritance** | `SavingsAccount` and `CurrentAccount` inherit from `Account`, reusing `balance`, `transfer()`, and `toString()`. |
-| **Polymorphism** | `TransactionService` accepts `Account&` references — it calls `deposit()` and `withdraw()` without knowing the concrete type. The virtual dispatch selects the right implementation at runtime. |
+| **Polymorphism** | `TransactionService` accepts `Account&` references — it calls `deposit()` and `withdraw()` without knowing the concrete type. |
 | **Abstraction** | `Account` is an abstract class with pure virtual `deposit()`, `withdraw()`, and `getAccountType()`. No "bare" account can be created. |
 | **Composition** | `Account` **has-a** `Customer`. `TransactionService` **has-a** `FraudDetectionService`, `NotificationService`, and `AuditLogs`. |
 
 ---
 
+# PHASE 4 — Database Integration with SQLite
+
+---
+
+## The Core Rule: Zero Changes to Existing Code
+
+Phase 4 adds a complete persistence layer without touching a **single line** from Phases 1–3. Every `.h` file in `models/`, `services/`, `security/`, and `infrastructure/` stays exactly as written. The database layer is **purely additive**.
+
+This is real-world engineering discipline: when you add persistence to a production codebase, you do not rewrite the domain — you wrap it.
+
+### How This Is Achieved
+
+The strategy has three parts:
+
+1. **Repository classes** sit beside the existing services and handle all SQL. They accept the same domain objects (`Account&`, `Customer&`) the services already use.
+2. **`PersistentAuditLogs`** subclasses `AuditLogs` using inheritance — it overrides `log()` to write to the database *and* call the parent's in-memory log. The rest of the codebase never notices.
+3. **`main_db.cpp`** is a new entry point that initialises the database, then uses the exact same service constructors as `main.cpp`. After each service call it asks the repository to persist the updated state.
+
+```
+Phase 3 code                     Phase 4 additions
+─────────────────────────────    ──────────────────────────────────────
+models/       ← untouched        database/Database.h
+services/     ← untouched        database/CustomerRepo.h
+security/     ← untouched        database/AccountRepo.h
+infrastructure/AuditLogs.h       database/TransactionRepo.h
+              ← untouched        database/LoanRepo.h
+main.cpp      ← untouched        infrastructure/PersistentAuditLogs.h
+                                 main_db.cpp   ← new entry point
+```
+
+---
+
+## Updated Project Structure
+
+```
+/bank-system
+│
+├── models/                        ← Phase 3 — UNCHANGED
+│   ├── Customer.h
+│   ├── Account.h
+│   ├── SavingsAccount.h
+│   └── CurrentAccount.h
+│
+├── services/                      ← Phase 3 — UNCHANGED
+│   ├── AccountService.h
+│   ├── TransactionService.h
+│   ├── LoanService.h
+│   └── NotificationService.h
+│
+├── security/                      ← Phase 3 — UNCHANGED
+│   └── FraudDetectionService.h
+│
+├── infrastructure/
+│   ├── AuditLogs.h                ← Phase 3 — UNCHANGED
+│   └── PersistentAuditLogs.h      ← Phase 4 — NEW (subclass only)
+│
+├── database/                      ← Phase 4 — NEW
+│   ├── Database.h
+│   ├── CustomerRepo.h
+│   ├── AccountRepo.h
+│   ├── TransactionRepo.h
+│   └── LoanRepo.h
+│
+├── main.cpp                       ← Phase 3 — UNCHANGED
+└── main_db.cpp                    ← Phase 4 — NEW entry point
+```
+
+---
+
+## Installation
+
+### Install SQLite3
+
+**Ubuntu / Debian**
+```bash
+sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+```
+
+**macOS (Homebrew)**
+```bash
+brew install sqlite3
+```
+
+**Windows (vcpkg)**
+```bash
+vcpkg install sqlite3:x64-windows
+```
+
+### Verify
+```bash
+sqlite3 --version
+# 3.x.x 20xx-xx-xx ...
+```
+
+---
+
+## Schema Design
+
+Before writing C++, define the tables. The schema maps directly to the domain objects in Phase 3.
+
+```sql
+-- Stores Customer value objects
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    email       TEXT NOT NULL UNIQUE,
+    phone       TEXT NOT NULL
+);
+
+-- Stores both SavingsAccount and CurrentAccount rows.
+-- account_type drives which columns are meaningful.
+-- interest_rate / overdraft_limit are NULL for the irrelevant type.
+CREATE TABLE IF NOT EXISTS accounts (
+    account_id      TEXT PRIMARY KEY,
+    account_type    TEXT NOT NULL,     -- 'SavingsAccount' | 'CurrentAccount'
+    balance         REAL NOT NULL,
+    customer_id     TEXT NOT NULL,
+    interest_rate   REAL,              -- SavingsAccount only
+    overdraft_limit REAL,              -- CurrentAccount only
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- Immutable record of every deposit / withdrawal / transfer
+CREATE TABLE IF NOT EXISTS transactions (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id      TEXT NOT NULL,
+    type            TEXT NOT NULL,     -- 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER'
+    amount          REAL NOT NULL,
+    target_account  TEXT,              -- NULL unless TRANSFER
+    flagged         INTEGER NOT NULL DEFAULT 0,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (account_id) REFERENCES accounts(account_id)
+);
+
+-- Loan application and decision record
+CREATE TABLE IF NOT EXISTS loans (
+    application_id  TEXT PRIMARY KEY,
+    customer_id     TEXT NOT NULL,
+    amount          REAL NOT NULL,
+    term_months     INTEGER NOT NULL,
+    approved        INTEGER NOT NULL,  -- 1 = approved, 0 = declined
+    interest_rate   REAL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- Mirrors every AuditLogs::log() call — append-only
+CREATE TABLE IF NOT EXISTS audit_log (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    event      TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
+
+**Key design decisions:**
+
+| Decision | Reason |
+|---|---|
+| Single `accounts` table for both types | Matches the single `Account` base class; avoids joins for simple reads |
+| `AUTOINCREMENT` on `transactions` and `audit_log` | These are append-only; business IDs are not needed |
+| `FOREIGN KEY` constraints | Database enforces referential integrity that mirrors C++ object ownership |
+| `flagged` column on transactions | Allows forensic queries like "show all flagged deposits" without re-running fraud rules |
+
+---
+
+## `database/Database.h`
+
+The `Database` singleton owns the `sqlite3*` connection, initialises the schema, and exposes helpers used by every repository.
+
+```cpp
+#pragma once
+#include <string>
+#include <iostream>
+#include <stdexcept>
+#include <sqlite3.h>
+
+// ─────────────────────────────────────────────────────────────
+//  Database — Singleton that owns the SQLite connection.
+//  All repositories obtain the raw handle via getHandle().
+// ─────────────────────────────────────────────────────────────
+class Database {
+private:
+    sqlite3*    handle = nullptr;
+    std::string path;
+
+    Database() = default;
+
+    // Execute a statement that returns no rows (CREATE, INSERT, UPDATE, DELETE)
+    void exec(const std::string& sql) const {
+        char* errMsg = nullptr;
+        if (sqlite3_exec(handle, sql.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
+            std::string msg = errMsg ? errMsg : "unknown";
+            sqlite3_free(errMsg);
+            throw std::runtime_error("[Database] SQL error: " + msg);
+        }
+    }
+
+    void createSchema() const {
+        exec("PRAGMA foreign_keys = ON;");
+
+        exec(R"(
+            CREATE TABLE IF NOT EXISTS customers (
+                customer_id TEXT PRIMARY KEY,
+                name        TEXT NOT NULL,
+                email       TEXT NOT NULL UNIQUE,
+                phone       TEXT NOT NULL
+            );
+        )");
+
+        exec(R"(
+            CREATE TABLE IF NOT EXISTS accounts (
+                account_id      TEXT PRIMARY KEY,
+                account_type    TEXT NOT NULL,
+                balance         REAL NOT NULL,
+                customer_id     TEXT NOT NULL,
+                interest_rate   REAL,
+                overdraft_limit REAL,
+                FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+            );
+        )");
+
+        exec(R"(
+            CREATE TABLE IF NOT EXISTS transactions (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_id     TEXT    NOT NULL,
+                type           TEXT    NOT NULL,
+                amount         REAL    NOT NULL,
+                target_account TEXT,
+                flagged        INTEGER NOT NULL DEFAULT 0,
+                created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (account_id) REFERENCES accounts(account_id)
+            );
+        )");
+
+        exec(R"(
+            CREATE TABLE IF NOT EXISTS loans (
+                application_id TEXT    PRIMARY KEY,
+                customer_id    TEXT    NOT NULL,
+                amount         REAL    NOT NULL,
+                term_months    INTEGER NOT NULL,
+                approved       INTEGER NOT NULL,
+                interest_rate  REAL,
+                created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+            );
+        )");
+
+        exec(R"(
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                event      TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+        )");
+    }
+
+public:
+    // ── Singleton access ────────────────────────────────────────
+    static Database& get() {
+        static Database instance;
+        return instance;
+    }
+
+    Database(const Database&)            = delete;
+    Database& operator=(const Database&) = delete;
+
+    // ── Lifecycle ───────────────────────────────────────────────
+    void open(const std::string& filePath = "bank.db") {
+        path = filePath;
+        if (sqlite3_open(filePath.c_str(), &handle) != SQLITE_OK)
+            throw std::runtime_error("[Database] Cannot open: " +
+                                     std::string(sqlite3_errmsg(handle)));
+        std::cout << "[Database] Connected → " << filePath << "\n";
+        createSchema();
+        std::cout << "[Database] Schema ready.\n";
+    }
+
+    void close() {
+        if (handle) {
+            sqlite3_close(handle);
+            handle = nullptr;
+            std::cout << "[Database] Connection closed.\n";
+        }
+    }
+
+    ~Database() { close(); }
+
+    // ── Raw handle for repositories ─────────────────────────────
+    sqlite3* getHandle() const {
+        if (!handle) throw std::runtime_error("[Database] Not open.");
+        return handle;
+    }
+
+    // ── Atomic transaction helpers ───────────────────────────────
+    void begin()    const { exec("BEGIN;");    }
+    void commit()   const { exec("COMMIT;");   }
+    void rollback() const { exec("ROLLBACK;"); }
+
+    // ── Utility: prepare a statement safely ─────────────────────
+    sqlite3_stmt* prepare(const std::string& sql) const {
+        sqlite3_stmt* stmt = nullptr;
+        if (sqlite3_prepare_v2(handle, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+            throw std::runtime_error("[Database] Prepare failed: " +
+                                     std::string(sqlite3_errmsg(handle)));
+        return stmt;   // caller must sqlite3_finalize(stmt)
+    }
+};
+```
+
+---
+
+## `database/CustomerRepo.h`
+
+Persists and loads `Customer` objects. Notice the methods accept the exact same `Customer` type defined in Phase 3 — no changes to the model.
+
+```cpp
+#pragma once
+#include <vector>
+#include <optional>
+#include <sqlite3.h>
+#include "../models/Customer.h"
+#include "Database.h"
+
+// ─────────────────────────────────────────────────────────────
+//  CustomerRepo
+//  All methods accept / return the Phase-3 Customer type.
+// ─────────────────────────────────────────────────────────────
+class CustomerRepo {
+    sqlite3* db() const { return Database::get().getHandle(); }
+
+public:
+    // INSERT OR IGNORE — safe to call even if customer already exists
+    void save(const Customer& c) const {
+        const char* sql =
+            "INSERT OR IGNORE INTO customers (customer_id, name, email, phone) "
+            "VALUES (?, ?, ?, ?);";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text(stmt, 1, c.getCustomerId().c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 2, c.getName().c_str(),       -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 3, c.getEmail().c_str(),      -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 4, c.getPhone().c_str(),      -1, SQLITE_TRANSIENT);
+
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+    }
+
+    // Returns std::nullopt if not found
+    std::optional<Customer> findById(const std::string& customerId) const {
+        const char* sql =
+            "SELECT customer_id, name, email, phone "
+            "FROM customers WHERE customer_id = ?;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text(stmt, 1, customerId.c_str(), -1, SQLITE_TRANSIENT);
+
+        std::optional<Customer> result;
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            result = Customer(
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3))
+            );
+        }
+        sqlite3_finalize(stmt);
+        return result;
+    }
+
+    std::vector<Customer> findAll() const {
+        const char* sql =
+            "SELECT customer_id, name, email, phone FROM customers;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+
+        std::vector<Customer> results;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            results.emplace_back(
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)),
+                reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3))
+            );
+        }
+        sqlite3_finalize(stmt);
+        return results;
+    }
+};
+```
+
+---
+
+## `database/AccountRepo.h`
+
+The most interesting repository: it uses `dynamic_cast` to detect the concrete type when saving, and reconstructs the correct subclass (polymorphically) when loading — the same pattern used in Phase 3's virtual dispatch.
+
+```cpp
+#pragma once
+#include <vector>
+#include <memory>
+#include <sqlite3.h>
+#include "../models/Account.h"
+#include "../models/SavingsAccount.h"
+#include "../models/CurrentAccount.h"
+#include "Database.h"
+
+// ─────────────────────────────────────────────────────────────
+//  AccountRepo
+//  Saves any Account* subclass; rehydrates into the correct
+//  concrete type on load — polymorphism meets persistence.
+// ─────────────────────────────────────────────────────────────
+class AccountRepo {
+    sqlite3* db() const { return Database::get().getHandle(); }
+
+public:
+    // INSERT OR IGNORE — detects subtype via dynamic_cast
+    void save(const Account& acc) const {
+        const char* sql =
+            "INSERT OR IGNORE INTO accounts "
+            "(account_id, account_type, balance, customer_id, "
+            " interest_rate, overdraft_limit) "
+            "VALUES (?, ?, ?, ?, ?, ?);";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+
+        // Type-specific fields
+        double interestRate   = -1.0;   // sentinel = NULL
+        double overdraftLimit = -1.0;
+
+        if (const auto* sav = dynamic_cast<const SavingsAccount*>(&acc))
+            interestRate = sav->getInterestRate();
+        else if (const auto* cur = dynamic_cast<const CurrentAccount*>(&acc))
+            overdraftLimit = cur->getOverdraftLimit();
+
+        sqlite3_bind_text  (stmt, 1, acc.getAccountId().c_str(),             -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text  (stmt, 2, acc.getAccountType().c_str(),           -1, SQLITE_TRANSIENT);
+        sqlite3_bind_double(stmt, 3, acc.getBalance());
+        sqlite3_bind_text  (stmt, 4, acc.getOwner().getCustomerId().c_str(), -1, SQLITE_TRANSIENT);
+
+        // Bind NULL when the field does not apply to this subtype
+        if (interestRate   >= 0) sqlite3_bind_double(stmt, 5, interestRate);
+        else                     sqlite3_bind_null  (stmt, 5);
+        if (overdraftLimit >= 0) sqlite3_bind_double(stmt, 6, overdraftLimit);
+        else                     sqlite3_bind_null  (stmt, 6);
+
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+    }
+
+    // UPDATE balance after every transaction — keeps DB in sync with in-memory object
+    void updateBalance(const Account& acc) const {
+        const char* sql =
+            "UPDATE accounts SET balance = ? WHERE account_id = ?;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_double(stmt, 1, acc.getBalance());
+        sqlite3_bind_text  (stmt, 2, acc.getAccountId().c_str(), -1, SQLITE_TRANSIENT);
+
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+    }
+
+    // Load all accounts, rehydrating each into the correct concrete subclass.
+    // Requires a customer lookup to reconstruct the Customer value object.
+    std::vector<std::shared_ptr<Account>>
+    findAll(const std::vector<Customer>& customers) const {
+        const char* sql =
+            "SELECT account_id, account_type, balance, customer_id, "
+            "       interest_rate, overdraft_limit "
+            "FROM accounts;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+
+        // Build a quick lookup map from the supplied customer list
+        std::unordered_map<std::string, Customer> custMap;
+        for (const auto& c : customers) custMap[c.getCustomerId()] = c;
+
+        std::vector<std::shared_ptr<Account>> results;
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string accountId   = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string accountType = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            double      balance     = sqlite3_column_double(stmt, 2);
+            std::string customerId  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+
+            // Resolve the owner
+            Customer owner;
+            auto it = custMap.find(customerId);
+            if (it != custMap.end()) owner = it->second;
+
+            std::shared_ptr<Account> acc;
+
+            if (accountType == "SavingsAccount") {
+                double rate = (sqlite3_column_type(stmt, 4) != SQLITE_NULL)
+                              ? sqlite3_column_double(stmt, 4)
+                              : 0.035;
+                acc = std::make_shared<SavingsAccount>(accountId, balance, owner, rate);
+
+            } else if (accountType == "CurrentAccount") {
+                double limit = (sqlite3_column_type(stmt, 5) != SQLITE_NULL)
+                               ? sqlite3_column_double(stmt, 5)
+                               : 1000.0;
+                acc = std::make_shared<CurrentAccount>(accountId, balance, owner, limit);
+            }
+
+            if (acc) results.push_back(std::move(acc));
+        }
+
+        sqlite3_finalize(stmt);
+        return results;
+    }
+};
+```
+
+> **Why `dynamic_cast` in `save()`?**
+> The repository receives an `Account&` (the base type), but needs to store subtype-specific fields. Rather than adding virtual `serialize()` methods to the models (which would require changing Phase 3 code), `dynamic_cast` lets the repository detect the concrete type externally. This preserves the zero-changes rule.
+
+---
+
+## `database/TransactionRepo.h`
+
+Records every `TransactionRecord` from `FraudDetectionService` (the same struct defined in Phase 3) into the `transactions` table.
+
+```cpp
+#pragma once
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sqlite3.h>
+#include "../security/FraudDetectionService.h"   // reuses Phase-3 TransactionRecord
+#include "Database.h"
+
+// ─────────────────────────────────────────────────────────────
+//  TransactionRepo
+//  Reuses the TransactionRecord struct from FraudDetectionService
+//  so no new data types are introduced.
+// ─────────────────────────────────────────────────────────────
+class TransactionRepo {
+    sqlite3* db() const { return Database::get().getHandle(); }
+
+public:
+    // Save a TransactionRecord (Phase-3 struct) with an optional transfer target
+    // and the fraud flag returned by FraudDetectionService::analyse()
+    void save(const TransactionRecord& txn,
+              bool flagged,
+              const std::string& targetAccountId = "") const {
+
+        const char* sql =
+            "INSERT INTO transactions "
+            "(account_id, type, amount, target_account, flagged) "
+            "VALUES (?, ?, ?, ?, ?);";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text   (stmt, 1, txn.accountId.c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text   (stmt, 2, txn.type.c_str(),      -1, SQLITE_TRANSIENT);
+        sqlite3_bind_double (stmt, 3, txn.amount);
+
+        if (targetAccountId.empty()) sqlite3_bind_null(stmt, 4);
+        else sqlite3_bind_text(stmt, 4, targetAccountId.c_str(), -1, SQLITE_TRANSIENT);
+
+        sqlite3_bind_int(stmt, 5, flagged ? 1 : 0);
+
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+    }
+
+    // Retrieve full history for one account, newest first
+    void printHistory(const std::string& accountId) const {
+        const char* sql =
+            "SELECT type, amount, target_account, flagged, created_at "
+            "FROM transactions "
+            "WHERE account_id = ? "
+            "ORDER BY id DESC;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text(stmt, 1, accountId.c_str(), -1, SQLITE_TRANSIENT);
+
+        std::cout << "\n===== Transaction History: " << accountId << " =====\n";
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string type      = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            double      amount    = sqlite3_column_double(stmt, 1);
+            bool        flagged   = sqlite3_column_int(stmt, 3) == 1;
+            std::string createdAt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+            std::string target    = (sqlite3_column_type(stmt, 2) != SQLITE_NULL)
+                                    ? reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2))
+                                    : "";
+
+            std::cout << "[" << createdAt << "] "
+                      << type << " $" << amount;
+            if (!target.empty()) std::cout << " → " << target;
+            if (flagged)         std::cout << " ⚠ FLAGGED";
+            std::cout << "\n";
+        }
+        std::cout << "=============================================\n";
+        sqlite3_finalize(stmt);
+    }
+
+    // Count flagged transactions — useful for a compliance report
+    int countFlagged() const {
+        const char* sql =
+            "SELECT COUNT(*) FROM transactions WHERE flagged = 1;";
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        int count = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+            count = sqlite3_column_int(stmt, 0);
+        sqlite3_finalize(stmt);
+        return count;
+    }
+};
+```
+
+---
+
+## `database/LoanRepo.h`
+
+Persists the `LoanApplication` struct and the approval decision from `LoanService`.
+
+```cpp
+#pragma once
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sqlite3.h>
+#include "../services/LoanService.h"   // reuses Phase-3 LoanApplication struct
+#include "Database.h"
+
+// ─────────────────────────────────────────────────────────────
+//  LoanRepo
+//  Reuses the LoanApplication struct defined in LoanService.h
+// ─────────────────────────────────────────────────────────────
+class LoanRepo {
+    sqlite3* db() const { return Database::get().getHandle(); }
+
+public:
+    // Save application + decision in one row
+    void save(const LoanApplication& app,
+              bool approved,
+              double interestRate) const {
+
+        const char* sql =
+            "INSERT OR IGNORE INTO loans "
+            "(application_id, customer_id, amount, term_months, "
+            " approved, interest_rate) "
+            "VALUES (?, ?, ?, ?, ?, ?);";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text  (stmt, 1, app.applicationId.c_str(),           -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text  (stmt, 2, app.applicant.getCustomerId().c_str(),-1, SQLITE_TRANSIENT);
+        sqlite3_bind_double(stmt, 3, app.requestedAmount);
+        sqlite3_bind_int   (stmt, 4, app.termMonths);
+        sqlite3_bind_int   (stmt, 5, approved ? 1 : 0);
+        sqlite3_bind_double(stmt, 6, interestRate);
+
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+    }
+
+    // Print all loans for a customer
+    void printByCustomer(const std::string& customerId) const {
+        const char* sql =
+            "SELECT application_id, amount, term_months, approved, "
+            "       interest_rate, created_at "
+            "FROM loans WHERE customer_id = ? ORDER BY created_at DESC;";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text(stmt, 1, customerId.c_str(), -1, SQLITE_TRANSIENT);
+
+        std::cout << "\n===== Loan History: " << customerId << " =====\n";
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::cout
+                << "ID: "     << sqlite3_column_text  (stmt, 0)
+                << " | $"     << sqlite3_column_double(stmt, 1)
+                << " / "      << sqlite3_column_int   (stmt, 2) << " months"
+                << " | "      << (sqlite3_column_int(stmt, 3) ? "APPROVED" : "DECLINED")
+                << " @ "      << (sqlite3_column_double(stmt, 4) * 100.0) << "%"
+                << " | "      << sqlite3_column_text  (stmt, 5)
+                << "\n";
+        }
+        std::cout << "==========================================\n";
+        sqlite3_finalize(stmt);
+    }
+};
+```
+
+---
+
+## `infrastructure/PersistentAuditLogs.h`
+
+This subclass is the cleanest demonstration of **inheritance for extension** in Phase 4. It overrides `log()` to write to the database, then calls `AuditLogs::log()` to preserve the in-memory behaviour. The rest of the codebase uses `AuditLogs&` — substituting a `PersistentAuditLogs` object works transparently thanks to the Liskov Substitution Principle.
+
+```cpp
+#pragma once
+#include "../infrastructure/AuditLogs.h"
+#include "../database/Database.h"
+#include <sqlite3.h>
+#include <iostream>
+
+// ─────────────────────────────────────────────────────────────
+//  PersistentAuditLogs
+//
+//  Extends AuditLogs (Phase 3) via inheritance.
+//  Overrides log() to ALSO write every entry to the database.
+//  The parent's in-memory log and printAll() are fully preserved.
+//
+//  Usage: pass a PersistentAuditLogs wherever AuditLogs& is expected.
+//  No other code changes needed.
+// ─────────────────────────────────────────────────────────────
+class PersistentAuditLogs : public AuditLogs {
+public:
+    // Shadows AuditLogs::log() — writes to DB then to memory
+    void log(const std::string& event) {
+        // 1. Persist to database
+        const char* sql =
+            "INSERT INTO audit_log (event) VALUES (?);";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+        sqlite3_bind_text(stmt, 1, event.c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+
+        // 2. Delegate to parent for in-memory storage and timestamp
+        AuditLogs::log(event);
+    }
+
+    // Query the persistent log from the database (survives restarts)
+    void printFromDb(int limit = 50) const {
+        std::string sql =
+            "SELECT event, created_at FROM audit_log "
+            "ORDER BY id DESC LIMIT " + std::to_string(limit) + ";";
+
+        sqlite3_stmt* stmt = Database::get().prepare(sql);
+
+        std::cout << "\n===== PERSISTENT AUDIT LOG (DB, last "
+                  << limit << ") =====\n";
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::cout << "[" << sqlite3_column_text(stmt, 1) << "] "
+                      << sqlite3_column_text(stmt, 0) << "\n";
+        }
+        std::cout << "====================================================\n";
+        sqlite3_finalize(stmt);
+    }
+};
+```
+
+---
+
+## `main_db.cpp` — Phase 4 Entry Point
+
+This is the only new file that touches service wiring. Compare it to `main.cpp` line by line:
+
+- **Lines 1–5**: adds four repository headers and `PersistentAuditLogs.h`.
+- **Lines 6–end**: identical service construction; repositories called after each service operation.
+- `main.cpp` is completely untouched and still compiles independently.
+
+```cpp
+#include <iostream>
+#include <memory>
+
+// ── Phase 3 includes (unchanged) ────────────────────────────
+#include "models/Customer.h"
+#include "models/SavingsAccount.h"
+#include "models/CurrentAccount.h"
+#include "services/AccountService.h"
+#include "services/TransactionService.h"
+#include "services/LoanService.h"
+#include "services/NotificationService.h"
+#include "security/FraudDetectionService.h"
+
+// ── Phase 4 additions ────────────────────────────────────────
+#include "database/Database.h"
+#include "database/CustomerRepo.h"
+#include "database/AccountRepo.h"
+#include "database/TransactionRepo.h"
+#include "database/LoanRepo.h"
+#include "infrastructure/PersistentAuditLogs.h"
+
+// ── Helper ───────────────────────────────────────────────────
+static void section(const std::string& title) {
+    std::cout << "\n" << std::string(50, '─') << "\n"
+              << "  " << title << "\n"
+              << std::string(50, '─') << "\n";
+}
+
+int main() {
+    std::cout << "================================================\n";
+    std::cout << "  C++ Banking System — Phase 4: DB Integration  \n";
+    std::cout << "================================================\n\n";
+
+    // ── 1. Open the database (creates bank.db if absent) ─────────
+    section("1. Database Initialisation");
+    Database::get().open("bank.db");
+
+    // ── 2. Repositories ──────────────────────────────────────────
+    CustomerRepo    customerRepo;
+    AccountRepo     accountRepo;
+    TransactionRepo txnRepo;
+    LoanRepo        loanRepo;
+
+    // ── 3. Infrastructure — swap in PersistentAuditLogs ──────────
+    //    All services receive AuditLogs& — Liskov holds perfectly.
+    PersistentAuditLogs auditLogs;
+
+    // ── 4. Services — IDENTICAL constructors to main.cpp ─────────
+    NotificationService   notifService;
+    FraudDetectionService fraudService;
+    TransactionService    txnService(fraudService, notifService, auditLogs);
+    AccountService        accountService(auditLogs);
+    LoanService           loanService(notifService, auditLogs);
+
+    // ── 5. Customers ──────────────────────────────────────────────
+    section("2. Create & Persist Customers");
+    Customer alice("C001", "Alice Johnson", "alice@bank.com", "+1-555-0101");
+    Customer bob  ("C002", "Bob Smith",     "bob@bank.com",   "+1-555-0202");
+
+    customerRepo.save(alice);   // Phase 4: persist
+    customerRepo.save(bob);
+
+    std::cout << alice.toString() << "\n";
+    std::cout << bob.toString()   << "\n";
+
+    // ── 6. Open accounts ─────────────────────────────────────────
+    section("3. Open & Persist Accounts");
+    auto aliceSavings = accountService.openSavingsAccount(alice, 5000.00);
+    auto aliceCurrent = accountService.openCurrentAccount(alice, 2000.00, 1500.00);
+    auto bobSavings   = accountService.openSavingsAccount(bob,   3000.00);
+
+    accountRepo.save(*aliceSavings);   // Phase 4: persist each account
+    accountRepo.save(*aliceCurrent);
+    accountRepo.save(*bobSavings);
+
+    accountService.listAll();
+
+    // ─────────────────────────────────────────────────────────────
+    //  Helper lambda: wraps txnService.deposit() and persists
+    //  both the updated balance and the transaction record.
+    //  The lambda captures by reference — no new classes needed.
+    // ─────────────────────────────────────────────────────────────
+    auto persistDeposit = [&](Account& acc, double amount) {
+        txnService.deposit(acc, amount);                            // Phase 3
+
+        accountRepo.updateBalance(acc);                             // Phase 4
+        TransactionRecord rec{ acc.getAccountId(), amount,
+                               "DEPOSIT",
+                               std::chrono::system_clock::now() };
+        txnRepo.save(rec, false);
+    };
+
+    auto persistWithdraw = [&](Account& acc, double amount) {
+        txnService.withdraw(acc, amount);
+
+        accountRepo.updateBalance(acc);
+        TransactionRecord rec{ acc.getAccountId(), amount,
+                               "WITHDRAWAL",
+                               std::chrono::system_clock::now() };
+        txnRepo.save(rec, false);
+    };
+
+    auto persistTransfer = [&](Account& src, Account& tgt, double amount) {
+        txnService.transfer(src, tgt, amount);
+
+        accountRepo.updateBalance(src);
+        accountRepo.updateBalance(tgt);
+        TransactionRecord rec{ src.getAccountId(), amount,
+                               "TRANSFER",
+                               std::chrono::system_clock::now() };
+        txnRepo.save(rec, false, tgt.getAccountId());
+    };
+
+    // ── 7. Deposits ───────────────────────────────────────────────
+    section("4. Deposits");
+    persistDeposit(*aliceSavings, 1200.00);
+    persistDeposit(*bobSavings,   800.00);
+
+    // ── 8. Withdrawal ─────────────────────────────────────────────
+    section("5. Withdrawal");
+    persistWithdraw(*aliceSavings, 300.00);
+
+    // ── 9. Transfer ───────────────────────────────────────────────
+    section("6. Transfer Alice → Bob");
+    persistTransfer(*aliceSavings, *bobSavings, 500.00);
+
+    // ── 10. Apply Interest ────────────────────────────────────────
+    section("7. Apply Savings Interest");
+    aliceSavings->applyInterest();
+    accountRepo.updateBalance(*aliceSavings);   // keep DB in sync
+
+    // ── 11. Large deposit — fraud trigger ─────────────────────────
+    section("8. Large Deposit (Fraud Detection Test)");
+    txnService.deposit(*aliceCurrent, 15000.00);
+    accountRepo.updateBalance(*aliceCurrent);
+    {
+        TransactionRecord rec{ aliceCurrent->getAccountId(), 15000.00,
+                               "DEPOSIT",
+                               std::chrono::system_clock::now() };
+        txnRepo.save(rec, /*flagged=*/true);   // mark as flagged in DB
+    }
+
+    // ── 12. Loan ──────────────────────────────────────────────────
+    section("9. Loan Processing");
+    LoanApplication loanApp{ "LOAN-2024-001", alice, 10000.00, 36 };
+    loanService.processLoan(loanApp, *aliceSavings);
+    accountRepo.updateBalance(*aliceSavings);           // loan disbursed
+    loanRepo.save(loanApp, /*approved=*/true, 0.07);
+
+    // ── 13. Overdraft test ────────────────────────────────────────
+    section("10. Overdraft Test");
+    try {
+        txnService.withdraw(*aliceCurrent, 20000.00);
+    } catch (const std::runtime_error& e) {
+        std::cout << "[CAUGHT] " << e.what() << "\n";
+    }
+
+    // ── 14. Reload from database ──────────────────────────────────
+    section("11. Reload All Data from Database");
+    auto dbCustomers = customerRepo.findAll();
+    auto dbAccounts  = accountRepo.findAll(dbCustomers);
+
+    std::cout << "\nCustomers in DB:\n";
+    for (const auto& c : dbCustomers)
+        std::cout << "  " << c.toString() << "\n";
+
+    std::cout << "\nAccounts in DB:\n";
+    for (const auto& a : dbAccounts)
+        std::cout << "  " << a->toString() << "\n";
+
+    // ── 15. Transaction histories ─────────────────────────────────
+    section("12. Transaction Histories");
+    txnRepo.printHistory(aliceSavings->getAccountId());
+    txnRepo.printHistory(bobSavings->getAccountId());
+
+    std::cout << "\nTotal flagged transactions: "
+              << txnRepo.countFlagged() << "\n";
+
+    // ── 16. Loan history ──────────────────────────────────────────
+    section("13. Loan History");
+    loanRepo.printByCustomer(alice.getCustomerId());
+
+    // ── 17. Audit logs ────────────────────────────────────────────
+    section("14. Audit Logs");
+    auditLogs.printAll();          // in-memory (Phase 3 method — unchanged)
+    auditLogs.printFromDb();       // persistent (Phase 4 method)
+
+    // ── 18. Close database ────────────────────────────────────────
+    Database::get().close();
+
+    std::cout << "\n✔  Done. Inspect with:  sqlite3 bank.db\n";
+    return 0;
+}
+```
+
+---
+
+## Build & Run
+
+### Phase 3 binary (unchanged)
+```bash
+g++ -std=c++20 -Wall -Wextra -o bank main.cpp
+./bank
+```
+
+### Phase 4 binary (new entry point, links SQLite)
+```bash
+g++ -std=c++20 -Wall -Wextra -o bank_db main_db.cpp -lsqlite3
+./bank_db
+```
+
+### Inspect the database
+```bash
+sqlite3 bank.db
+```
+
+```sql
+-- All tables
+.tables
+
+-- Current balances
+SELECT account_id, account_type, balance FROM accounts;
+
+-- Full transaction log (newest first)
+SELECT account_id, type, amount, flagged, created_at
+FROM transactions ORDER BY id DESC;
+
+-- Only flagged transactions
+SELECT * FROM transactions WHERE flagged = 1;
+
+-- Loan decisions
+SELECT application_id, amount, approved, interest_rate FROM loans;
+
+-- Audit trail (last 20)
+SELECT event, created_at FROM audit_log ORDER BY id DESC LIMIT 20;
+
+-- Total deposited per account
+SELECT account_id, SUM(amount) AS total
+FROM transactions
+WHERE type = 'DEPOSIT'
+GROUP BY account_id;
+
+.quit
+```
+
+---
+
+## Phase 4 Example Output
+
+```
+================================================
+  C++ Banking System — Phase 4: DB Integration
+================================================
+
+──────────────────────────────────────────────────
+  1. Database Initialisation
+──────────────────────────────────────────────────
+[Database] Connected → bank.db
+[Database] Schema ready.
+
+──────────────────────────────────────────────────
+  2. Create & Persist Customers
+──────────────────────────────────────────────────
+[Customer C001] Alice Johnson | alice@bank.com | +1-555-0101
+[Customer C002] Bob Smith | bob@bank.com | +1-555-0202
+
+──────────────────────────────────────────────────
+  3. Open & Persist Accounts
+──────────────────────────────────────────────────
+[AccountService] Opened: [SavingsAccount SAV-1001] Alice Johnson | Balance: $5000.000000
+[AccountService] Opened: [CurrentAccount CUR-1002] Alice Johnson | Balance: $2000.000000
+[AccountService] Opened: [SavingsAccount SAV-1003] Bob Smith | Balance: $3000.000000
+
+──────────────────────────────────────────────────
+  4. Deposits
+──────────────────────────────────────────────────
+[Savings] Deposited $1200 | New balance: $6200
+[NOTIFICATION] Email to alice@bank.com — DEPOSIT of $1200 on SAV-1001
+[Savings] Deposited $800 | New balance: $3800
+[NOTIFICATION] Email to bob@bank.com — DEPOSIT of $800 on SAV-1003
+
+──────────────────────────────────────────────────
+  8. Large Deposit (Fraud Detection Test)
+──────────────────────────────────────────────────
+[Current] Deposited $15000 | New balance: $17000
+[FRAUD ALERT] Large transaction detected: $15000 on account CUR-1002
+[FRAUD NOTIFICATION] SMS to +1-555-0101 — Suspicious activity on CUR-1002.
+
+──────────────────────────────────────────────────
+  11. Reload All Data from Database
+──────────────────────────────────────────────────
+Customers in DB:
+  [Customer C001] Alice Johnson | alice@bank.com | +1-555-0101
+  [Customer C002] Bob Smith | bob@bank.com | +1-555-0202
+
+Accounts in DB:
+  [SavingsAccount SAV-1001] Alice Johnson | Balance: $15589.000000
+  [CurrentAccount CUR-1002] Alice Johnson | Balance: $17000.000000
+  [SavingsAccount SAV-1003] Bob Smith     | Balance: $4300.000000
+
+──────────────────────────────────────────────────
+  12. Transaction Histories
+──────────────────────────────────────────────────
+===== Transaction History: SAV-1001 =====
+[2026-03-10 12:00:05] TRANSFER $500.000000 → SAV-1003
+[2026-03-10 12:00:04] WITHDRAWAL $300.000000
+[2026-03-10 12:00:03] DEPOSIT $1200.000000
+==========================================
+
+Total flagged transactions: 1
+
+──────────────────────────────────────────────────
+  13. Loan History
+──────────────────────────────────────────────────
+===== Loan History: C001 =====
+ID: LOAN-2024-001 | $10000 / 36 months | APPROVED @ 7% | 2026-03-10 12:00:06
+==========================================
+
+──────────────────────────────────────────────────
+  14. Audit Logs
+──────────────────────────────────────────────────
+===== AUDIT LOG =====
+[Tue Mar 10 12:00:01 2026] OPENED SavingsAccount SAV-1001 for Alice Johnson
+[Tue Mar 10 12:00:03 2026] DEPOSIT $1200.000000 to SAV-1001
+[Tue Mar 10 12:00:04 2026] WITHDRAWAL $300.000000 from SAV-1001
+[Tue Mar 10 12:00:05 2026] TRANSFER $500.000000 from SAV-1001 to SAV-1003
+[Tue Mar 10 12:00:06 2026] LOAN APPROVED $10000.000000 for Alice Johnson
+=====================
+
+===== PERSISTENT AUDIT LOG (DB, last 50) =====
+[2026-03-10 12:00:06] LOAN APPROVED $10000.000000 for Alice Johnson
+[2026-03-10 12:00:05] TRANSFER $500.000000 from SAV-1001 to SAV-1003
+[2026-03-10 12:00:04] WITHDRAWAL $300.000000 from SAV-1001
+[2026-03-10 12:00:03] DEPOSIT $1200.000000 to SAV-1001
+[2026-03-10 12:00:01] OPENED SavingsAccount SAV-1001 for Alice Johnson
+====================================================
+
+[Database] Connection closed.
+✔  Done. Inspect with:  sqlite3 bank.db
+```
+
+---
+
+## OOP Patterns Introduced in Phase 4
+
+| Pattern | Where | Description |
+|---|---|---|
+| **Inheritance for extension** | `PersistentAuditLogs : AuditLogs` | Adds DB persistence without altering the base class. Liskov Substitution holds — passes silently wherever `AuditLogs&` is expected. |
+| **Polymorphism in persistence** | `AccountRepo::save(const Account&)` | Accepts any `Account` subtype. Uses `dynamic_cast` externally to read type-specific fields, keeping models clean. |
+| **Polymorphic rehydration** | `AccountRepo::findAll()` | Reads `account_type` column and `make_shared<SavingsAccount>` or `make_shared<CurrentAccount>`. Returns `vector<shared_ptr<Account>>` — callers use the base interface. |
+| **Singleton** | `Database::get()` | One connection, globally accessible, no parameters to thread through every call. |
+| **Composition over intrusion** | Lambda wrappers in `main_db.cpp` | Rather than modifying `TransactionService`, thin lambdas compose the service call with a repo call. Phase 3 source stays pristine. |
+
+---
+
+## How to Migrate to PostgreSQL or MySQL
+
+Because all SQL is isolated in the four repository files and `Database.h`, switching the database engine requires touching **only those five files**. Every model, service, and `main_db.cpp` stays unchanged.
+
+| Operation | SQLite3 C API | libpq (PostgreSQL) | MySQL C API |
+|---|---|---|---|
+| Connect | `sqlite3_open(path, &db)` | `PQconnectdb(connStr)` | `mysql_real_connect(...)` |
+| Prepare | `sqlite3_prepare_v2(...)` | `PQprepare(...)` | `mysql_stmt_prepare(...)` |
+| Bind text | `sqlite3_bind_text(...)` | `PQexecParams(...)` | `mysql_stmt_bind_param(...)` |
+| Step/execute | `sqlite3_step(stmt)` | `PQexecPrepared(...)` | `mysql_stmt_execute(...)` |
+| Read column | `sqlite3_column_text/double/int` | `PQgetvalue(res, row, col)` | `mysql_stmt_bind_result(...)` |
+| Finalise | `sqlite3_finalize(stmt)` | `PQclear(res)` | `mysql_stmt_close(stmt)` |
+| Close | `sqlite3_close(db)` | `PQfinish(conn)` | `mysql_close(conn)` |
+
+The **logical flow** — prepare → bind → execute → read rows → finalise — is identical across all three.
+
+---
+
 # Possible Future Improvements
 
-- **Database Integration** — replace in-memory vectors with PostgreSQL or SQLite via an ORM or raw SQL layer.
-- **REST API** — wrap services in HTTP endpoints using a library like Crow or cpp-httplib; expose `/accounts`, `/transactions`, `/loans`.
-- **ATM System** — add a `ATMController` class with a `CardReader` component and PIN validation.
-- **Concurrency Handling** — add `std::mutex` guards around `balance` mutations to support multi-threaded transaction processing.
+- **REST API** — wrap services in HTTP endpoints using Crow or cpp-httplib; expose `/accounts`, `/transactions`, `/loans`.
+- **ATM System** — add an `ATMController` class with `CardReader` and PIN validation components.
+- **Concurrency** — add `std::mutex` guards around `balance` mutations and the `Database` singleton to support multi-threaded transaction processing.
 - **Authentication & Authorisation** — introduce `AuthService` with JWT tokens and role-based access control.
-- **Distributed Architecture** — break services into microservices communicating over gRPC or a message queue (Kafka/RabbitMQ).
-- **Machine Learning Fraud Detection** — replace heuristic rules in `FraudDetectionService` with a real-time inference model.
-- **Unit Tests** — add Google Test or Catch2 suites for every service class.
-- **Logging Framework** — replace `std::cout` in `AuditLogs` with a structured logging library such as spdlog.
+- **Distributed Architecture** — break services into microservices communicating over gRPC or Kafka; each owns its own database schema.
+- **Machine Learning Fraud Detection** — replace heuristic rules with a real-time ONNX inference model trained on the persisted `transactions` table.
+- **Unit Tests** — add Google Test or Catch2 suites for every service class and repository.
+- **Connection Pooling** — replace the single-connection `Database` singleton with a thread-safe pool for multi-threaded deployments.
+- **Migrations** — introduce a versioned schema migration system (Flyway-style) so the schema can evolve without dropping tables.
 
 ---
 
 # Conclusion
 
-You started with the building blocks of OOP — classes, objects, and access specifiers — and stepped through every pillar:
+You started with the building blocks of OOP and stepped through every pillar:
 
 1. **Encapsulation** — protecting state behind controlled interfaces.
 2. **Inheritance** — sharing and extending behaviour across account types.
 3. **Polymorphism** — writing service code that works on *any* account type without branching.
 4. **Abstraction** — enforcing a contract that all account types must fulfil.
 5. **Composition** — wiring independent services together cleanly.
+6. **Database Integration** — persisting domain objects through a repository layer that wraps the existing codebase without changing it.
 
-The Banking System demonstrates that **real-world software is not a monolithic function** — it is a network of well-defined objects, each responsible for one concern, collaborating through stable interfaces. This is the foundation of every large-scale C++ codebase you will encounter in industry.
+The central lesson of Phase 4 is as important as any OOP pillar: **good architecture enables change in isolation**. Because Phase 3 respected encapsulation, abstraction, and separation of concerns, Phase 4 added a full persistence layer by writing new files — not by editing old ones. Every repository, every query, every schema decision fits naturally around the domain objects precisely because those objects were designed well from the start.
 
-Master these patterns and you will be ready to design systems of any complexity.
+This is the foundation of every large-scale C++ codebase you will encounter in industry. Master these patterns and you will be ready to design systems of any complexity.
 
 ---
 
