@@ -2,176 +2,89 @@
 
 > A professional, beginner-to-advanced guide covering every OOP pillar in C++ through hands-on examples, culminating in a fully modular Banking System you can run, extend, and deploy.
 ---
-
-# Table of Contents
+## Table of Contents
 
 - [Introduction](#introduction)
   - [Why OOP Matters](#why-oop-matters)
   - [Why Real-World Systems Use OOP](#why-real-world-systems-use-oop)
   - [What You Will Build](#what-you-will-build)
 
----
+- [PHASE 1 — Learning OOP Concepts in C++](#phase-1--learning-oop-concepts-in-c)
+  1. [Classes and Objects](#1-classes-and-objects)
+  2. [Encapsulation](#2-encapsulation)
+  3. [Constructors and Destructors](#3-constructors-and-destructors)
+  4. [Inheritance](#4-inheritance)
+  5. [Polymorphism](#5-polymorphism)
+  6. [Abstraction](#6-abstraction)
+  7. [Composition vs Inheritance](#7-composition-vs-inheritance)
 
-# PHASE 1 — Learning OOP Concepts in C++
+- [PHASE 2 — Applying OOP to a Real Project](#phase-2--applying-oop-to-a-real-project)
+  - [Project Overview: The Banking System](#project-overview-the-banking-system)
+  - [System Architecture](#system-architecture)
+  - [Module Responsibilities](#module-responsibilities)
+  - [Implementation Roadmap](#implementation-steps)
+    1. [Step 1 — Project Structure](#step-1--project-structure)
+    2. [Step 2 — Designing Core Models](#step-2--designing-core-models)
+    3. [Step 3 — Implement Account Operations](#step-3--implement-account-operations)
+    4. [Step 4 — Transaction Service](#step-4--transaction-service)
+    5. [Step 5 — Fraud Detection System](#step-5--fraud-detection-system)
+    6. [Step 6 — Loan System](#step-6--loan-system)
+    7. [Step 7 — Notification System](#step-7--notification-system)
+    8. [Step 8 — Audit Logs](#step-8--audit-logs)
 
-1. [Classes and Objects](#1-classes-and-objects)
-   - [Explanation](#explanation)
-   - [Real-World Analogy](#real-world-analogy)
-   - [C++ Example](#c-example)
-   - [Key Takeaways](#key-takeaways)
+- [PHASE 3 — Complete Banking System Implementation](#phase-3--complete-banking-system-implementation)
+  - [Source Code](#source-code)
+    - Models
+      - [`models/Customer.h`](#modelscustomerh)
+      - [`models/Account.h`](#modelsaccounth)
+      - [`models/SavingsAccount.h`](#modelssavingsaccounth)
+      - [`models/CurrentAccount.h`](#modelscurrentaccounth)
+    - Infrastructure
+      - [`infrastructure/AuditLogs.h`](#infrastructureauditlogsh)
+    - Security
+      - [`security/FraudDetectionService.h`](#securityfrauddetectionserviceh)
+    - Services
+      - [`services/NotificationService.h`](#servicesnotificationserviceh)
+      - [`services/TransactionService.h`](#servicestransactionserviceh)
+      - [`services/LoanService.h`](#servicesloanserviceh)
+      - [`services/AccountService.h`](#servicesaccountserviceh)
+    - Entry Point
+      - [`main.cpp`](#maincpp)
+  - [Running the System](#running-the-system)
+    - [How to Compile & Run](#how-to-compile--run)
+    - [Example Output](#example-output)
+  - [OOP Concepts Used in the Project](#key-oop-concepts-used-in-the-project)
 
-2. [Encapsulation](#2-encapsulation)
-   - [Explanation](#explanation-1)
-   - [Real-World Analogy](#real-world-analogy-1)
-   - [C++ Example](#c-example-1)
-   - [Key Takeaways](#key-takeaways-1)
-
-3. [Constructors and Destructors](#3-constructors-and-destructors)
-   - [Explanation](#explanation-2)
-   - [Real-World Analogy](#real-world-analogy-2)
-   - [C++ Example](#c-example-2)
-   - [Key Takeaways](#key-takeaways-2)
-
-4. [Inheritance](#4-inheritance)
-   - [Explanation](#explanation-3)
-   - [Real-World Analogy](#real-world-analogy-3)
-   - [C++ Example](#c-example-3)
-   - [Key Takeaways](#key-takeaways-3)
-
-5. [Polymorphism](#5-polymorphism)
-   - [Explanation](#explanation-4)
-   - [Real-World Analogy](#real-world-analogy-4)
-   - [C++ Example](#c-example-4)
-   - [Key Takeaways](#key-takeaways-4)
-
-6. [Abstraction](#6-abstraction)
-   - [Explanation](#explanation-5)
-   - [Real-World Analogy](#real-world-analogy-5)
-   - [C++ Example](#c-example-5)
-   - [Key Takeaways](#key-takeaways-5)
-
-7. [Composition vs Inheritance](#7-composition-vs-inheritance)
-   - [Explanation](#explanation-6)
-   - [Real-World Analogy](#real-world-analogy-6)
-   - [C++ Example](#c-example-6)
-   - [Key Takeaways](#key-takeaways-6)
-
----
-
-# PHASE 2 — Applying OOP to a Real Project
-
-- [Project Overview: The Banking System](#project-overview-the-banking-system)
-- [System Architecture](#system-architecture)
-- [Module Responsibilities](#module-responsibilities)
-
-### Implementation Steps
-
-1. [Step 1 — Project Structure](#step-1--project-structure)
-2. [Step 2 — Designing Core Models](#step-2--designing-core-models)
-3. [Step 3 — Implement Account Operations](#step-3--implement-account-operations)
-4. [Step 4 — Transaction Service](#step-4--transaction-service)
-5. [Step 5 — Fraud Detection System](#step-5--fraud-detection-system)
-6. [Step 6 — Loan System](#step-6--loan-system)
-7. [Step 7 — Notification System](#step-7--notification-system)
-8. [Step 8 — Audit Logs](#step-8--audit-logs)
-
----
-
-# PHASE 3 — Complete Banking System Implementation
-
-### Source Code
-
-- [`models/Customer.h`](#modelscustomerh)
-- [`models/Account.h`](#modelsaccounth)
-- [`models/SavingsAccount.h`](#modelssavingsaccounth)
-- [`models/CurrentAccount.h`](#modelscurrentaccounth)
-
-- [`infrastructure/AuditLogs.h`](#infrastructureauditlogsh)
-
-- [`security/FraudDetectionService.h`](#securityfrauddetectionserviceh)
-
-- [`services/NotificationService.h`](#servicesnotificationserviceh)
-- [`services/TransactionService.h`](#servicestransactionserviceh)
-- [`services/LoanService.h`](#servicesloanserviceh)
-- [`services/AccountService.h`](#servicesaccountserviceh)
-
-- [`main.cpp`](#maincpp)
-
-### Running the System
-
-- [How to Compile & Run](#how-to-compile--run)
-- [Example Output](#example-output)
-
-### OOP Concepts Used in the Project
-
-- [Key OOP Concepts Used in the Project](#key-oop-concepts-used-in-the-project)
-
----
-
-# PHASE 4 — Database Integration with SQLite
-
-- [The Core Rule: Zero Changes to Existing Code](#the-core-rule-zero-changes-to-existing-code)
-- [How This Is Achieved](#how-this-is-achieved)
-- [Updated Project Structure](#updated-project-structure)
-
-### Installation
-
-- [Install SQLite3](#install-sqlite3)
-- [Verify Installation](#verify)
-
-### Database Design
-
-- [Schema Design](#schema-design)
-
----
-
-## Database Layer Implementation
-
-- [`database/Database.h`](#databasedatabaseh)
-- [`database/CustomerRepo.h`](#databasecustomerrepoh)
-- [`database/AccountRepo.h`](#databaseaccountrepoh)
-- [`database/TransactionRepo.h`](#databasetransactionrepoh)
-- [`database/LoanRepo.h`](#databaseloanrepoh)
-
----
-
-## Infrastructure Extension
-
-- [`infrastructure/PersistentAuditLogs.h`](#infrastructurepersistentauditlogsh)
-
----
-
-## Phase 4 Entry Point
-
-- [`main_db.cpp`](#main_dbcpp)
-
----
-
-## Running the Database Version
-
-- [Build & Run](#build--run)
-- [Inspect the Database](#inspect-the-database)
-
----
-
-## Architecture & Design
-
-- [OOP Patterns Introduced in Phase 4](#oop-patterns-introduced-in-phase-4)
-- [How to Migrate to PostgreSQL or MySQL](#how-to-migrate-to-postgresql-or-mysql)
-
----
-
-## Future Improvements
-
-- [Possible Future Improvements](#possible-future-improvements)
-
----
-
-## Conclusion
+- [PHASE 4 — Database Integration with SQLite](#phase-4--database-integration-with-sqlite)
+  - [The Core Rule: Zero Changes to Existing Code](#the-core-rule-zero-changes-to-existing-code)
+  - [How This Is Achieved](#how-this-is-achieved)
+  - [Updated Project Structure](#updated-project-structure)
+  - [Installation](#installation)
+    - [Install SQLite3](#install-sqlite3)
+    - [Verify Installation](#verify)
+  - [Database Design](#database-design)
+    - [Schema Design](#schema-design)
+  - [Database Layer Implementation](#database-layer-implementation)
+    - [`database/Database.h`](#databasedatabaseh)
+    - [`database/CustomerRepo.h`](#databasecustomerrepoh)
+    - [`database/AccountRepo.h`](#databaseaccountrepoh)
+    - [`database/TransactionRepo.h`](#databasetransactionrepoh)
+    - [`database/LoanRepo.h`](#databaseloanrepoh)
+  - [Infrastructure Extension](#infrastructure-extension)
+    - [`infrastructure/PersistentAuditLogs.h`](#infrastructurepersistentauditlogsh)
+  - [Phase 4 Entry Point](#phase-4-entry-point)
+    - [`main_db.cpp`](#main_dbcpp)
+  - [Running the Database Version](#running-the-database-version)
+    - [Build & Run](#build--run)
+    - [Inspect the Database](#inspect-the-database)
+  - [Architecture & Design](#architecture--design)
+    - [OOP Patterns Introduced in Phase 4](#oop-patterns-introduced-in-phase-4)
+    - [How to Migrate to PostgreSQL or MySQL](#how-to-migrate-to-postgresql-or-mysql)
+  - [Future Improvements](#possible-future-improvements)
 
 - [Conclusion](#conclusion)
----
 
+---
 ## Introduction
 
 **Object-Oriented Programming (OOP)** is a programming paradigm that organises software around *objects* — entities that bundle related data (attributes) and behaviour (methods) together. Instead of writing a series of procedural instructions, you model the world using classes that mirror real-world concepts.
