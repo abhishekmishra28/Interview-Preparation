@@ -1,9 +1,5 @@
 # System Design
 
-Hey, welcome to the course. I hope this course provides a great learning experience.
-
-_Please leave a ⭐ as motivation if this was helpful!_
-
 # Table of contents
 
 - **Getting Started**
