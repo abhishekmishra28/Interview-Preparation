@@ -1,0 +1,302 @@
+BCRYPTJS – COMPLETE GUIDE (WITH INTERVIEW QUESTIONS)
+
+---
+
+1. INTRODUCTION
+
+---
+
+bcryptjs is a JavaScript library used to hash passwords securely in Node.js applications. It is a pure JavaScript implementation of the bcrypt hashing algorithm.
+
+bcrypt is specifically designed for password hashing and is widely used in authentication systems to protect user credentials.
+
+---
+
+2. WHY BCRYPTJS IS USED
+
+---
+
+Storing passwords in plain text is extremely dangerous. If a database is compromised, all user passwords become visible.
+
+bcryptjs solves this problem by:
+
+* Converting passwords into hashed values
+* Making hashes irreversible (one-way)
+* Adding randomness using salt
+* Making hashing computationally expensive (slow)
+
+---
+
+3. KEY FEATURES OF BCRYPTJS
+
+---
+
+1. One-way hashing:
+   Passwords cannot be converted back to original form.
+
+2. Salting:
+   Adds random data to passwords before hashing.
+
+3. Adaptive cost:
+   Hashing can be made slower using "salt rounds" to increase security.
+
+4. Built-in salt storage:
+   Salt is embedded inside the hash, so no need to store it separately.
+
+---
+
+4. INSTALLATION
+
+---
+
+Command:
+npm install bcryptjs
+
+Import:
+const bcrypt = require('bcryptjs');
+
+---
+
+5. HOW BCRYPT WORKS (INTERNAL FLOW)
+
+---
+
+Step 1: Generate salt
+Step 2: Combine password + salt
+Step 3: Apply hashing algorithm multiple times
+Step 4: Store final hash
+
+Final hash format:
+$2a$10$<salt><hash>
+
+Where:
+
+* 2a → algorithm version
+* 10 → cost factor (salt rounds)
+* rest → actual hash data
+
+---
+
+6. SALT AND SALT ROUNDS
+
+---
+
+Salt:
+A random string added to password before hashing.
+
+Purpose:
+
+* Prevents identical passwords from having identical hashes
+* Protects against rainbow table attacks
+
+Salt rounds:
+Defines how many times hashing is applied.
+
+Example:
+bcrypt.genSalt(10)
+
+Higher value:
+
+* More secure
+* Slower performance
+
+Typical value: 10–12
+
+---
+
+7. HASHING A PASSWORD (SIGNUP)
+
+---
+
+Example:
+
+const bcrypt = require('bcryptjs');
+
+const password = "mypassword123";
+
+const salt = await bcrypt.genSalt(10);
+const hashedPassword = await bcrypt.hash(password, salt);
+
+Store hashedPassword in database.
+
+Shortcut:
+const hashedPassword = await bcrypt.hash(password, 10);
+
+---
+
+8. VERIFYING PASSWORD (LOGIN)
+
+---
+
+You never compare passwords directly.
+
+Correct method:
+
+const isMatch = await bcrypt.compare(enteredPassword, storedHash);
+
+If isMatch is true → login success
+Else → invalid credentials
+
+---
+
+9. WHY DIRECT COMPARISON FAILS
+
+---
+
+Wrong:
+if(password === hashedPassword)
+
+Reason:
+Hash is completely different from original password.
+
+bcrypt.compare():
+
+* Extracts salt from stored hash
+* Re-hashes input password
+* Compares both hashes
+
+---
+
+10. USING BCRYPT WITH MONGOOSE
+
+---
+
+Schema example:
+
+const userSchema = new mongoose.Schema({
+password: String
+});
+
+Pre-save hook:
+
+userSchema.pre('save', async function(next) {
+if (!this.isModified('password')) return next();
+
+this.password = await bcrypt.hash(this.password, 10);
+next();
+});
+
+This ensures passwords are always hashed before saving.
+
+---
+
+11. COMMON MISTAKES
+
+---
+
+1. Storing plain passwords
+2. Forgetting to use await
+3. Comparing raw password with hash
+4. Hashing password multiple times unnecessarily
+5. Using very low salt rounds
+6. Not handling errors properly
+
+---
+
+12. PERFORMANCE CONSIDERATIONS
+
+---
+
+bcrypt is intentionally slow.
+
+Why?
+
+* Slows down brute-force attacks
+
+Trade-off:
+
+* Higher cost → more secure but slower login/signup
+
+Recommended:
+
+* Use 10–12 salt rounds for most applications
+
+---
+
+13. BCRYPT VS BCRYPTJS
+
+---
+
+bcrypt:
+
+* Native C++ bindings
+* Faster
+* Requires build tools
+
+bcryptjs:
+
+* Pure JavaScript
+* Slower
+* Easier to install (no compilation issues)
+
+---
+
+14. SECURITY BEST PRACTICES
+
+---
+
+1. Always hash passwords before storing
+2. Use environment variables for sensitive data
+3. Never log passwords
+4. Use HTTPS to protect data in transit
+5. Combine bcrypt with JWT or session-based authentication
+6. Regularly update dependencies
+
+---
+
+15. REAL-WORLD AUTH FLOW
+
+---
+
+Signup:
+User → enters password → bcrypt.hash → store in DB
+
+Login:
+User → enters password → bcrypt.compare → authenticate
+
+---
+
+16. INTERVIEW QUESTIONS (IMPORTANT)
+
+---
+
+Basic Questions:
+
+1. What is bcryptjs?
+2. Why should we hash passwords?
+3. What is the difference between hashing and encryption?
+4. What is salt in bcrypt?
+5. What are salt rounds?
+
+Intermediate Questions:
+6. How does bcrypt internally work?
+7. Why is bcrypt considered slow and why is that good?
+8. Why do two identical passwords produce different hashes?
+9. How does bcrypt.compare work without storing salt separately?
+10. What happens if salt rounds are increased?
+
+Advanced Questions:
+11. Difference between bcrypt and argon2?
+12. What are rainbow table attacks and how does bcrypt prevent them?
+13. Can bcrypt hashes be reversed?
+14. What is the impact of very high cost factor on performance?
+15. How would you design a secure authentication system using bcrypt?
+
+Coding Questions:
+16. Write code to hash a password using bcryptjs
+17. Write code to compare passwords during login
+18. Implement password hashing using Mongoose middleware
+19. How would you handle password reset securely?
+20. How do you prevent timing attacks in password comparison?
+
+---
+
+17. FINAL SUMMARY
+
+---
+
+bcryptjs is a secure password hashing library used in Node.js. It protects user credentials by converting passwords into irreversible hashes using salting and multiple hashing rounds. It is essential for building secure authentication systems.
+
+---
+
+## END OF DOCUMENT
