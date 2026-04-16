@@ -78,23 +78,23 @@ Return IP to User
 ```
 ┌─────────────────────────────────┐
 │           HEADER                │
-│  - Transaction ID              │
-│  - Flags (QR, Opcode, etc.)    │
-│  - Question/Answer Counts      │
+│  - Transaction ID               │
+│  - Flags (QR, Opcode, etc.)     │
+│  - Question/Answer Counts       │
 ├─────────────────────────────────┤
 │          QUESTION               │
-│  - Query Name (Domain)         │
-│  - Query Type (A, MX, etc.)    │
-│  - Query Class (IN = Internet) │
+│  - Query Name (Domain)          │
+│  - Query Type (A, MX, etc.)     │
+│  - Query Class (IN = Internet)  │
 ├─────────────────────────────────┤
 │          ANSWER                 │
-│  - Resource Records            │
+│  - Resource Records             │
 ├─────────────────────────────────┤
-│        AUTHORITY               │
-│  - Name Server Records         │
+│        AUTHORITY                │
+│  - Name Server Records          │
 ├─────────────────────────────────┤
-│        ADDITIONAL              │
-│  - Additional Information      │
+│        ADDITIONAL               │
+│  - Additional Information       │
 └─────────────────────────────────┘
 ```
 
