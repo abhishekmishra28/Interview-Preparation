@@ -92,7 +92,7 @@ RIGHT JOIN departments d ON e.dept_id = d.id;
 Classic ranking problem. Multiple approaches — understand all of them.
 
 ```sql
--- Approach 1: LIMIT + OFFSET (MySQL)
+-- Approach 1: SubQueries
 SELECT MAX(salary) AS SecondHighest
 FROM employees
 WHERE salary < (SELECT MAX(salary) FROM employees);
