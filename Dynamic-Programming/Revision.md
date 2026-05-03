@@ -34,8 +34,9 @@
 ### 1. [Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/) (LC 1143)
 ### 2. [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/) (LC 516)
 ### 3. [Minimum Insertion Steps to Make a String Palindrome](https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/) (LC 1312)
-### 4. [Edit Distance](https://leetcode.com/problems/edit-distance/) (LC 72)
-### 5. [Distinct Subsequences](https://leetcode.com/problems/distinct-subsequences/) (LC 115)
+### 4. [Delete Operation for Two Strings](https://leetcode.com/problems/delete-operation-for-two-strings/) (LC 583)
+### 5. [Edit Distance](https://leetcode.com/problems/edit-distance/) (LC 72)
+### 6. [Distinct Subsequences](https://leetcode.com/problems/distinct-subsequences/) (LC 115)
 
 ---
 
