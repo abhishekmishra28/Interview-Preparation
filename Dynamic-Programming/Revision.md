@@ -14,6 +14,8 @@
 ### 8. [Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray/) (LC 152)
 ### 9. [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/) (LC 300)
 ### 10. [Number of Longest Increasing Subsequence](https://leetcode.com/problems/number-of-longest-increasing-subsequence/) (LC 673)
+### 11. [Count Sorted Vowel Strings](https://leetcode.com/problems/count-sorted-vowel-strings/) (LC 1641)
+### 12. [Get Maximum in Generated Array](https://leetcode.com/problems/get-maximum-in-generated-array/) (LC 1646)
 
 ---
 
