@@ -31,13 +31,16 @@
 
 ## 🔹 String DP (LCS Pattern)
 
+## 🔹 String DP (LCS Pattern)
+
 ### 1. [Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/) (LC 1143)
 ### 2. [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/) (LC 516)
 ### 3. [Minimum Insertion Steps to Make a String Palindrome](https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/) (LC 1312)
 ### 4. [Delete Operation for Two Strings](https://leetcode.com/problems/delete-operation-for-two-strings/) (LC 583)
-### 5. [Shortest Common Supersequence](https://leetcode.com/problems/shortest-common-supersequence/) (LC 1092)
-### 6. [Edit Distance](https://leetcode.com/problems/edit-distance/) (LC 72)
-### 7. [Distinct Subsequences](https://leetcode.com/problems/distinct-subsequences/) (LC 115)
+### 5. [Minimum ASCII Delete Sum for Two Strings](https://leetcode.com/problems/minimum-ascii-delete-sum-for-two-strings/) (LC 712)
+### 6. [Shortest Common Supersequence](https://leetcode.com/problems/shortest-common-supersequence/) (LC 1092)
+### 7. [Edit Distance](https://leetcode.com/problems/edit-distance/) (LC 72)
+### 8. [Distinct Subsequences](https://leetcode.com/problems/distinct-subsequences/) (LC 115)
 
 ---
 
