@@ -19,16 +19,16 @@ These build graph intuition, traversal understanding, and BFS/DFS basics.
 
 ## Graph Traversal Basics
 
-1. Find if Path Exists in Graph (LC 1971)
-2. Flood Fill (LC 733)
-3. Number of Islands (LC 200)
-4. Max Area of Island (LC 695)
+1. Find if Path Exists in Graph (LC 1971)      [Done]
+2. Flood Fill (LC 733)                         [Done]
+3. Number of Islands (LC 200)                  [Done]
+4. Max Area of Island (LC 695)                 [Done]
 
 ## DFS Basics
 
-5. Clone Graph (LC 133)
-6. All Paths From Source to Target (LC 797)
-7. Find Center of Star Graph (LC 1791)
+5. Clone Graph (LC 133)                        [Done]
+6. All Paths From Source to Target (LC 797)    [Done]
+7. Find Center of Star Graph (LC 1791)         [Done]
 
 ## BFS Basics
 
