@@ -32,9 +32,9 @@ These build graph intuition, traversal understanding, and BFS/DFS basics.
 
 ## BFS Basics
 
-8. Shortest Path in Binary Matrix (LC 1091)
-9. Rotting Oranges (LC 994)
-10. Nearest Exit from Entrance in Maze (LC 1926)
+8. Shortest Path in Binary Matrix (LC 1091)      [Done]
+9. Rotting Oranges (LC 994)                      [Done]
+10. Nearest Exit from Entrance in Maze (LC 1926) [Done]
 
 ## Grid Traversal
 
