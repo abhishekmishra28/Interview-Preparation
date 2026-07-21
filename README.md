@@ -9,7 +9,7 @@ A complete Data Structures & Algorithms practice tracker — organized phase-wis
 ## Phase 1 (Most Important) — Arrays (35–45 Questions)
 
 ### Pattern 1: Basic Traversal
-- [ ] Two Sum
+- [x] Two Sum
 - [ ] Best Time to Buy & Sell Stock
 - [ ] Remove Duplicates
 - [ ] Move Zeroes
