@@ -2,7 +2,7 @@
 
 A complete Data Structures & Algorithms practice tracker — organized phase-wise and pattern-wise. Check off each question as you solve it.
 
-**Progress:** `0 / 209` questions solved
+**Progress:** `1 / 209` questions solved
 
 ---
 
