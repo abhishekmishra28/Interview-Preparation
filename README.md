@@ -2,7 +2,7 @@
 
 A complete Data Structures & Algorithms practice tracker — organized phase-wise and pattern-wise. Check off each question as you solve it.
 
-**Progress:** `3 / 209` questions solved
+**Progress:** `4 / 209` questions solved
 
 ---
 
@@ -12,7 +12,7 @@ A complete Data Structures & Algorithms practice tracker — organized phase-wis
 - [x] Two Sum
 - [x] Best Time to Buy & Sell Stock
 - [x] Remove Duplicates
-- [ ] Move Zeroes
+- [x] Move Zeroes
 - [ ] Majority Element
 
 ### Pattern 2: Prefix Sum
