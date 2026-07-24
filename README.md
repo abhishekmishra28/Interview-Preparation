@@ -2,7 +2,7 @@
 
 A complete Data Structures & Algorithms practice tracker — organized phase-wise and pattern-wise. Check off each question as you solve it.
 
-**Progress:** `5 / 209` questions solved
+**Progress:** `6 / 209` questions solved
 
 ---
 
@@ -16,7 +16,7 @@ A complete Data Structures & Algorithms practice tracker — organized phase-wis
 - [x] Majority Element
 
 ### Pattern 2: Prefix Sum
-- [ ] Running Sum
+- [x] Running Sum
 - [ ] Prefix Sum Queries
 - [ ] Subarray Sum Equals K
 - [ ] Continuous Subarray Sum
