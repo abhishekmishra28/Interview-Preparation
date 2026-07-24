@@ -2,7 +2,7 @@
 
 A complete Data Structures & Algorithms practice tracker — organized phase-wise and pattern-wise. Check off each question as you solve it.
 
-**Progress:** `1 / 209` questions solved
+**Progress:** `2 / 209` questions solved
 
 ---
 
@@ -10,7 +10,7 @@ A complete Data Structures & Algorithms practice tracker — organized phase-wis
 
 ### Pattern 1: Basic Traversal
 - [x] Two Sum
-- [ ] Best Time to Buy & Sell Stock
+- [x] Best Time to Buy & Sell Stock
 - [ ] Remove Duplicates
 - [ ] Move Zeroes
 - [ ] Majority Element
